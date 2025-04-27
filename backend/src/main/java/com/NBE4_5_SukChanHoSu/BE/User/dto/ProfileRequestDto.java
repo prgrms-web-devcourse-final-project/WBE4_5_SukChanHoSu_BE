@@ -1,7 +1,12 @@
 package com.NBE4_5_SukChanHoSu.BE.User.dto;
 
+import com.NBE4_5_SukChanHoSu.BE.User.enums.Gender;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
 import lombok.Data;
+
 import java.time.LocalDate;
 import java.util.List;
 
@@ -15,8 +20,7 @@ public class ProfileRequestDto {
     @Email(message = "올바른 이메일 형식이어야 합니다.")
     private String email;
 
-    @NotBlank(message = "성별은 필수 항목입니다.")
-    private String gender;
+    private Gender gender;
 
     private String profileImage;
 
@@ -42,7 +46,6 @@ public class ProfileRequestDto {
     @Size(max = 4, message = "재밌게 본 영화는 최대 4개까지 등록 가능합니다.")
     private List<String> watchedMovies;
 
-    private List<String> wishMovies; // 보고 싶은 영화
+    private List<String> preferredTheaters; // 선호 영화관
 
-    private List<String> tags; // 태그 (성격, 관심사 등)
 }

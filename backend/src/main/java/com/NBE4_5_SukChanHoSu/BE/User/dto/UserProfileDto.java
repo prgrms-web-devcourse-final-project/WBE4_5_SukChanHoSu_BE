@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.User.dto;
 
+import com.NBE4_5_SukChanHoSu.BE.User.enums.Gender;
 import jakarta.validation.constraints.*;
 import lombok.Builder;
 import lombok.Data;
@@ -17,7 +18,7 @@ public class UserProfileDto {
     private String email;
 
     @NotBlank
-    private String gender;
+    private Gender gender;
 
     private String profileImage;
 

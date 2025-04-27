@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.User.entity;
 
+import com.NBE4_5_SukChanHoSu.BE.User.enums.Gender;
 import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
@@ -19,7 +20,7 @@ public class User extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = true, unique = true, length = 50)
+    @Column(unique = true, length = 50)
     private String nickname;
 
     @Column(nullable = false, unique = true, length = 100)
@@ -27,8 +28,9 @@ public class User extends BaseTime {
 
     private LocalDate birthdate;
 
+    @Enumerated(EnumType.STRING)
     @Column(length = 10)
-    private String gender;
+    private Gender gender;
 
     @Column(length = 255)
     private String profileImage;
