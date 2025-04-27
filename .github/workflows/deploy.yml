@@ -5,15 +5,15 @@ on:
     paths:
       - '.github/workflows/**'
       - 'src/**'
-      - 'build.gradle.kts'
-      - 'settings.gradle.kts'
+      - 'build.gradle'
+      - 'settings.gradle'
       - 'Dockerfile'
     branches:
       - main
       - develop
 
 env:
-  DOCKER_IMAGE_NAME: app250416
+  DOCKER_IMAGE_NAME: schs
 
 jobs:
   makeTagAndRelease:
@@ -60,7 +60,6 @@ jobs:
 
       - name: 🧪 테스트 코드 빌드 & 실행
         run: ./gradlew test
-        working-directory: ./  # 필요시 경로 수정
         shell: bash
 
       - name: application-secret.yml 생성
