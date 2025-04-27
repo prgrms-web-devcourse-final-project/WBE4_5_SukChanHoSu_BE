@@ -98,7 +98,7 @@ jobs:
       - name: Generate application-secret.yml
         env:
           APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
-        run: echo "$APPLICATION_SECRET" > src/main/resources/application-secret.yml
+        run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application-secret.yml
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
