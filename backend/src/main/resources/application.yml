@@ -18,3 +18,7 @@ spring:
 
   config:
     import: application-secret.yml
+
+jwt:
+  expiration_time: 86400000
+  secret: ${JWT.SECRET}
