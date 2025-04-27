@@ -10,7 +10,6 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: schs
-  SPRING_PROFILES_ACTIVE: test
 
 jobs:
   backend-ci:
@@ -31,12 +30,12 @@ jobs:
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
-        working-directory: backend/project2/
+        working-directory: backend/
         shell: bash
 
       - name: Build with Gradle with test profile
         run: ./gradlew build -Pprofile=test
-        working-directory: backend/project2/
+        working-directory: backend/
         shell: bash
 
       - name: Upload test report if it exists
@@ -44,7 +43,7 @@ jobs:
         uses: actions/upload-artifact@v4.6.2
         with:
           name: test-report
-          path: backend/project2/build/reports/tests/test/
+          path: backend/build/reports/tests/test/
           if-no-files-found: ignore
 
   makeTagAndRelease:
