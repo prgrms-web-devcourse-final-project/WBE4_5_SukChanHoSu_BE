@@ -3,11 +3,11 @@ name: deploy
 on:
   push:
     paths:
-      - '.github/workflows/**'
-      - 'src/**'
-      - 'build.gradle'
-      - 'settings.gradle'
-      - 'Dockerfile'
+        - '.github/workflows/**'
+        - 'backend/src/**'
+        - 'backend/build.gradle'
+        - 'backend/settings.gradle'
+        - 'Dockerfile'
     branches:
       - main
       - develop
