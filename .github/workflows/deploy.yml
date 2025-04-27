@@ -57,10 +57,12 @@ jobs:
 
       - name: ️☕️ Grant execute permission for gradlew
         run: chmod +x ./gradlew
+        working-directory: ./backend
 
       - name: 🧪 테스트 코드 빌드 & 실행
         run: ./gradlew test
         shell: bash
+        working-directory: ./backend
 
       - name: application-secret.yml 생성
         env:
