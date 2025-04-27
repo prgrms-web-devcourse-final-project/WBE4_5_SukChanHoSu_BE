@@ -3,17 +3,22 @@ name: deploy
 on:
   push:
     paths:
-        - '.github/workflows/**'
-        - 'backend/src/**'
-        - 'backend/build.gradle'
-        - 'backend/settings.gradle'
-        - 'Dockerfile'
+      - '.github/workflows/**'
+      - 'backend/src/**'
+      - 'backend/build.gradle'
+      - 'backend/settings.gradle'
+      - 'Dockerfile'
     branches:
       - main
       - develop
+  pull_request:
+    branches:
+      - main
+      - develop  # 🔥 PR도 추가 (테스트 돌리기 위해)
 
 env:
   DOCKER_IMAGE_NAME: schs
+  SPRING_PROFILES_ACTIVE: test
 
 jobs:
   makeTagAndRelease:
@@ -60,7 +65,7 @@ jobs:
         working-directory: ./backend
 
       - name: 🧪 테스트 코드 빌드 & 실행
-        run: ./gradlew test
+        run: ./gradlew test -Pspring.profiles.active=test
         shell: bash
         working-directory: ./backend
 
