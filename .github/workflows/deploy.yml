@@ -60,7 +60,7 @@ jobs:
         working-directory: ./backend
 
       - name: 🧪 테스트 코드 빌드 & 실행
-        run: ./gradlew test
+        run: ./gradlew test -Pspring.profiles.active=test
         shell: bash
         working-directory: ./backend
 
