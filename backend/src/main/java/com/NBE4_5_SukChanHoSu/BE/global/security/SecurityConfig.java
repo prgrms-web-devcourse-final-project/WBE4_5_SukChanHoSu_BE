@@ -27,16 +27,11 @@ public class SecurityConfig {
     private final OAuth2AuthenticationSuccessHandler successHandler;
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
-                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/oauth2/**", "/api/auth/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .cors(Customizer.withDefaults())
