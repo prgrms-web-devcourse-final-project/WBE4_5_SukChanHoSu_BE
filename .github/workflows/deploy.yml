@@ -10,12 +10,28 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: schs
+  DATABASE.URL: ${{ secrets.DATABASE_URL }}
+  DATABASE.USERNAME: ${{ secrets.DATABASE_USERNAME }}
+  DATABASE.PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
 jobs:
   backend-ci:
     runs-on: ubuntu-latest
     outputs:
       test-result: ${{ steps.upload-test-report.outputs.artifact }}
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
@@ -78,6 +94,7 @@ jobs:
     outputs:
       owner_lc: ${{ steps.export_owner.outputs.owner_lc }}
       image_name: ${{ steps.export_image.outputs.image_name }}
+
     steps:
       - uses: actions/checkout@v4
 
