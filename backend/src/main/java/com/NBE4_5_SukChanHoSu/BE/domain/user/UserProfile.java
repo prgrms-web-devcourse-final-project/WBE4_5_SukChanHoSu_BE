@@ -1,11 +1,14 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.Matching;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -37,5 +40,14 @@ public class UserProfile {
     private double latitude;
     @Column(nullable = false)
     private double longitude;
+
+    @OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserLikes> likes = new ArrayList<>(); // 사용자가 누른 좋아요 목록
+
+    @OneToMany(mappedBy = "toUser", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserLikes> likedBy = new ArrayList<>(); // 사용자를 좋아요한 목록
+
+    @OneToMany(mappedBy = "user1", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Matching> matchings = new ArrayList<>(); // 매칭된 사용자 목록
 
 }
