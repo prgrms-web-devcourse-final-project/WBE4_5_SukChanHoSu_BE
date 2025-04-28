@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.User.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileUpdateRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -9,7 +10,6 @@ import com.NBE4_5_SukChanHoSu.BE.User.dto.NicknameCheckResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileRequestDto;
 import com.NBE4_5_SukChanHoSu.BE.User.dto.UserProfileDto;
 import com.NBE4_5_SukChanHoSu.BE.User.service.UserProfileService;
-import com.NBE4_5_SukChanHoSu.BE.global.RsData;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

@@ -1,30 +1,31 @@
-package com.NBE4_5_SukChanHoSu.BE.global;
+package com.NBE4_5_SukChanHoSu.BE.global.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
-@AllArgsConstructor
+@NoArgsConstructor
 @Getter
+@AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class RsData<T> {
     @NonNull
     private String code;
     @NonNull
-    private String msg;
+    private String message;
     @NonNull
     private T data;
 
-    public RsData(String code, String msg) {
-        this(code, msg, (T) new Empty());
+    public RsData(String code, String message) {
+        this(code, message, (T) new Empty());
     }
 
     @JsonIgnore
     public int getStatusCode() {
-        String statusCodeStr = code;
+        String statusCodeStr = code.split("-")[0];
         return Integer.parseInt(statusCodeStr);
     }
 }
-

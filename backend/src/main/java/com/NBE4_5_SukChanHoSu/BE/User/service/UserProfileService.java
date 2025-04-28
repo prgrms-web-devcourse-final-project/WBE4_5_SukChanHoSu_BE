@@ -7,6 +7,7 @@ import com.NBE4_5_SukChanHoSu.BE.User.dto.UserProfileDto;
 import com.NBE4_5_SukChanHoSu.BE.User.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.User.repository.UserRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -14,6 +15,7 @@ public class UserProfileService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     public void createProfile(Long userId, ProfileRequestDto dto) {
         User user = userRepository.findById(userId).orElseThrow();
 
@@ -26,12 +28,12 @@ public class UserProfileService {
         user.setLatitude(dto.getLatitude());
         user.setLongitude(dto.getLongitude());
         user.setBirthdate(dto.getBirthdate());
-        user.setEmail(dto.getEmail());
         user.setProfileImage(dto.getProfileImage());
 //추후 해당 entity 생기면
         userRepository.save(user);
     }
 
+    @Transactional
     public void updateProfile(Long userId, ProfileUpdateRequestDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("유저 없음"));
 
@@ -52,15 +54,7 @@ public class UserProfileService {
     public UserProfileDto getMyProfile(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("유저 없음"));
 
-        return UserProfileDto.builder()
-                .nickname(user.getNickname())
-                .email(user.getEmail())
-                .gender(user.getGender())
-                .profileImage(user.getProfileImage())
-                .latitude(user.getLatitude())
-                .longitude(user.getLongitude())
-                .birthdate(user.getBirthdate())
-                .distance(user.getDistance())
+        return UserProfileDto.builder().nickname(user.getNickname()).email(user.getEmail()).gender(user.getGender()).profileImage(user.getProfileImage()).latitude(user.getLatitude()).longitude(user.getLongitude()).birthdate(user.getBirthdate()).distance(user.getDistance())
 //                .lifeMovie(user.getLifeMovie())
 //                .favoriteGenres(user.getFavoriteGenres())
 //                .watchedMovies(user.getWatchedMovies())

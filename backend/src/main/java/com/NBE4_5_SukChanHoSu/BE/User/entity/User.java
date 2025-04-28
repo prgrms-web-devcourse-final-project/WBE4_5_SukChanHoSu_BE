@@ -36,7 +36,7 @@ public class User extends BaseTime {
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(20)")
-    private Provider provider;
+    private Provider provider;  //ouath용(ex: kakao,naver),폼은 null
 
     private LocalDate birthdate;
 
@@ -55,5 +55,6 @@ public class User extends BaseTime {
 
     @Column(nullable = false)
     private Integer distance;
+
 
 }

@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.User;
+package com.NBE4_5_SukChanHoSu.BE.domain.User.service;
 
 import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileRequestDto;
 import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileUpdateRequestDto;
@@ -40,15 +40,7 @@ class UserProfileServiceTest {
     @Test
     void createProfile_성공() {
         // given
-        ProfileRequestDto dto = ProfileRequestDto.builder()
-                .nickname("testnick")
-                .email("test@example.com")
-                .gender(Gender.MALE)
-                .latitude(37.5)
-                .longitude(127.0)
-                .birthdate(LocalDate.of(1995, 5, 5))
-                .profileImage("image.jpg")
-                .build();
+        ProfileRequestDto dto = ProfileRequestDto.builder().nickname("testnick").email("test@example.com").gender(Gender.MALE).latitude(37.5).longitude(127.0).birthdate(LocalDate.of(1995, 5, 5)).profileImage("image.jpg").build();
 
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
@@ -67,14 +59,10 @@ class UserProfileServiceTest {
         user.setNickname("alreadySet");
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        ProfileRequestDto dto = ProfileRequestDto.builder()
-                .nickname("newNick")
-                .build();
+        ProfileRequestDto dto = ProfileRequestDto.builder().nickname("newNick").build();
 
         // when & then
-        assertThatThrownBy(() -> userProfileService.createProfile(1L, dto))
-                .isInstanceOf(IllegalStateException.class)
-                .hasMessage("이미 프로필이 등록된 사용자입니다.");
+        assertThatThrownBy(() -> userProfileService.createProfile(1L, dto)).isInstanceOf(IllegalStateException.class).hasMessage("이미 프로필이 등록된 사용자입니다.");
     }
 
     @Test
@@ -82,14 +70,7 @@ class UserProfileServiceTest {
         // given
         when(userRepository.findById(1L)).thenReturn(Optional.of(user));
 
-        ProfileUpdateRequestDto dto = ProfileUpdateRequestDto.builder()
-                .nickname("updatedNick")
-                .gender(Gender.FEMALE)
-                .latitude(36.5)
-                .longitude(128.0)
-                .birthdate(LocalDate.of(2000, 1, 1))
-                .profileImage("newImage.jpg")
-                .build();
+        ProfileUpdateRequestDto dto = ProfileUpdateRequestDto.builder().nickname("updatedNick").gender(Gender.FEMALE).latitude(36.5).longitude(128.0).birthdate(LocalDate.of(2000, 1, 1)).profileImage("newImage.jpg").build();
 
         // when
         userProfileService.updateProfile(1L, dto);
