@@ -9,7 +9,16 @@ spring:
   profiles:
     active: test  # ✅ 프로파일 변경 가능 (dev, test, prod 등)
     include: secret  # ✅ 추가 설정 파일 포함
-
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE.CLIENT_ID}  # Google OAuth2 클라이언트 ID
+            client-secret: ${GOOGLE.SECURITY_PASSWORD}  # Google OAuth2 클라이언트 비밀키
+            scope:
+              - profile
+              - email
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DATABASE.URL}  # ✅ 환경 변수로 MySQL 설정 가능
@@ -52,6 +61,6 @@ custom:
     frontUrl: "${custom.prod.frontUrl}"
 
   jwt:
-    secret: ${JWT.secretKey}
+    secret: ${JWT.SECRET}
   genFile:
     dirPath: c:/temp/glog_dev  # ✅ 파일 저장 경로 (리눅스면 /tmp 등으로 변경 가능)
