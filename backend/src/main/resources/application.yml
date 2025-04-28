@@ -9,8 +9,7 @@ spring:
   profiles:
     active: test  # ✅ 프로파일 변경 가능 (dev, test, prod 등)
   config:
-    import:
-      - "classpath:application-secret.yml"
+    import: application-secret.yml
 
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -54,6 +53,6 @@ custom:
     frontUrl: "${custom.prod.frontUrl}"
 
   jwt:
-    secret: ${JWT.secretKey}
+    expire-seconds: "#{60 * 30}"  # ✅ JWT 만료 시간 조정 가능 (초 단위)
   genFile:
     dirPath: c:/temp/glog_dev  # ✅ 파일 저장 경로 (리눅스면 /tmp 등으로 변경 가능)
