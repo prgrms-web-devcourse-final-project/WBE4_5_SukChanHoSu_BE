@@ -21,4 +21,7 @@ public class Member {
     private String email;
     private String password;
     private Role role;
+    private String name;
+    private String provider;
+    private String providerId;
 }
