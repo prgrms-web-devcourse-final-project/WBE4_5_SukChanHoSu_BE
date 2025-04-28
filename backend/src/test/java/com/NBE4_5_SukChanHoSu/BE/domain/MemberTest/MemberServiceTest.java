@@ -6,6 +6,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Member;
 import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Role;
 import com.NBE4_5_SukChanHoSu.BE.domain.member.repository.MemberRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.member.service.MemberService;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.TokenProvider;
 import com.NBE4_5_SukChanHoSu.BE.global.util.CookieUtil;
@@ -22,6 +23,7 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -29,6 +31,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
@@ -59,25 +62,30 @@ public class MemberServiceTest {
         // given
         MemberSignUpRequestDto requestDto = new MemberSignUpRequestDto();
         requestDto.setEmail("test@example.com");
-        requestDto.setPassword("encodedPassword");
+        requestDto.setPassword("plainPassword");
+        requestDto.setPasswordConfirm("plainPassword");
 
-        Member testMember = Member.builder()
-                .email("test@example.com")
+        when(memberRepository.findByEmail(requestDto.getEmail())).thenReturn(null);
+        when(passwordEncoder.encode(requestDto.getPassword())).thenReturn("encodedPassword");
+
+        Member expectedMember = Member.builder()
+                .email(requestDto.getEmail())
                 .password("encodedPassword")
                 .role(Role.USER)
                 .build();
 
-        given(passwordEncoder.encode(requestDto.getPassword())).willReturn("encodedPassword");
-        given(memberRepository.save(any(Member.class))).willReturn(testMember);
+        when(memberRepository.save(any(Member.class))).thenReturn(expectedMember);
 
         // when
-        Member result = memberService.join(requestDto);
+        Member actualMember = memberService.join(requestDto);
 
         // then
-        assertNotNull(result);
-        assertEquals("test@example.com", result.getEmail());
-        assertEquals("encodedPassword", result.getPassword());
-        assertEquals(Role.USER, result.getRole());
+        assertAll(
+                () -> assertNotNull(actualMember),
+                () -> assertEquals("test@example.com", actualMember.getEmail()),
+                () -> assertEquals("encodedPassword", actualMember.getPassword()),
+                () -> assertEquals(Role.USER, actualMember.getRole())
+        );
         verify(memberRepository).save(any(Member.class));
     }
 
@@ -85,49 +93,83 @@ public class MemberServiceTest {
     @DisplayName("로그인 성공")
     void loginSuccess() {
         // given
-        final String AUTHORITIES_KEY = "auth";
         MemberLoginRequestDto requestDto = new MemberLoginRequestDto();
         requestDto.setEmail("test@example.com");
-        requestDto.setPassword("encodedPassword");
+        requestDto.setPassword("plainPassword");
 
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(requestDto.getEmail(), requestDto.getPassword());
+        Member foundMember = Member.builder()
+                .email(requestDto.getEmail())
+                .password("encodedPassword")
+                .role(Role.USER)
+                .build();
+
+        when(memberRepository.findByEmail(requestDto.getEmail())).thenReturn(foundMember);
+        when(passwordEncoder.matches(requestDto.getPassword(), foundMember.getPassword())).thenReturn(true);
 
         Authentication authentication = mock(Authentication.class);
-        JwtTokenDto jwtTokenDto = new JwtTokenDto(
-                AUTHORITIES_KEY,
+        JwtTokenDto expectedToken = new JwtTokenDto(
+                "auth",
                 "accessToken",
                 "refreshToken"
         );
 
-        given(authenticationManagerBuilder.getObject()).willReturn(authenticationManager);
-        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).willReturn(authentication);
-        given(tokenProvider.generateToken(authentication)).willReturn(jwtTokenDto);
+        when(authenticationManagerBuilder.getObject()).thenReturn(authenticationManager);
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
+        when(tokenProvider.generateToken(authentication)).thenReturn(expectedToken);
 
         // when
-        JwtTokenDto result = memberService.login(requestDto);
+        JwtTokenDto actualToken = memberService.login(requestDto);
 
         // then
-        assertNotNull(result);
-        assertEquals("accessToken", result.getAccessToken());
-        assertEquals("refreshToken", result.getRefreshToken());
-        verify(util).addCookie("accessToken", "accessToken");
-        verify(util).addCookie("refreshToken", "refreshToken");
+        assertAll(
+                () -> assertNotNull(actualToken),
+                () -> assertEquals("accessToken", actualToken.getAccessToken()),
+                () -> assertEquals("refreshToken", actualToken.getRefreshToken())
+        );
+        verify(util).addCookie("access_token", "accessToken");
+        verify(util).addCookie("refresh_token", "refreshToken");
+    }
+
+
+    @Test
+    @DisplayName("로그인 실패 - 존재하지 않는 이메일")
+    void loginFail_EmailNotFound() {
+        // given
+        MemberLoginRequestDto requestDto = new MemberLoginRequestDto();
+        requestDto.setEmail("nonexistent@example.com");
+        requestDto.setPassword("anyPassword");
+
+        given(memberRepository.findByEmail(requestDto.getEmail()))
+                .willReturn(null);
+
+        // when & then
+        ServiceException exception = assertThrows(ServiceException.class, () -> memberService.login(requestDto));
+        assertEquals("존재하지 않는 이메일입니다.", exception.getMessage());
     }
 
     @Test
-    @DisplayName("로그인 실패")
-    void loginFail() {
+    @DisplayName("로그인 실패 - 비밀번호 불일치")
+    void loginFail_InvalidPassword() {
         // given
         MemberLoginRequestDto requestDto = new MemberLoginRequestDto();
         requestDto.setEmail("test@example.com");
-        requestDto.setPassword("encodedPassword");
+        requestDto.setPassword("wrongPassword");
 
-        given(authenticationManagerBuilder.getObject()).willReturn(authenticationManager);
-        given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                .willThrow(new BadCredentialsException("Bad credentials"));
+        Member foundMember = Member.builder()
+                .email(requestDto.getEmail())
+                .password("encodedPassword")
+                .role(Role.USER)
+                .build();
+
+        given(memberRepository.findByEmail(requestDto.getEmail()))
+                .willReturn(foundMember);
+        given(passwordEncoder.matches(requestDto.getPassword(), foundMember.getPassword()))
+                .willReturn(false);
 
         // when & then
-        assertThrows(BadCredentialsException.class, () -> memberService.login(requestDto));
+        ServiceException exception = assertThrows(ServiceException.class, () -> memberService.login(requestDto));
+        assertEquals("비밀번호가 일치하지 않습니다.", exception.getMessage());
     }
+
+
 }
