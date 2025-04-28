@@ -18,7 +18,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update  # ✅ 개발용 (update), 운영용 (validate or none)
+      ddl-auto: create-drop  # ✅ 개발용 (update), 운영용 (validate or none)
     show-sql: false  # ✅ SQL 출력 여부
     properties:
       hibernate:

@@ -1,0 +1,100 @@
+package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
+
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.UserLikeResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.MatchingResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.UserMatchingResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.LikeResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
+import com.NBE4_5_SukChanHoSu.BE.global.dto.Empty;
+import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.AllArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/users")
+@AllArgsConstructor
+@Tag(name = "User API", description = "사용자 관련 API")
+public class UserController {
+
+    private final UserService userService;
+
+    @PostMapping("/like")
+    @Operation(summary = "like 전송", description = "toUser에게 like 전송")
+    // todo: 인증 구현시 파라미터에서 인증정보로 변경
+    public RsData<?> likeUser(@RequestParam Long fromUserId,@RequestParam Long toUserId) {
+        // 유저 탐색
+        UserProfile fromUser = userService.findUser(fromUserId);
+        UserProfile toUser = userService.findUser(toUserId);
+
+        // 좋아요
+        userService.likeUser(fromUser,toUser);
+
+        // 매칭 확인
+        if(userService.isMatched(fromUser,toUser)){
+            MatchingResponse response = userService.matching(fromUser,toUser);
+            return new RsData<>("200", "매칭 성공", response);
+        }
+
+        LikeResponse likeResponse = new LikeResponse();
+//        likeResponse.setFromUserId(fromUser.getUserId());
+//        likeResponse.setFromUserNickname(fromUser.getNickName());
+//        likeResponse.setFromUserLikes(userService.getUserLikes(fromUser)); // user1의 좋아요 목록
+//        likeResponse.setToUserId(toUser.getUserId());
+//        likeResponse.setToUserNickname(toUser.getNickName());
+//        likeResponse.setToUserLikedBy(userService.getUserLiked(toUser)); // user2를 좋아요한 사용자 목록
+        likeResponse.setMessage(fromUser.getNickName() + "->" + toUser.getNickName());
+        likeResponse.setToUser(toUser);
+        return new RsData<>("200", "좋아요 성공", likeResponse);
+    }
+
+    @GetMapping("/like/{userId}")
+    @Operation(summary = "like 테이블 조회", description = "사용자의 like 테이블 조회")
+    public RsData<UserLikeResponse> getUserLikes(@PathVariable Long userId) {
+        UserProfile user = userService.findUser(userId);
+        UserLikeResponse response = new UserLikeResponse();
+//        response.setUserId(user.getUserId());
+//        response.setUserNickname(user.getNickName());
+//        response.setUser(user);
+        response.setUserLikes(userService.getUserLikes(user));
+
+        if(response.getUserLikes().isEmpty()){
+            return new RsData<>("404", "like한 사용자가 없습니다.");
+        }
+
+        return new RsData<>("200",user.getNickName()+"가 좋아요한 유저 목록 반환",response);
+    }
+
+    @GetMapping("/liked/{userId}")
+    @Operation(summary = "liked 테이블 조회", description = "사용자의 liked 테이블 조회")
+    public RsData<UserLikeResponse> getUserLiked(@PathVariable Long userId) {
+        UserProfile user = userService.findUser(userId);
+        UserLikeResponse response = new UserLikeResponse();
+//        response.setUserId(user.getUserId());
+//        response.setUserNickname(user.getNickName());
+//        response.setUser(user);
+        response.setUserLikes(userService.getUserLiked(user));
+
+        if(response.getUserLikes().isEmpty()){
+            return new RsData<>("404", "나를 like하는 사용자가 없습니다.");
+        }
+
+        return new RsData<>("200",user.getNickName()+"를 좋아요한 유저 목록 반환",response);
+    }
+
+    @GetMapping("/matching/{userId}")
+    @Operation(summary = "match 테이블 조회", description = "사용자의 match 테이블 조회")
+    public RsData<?> getUserMatch(@PathVariable Long userId) {
+        UserProfile user = userService.findUser(userId);
+        List<UserMatchingResponse> response = userService.getUserMatches(user);
+        if(response.isEmpty()){
+            return new RsData<>("404", "매칭된 사용자가 없습니다.",new Empty());
+        }
+        return new RsData<>("200","매칭된 사용자 목록 조회",response);
+    }
+
+}

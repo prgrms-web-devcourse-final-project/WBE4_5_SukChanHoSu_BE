@@ -1,14 +1,11 @@
 package com.NBE4_5_SukChanHoSu.BE.global.init;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.Genre;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.UserProfileRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,7 +47,7 @@ public class BaseInitData {
 
 			// Enum으로 장르를 설정 (임의로 Action, Comedy, Drama 선택)
 			List<Genre> genres = List.of(Genre.ACTION, Genre.COMEDY, Genre.DRAMA);
-			userProfile.setFavouriteGenres(genres); // 장르 리스트 설정
+			userProfile.setFavoriteGenres(genres); // 장르 리스트 설정
 
 			userProfile.setIntroduce("안녕하세요! 임시 유저 " + i + "입니다.");
 			userProfile.setLatitude(37.5665 + (i * 0.01)); // 임의의 위도 값
@@ -65,7 +62,7 @@ public class BaseInitData {
 			System.out.println("nickName: " + userProfile.getNickName());
 			System.out.println("gender: " + userProfile.getGender());
 			System.out.println("profileImage: " + userProfile.getProfileImage());
-			System.out.println("favoriteGenres: " + userProfile.getFavouriteGenres());
+			System.out.println("favoriteGenres: " + userProfile.getFavoriteGenres());
 			System.out.println("introduce: " + userProfile.getIntroduce());
 			System.out.println("latitude: " + userProfile.getLatitude());
 			System.out.println("longitude: " + userProfile.getLongitude());
