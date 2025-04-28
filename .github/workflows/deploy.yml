@@ -10,12 +10,28 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: schs
+  DATABASE.URL: ${{ secrets.DATABASE_URL }}
+  DATABASE.USERNAME: ${{ secrets.DATABASE_USERNAME }}
+  DATABASE.PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
 jobs:
   backend-ci:
     runs-on: ubuntu-latest
     outputs:
       test-result: ${{ steps.upload-test-report.outputs.artifact }}
+    services:
+      mysql:
+        image: mysql:8
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=3
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
@@ -34,7 +50,7 @@ jobs:
         shell: bash
 
       - name: Build with Gradle with test profile
-        run: ./gradlew build -Pprofile=test
+        run: ./gradlew build -Dspring.profiles.active=test
         working-directory: backend/
         shell: bash
 
@@ -78,6 +94,7 @@ jobs:
     outputs:
       owner_lc: ${{ steps.export_owner.outputs.owner_lc }}
       image_name: ${{ steps.export_image.outputs.image_name }}
+
     steps:
       - uses: actions/checkout@v4
 
@@ -118,7 +135,7 @@ jobs:
 
       - name: Export image name
         id: export_image
-        run: echo "image_name=app250416" >> $GITHUB_OUTPUT
+        run: echo "image_name=schs" >> $GITHUB_OUTPUT
 
       - name: Build and Push Docker image
         uses: docker/build-push-action@v3
