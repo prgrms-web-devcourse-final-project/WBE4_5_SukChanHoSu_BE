@@ -6,6 +6,7 @@ import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+
 import java.time.LocalDate;
 
 @Entity
@@ -33,6 +34,9 @@ public class User extends BaseTime {
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(20)")
     private Provider provider;
+
+    @Column(length = 100, unique = true)
+    private String loginId;
 
     private LocalDate birthdate;
 
