@@ -118,7 +118,7 @@ jobs:
 
       - name: Export image name
         id: export_image
-        run: echo "image_name=app250416" >> $GITHUB_OUTPUT
+        run: echo "schs" >> $GITHUB_OUTPUT
 
       - name: Build and Push Docker image
         uses: docker/build-push-action@v3
