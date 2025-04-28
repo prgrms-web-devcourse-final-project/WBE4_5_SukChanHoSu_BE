@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.User.service;
 
+import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileUpdateRequestDto;
 import lombok.RequiredArgsConstructor;
 import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileRequestDto;
 import com.NBE4_5_SukChanHoSu.BE.User.dto.UserProfileDto;
@@ -27,21 +28,20 @@ public class UserProfileService {
         user.setBirthdate(dto.getBirthdate());
         user.setEmail(dto.getEmail());
         user.setProfileImage(dto.getProfileImage());
-
+//추후 해당 entity 생기면
         userRepository.save(user);
     }
 
-    public void updateProfile(Long userId, UserProfileDto dto) {
+    public void updateProfile(Long userId, ProfileUpdateRequestDto dto) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("유저 없음"));
 
         user.setNickname(dto.getNickname());
-        user.setEmail(dto.getEmail());
         user.setGender(dto.getGender());
         user.setProfileImage(dto.getProfileImage());
         user.setLatitude(dto.getLatitude());
         user.setLongitude(dto.getLongitude());
         user.setBirthdate(dto.getBirthdate());
-
+        user.setDistance(dto.getDistance());
         userRepository.save(user);
     }
 
@@ -52,7 +52,21 @@ public class UserProfileService {
     public UserProfileDto getMyProfile(Long userId) {
         User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("유저 없음"));
 
-        return UserProfileDto.builder().nickname(user.getNickname()).email(user.getEmail()).gender(user.getGender()).profileImage(user.getProfileImage()).latitude(user.getLatitude()).longitude(user.getLongitude()).birthdate(user.getBirthdate()).build();
+        return UserProfileDto.builder()
+                .nickname(user.getNickname())
+                .email(user.getEmail())
+                .gender(user.getGender())
+                .profileImage(user.getProfileImage())
+                .latitude(user.getLatitude())
+                .longitude(user.getLongitude())
+                .birthdate(user.getBirthdate())
+                .distance(user.getDistance())
+//                .lifeMovie(user.getLifeMovie())
+//                .favoriteGenres(user.getFavoriteGenres())
+//                .watchedMovies(user.getWatchedMovies())
+//                .preferredTheaters(user.getPreferredTheaters())
+                //추후 해당 entity 생기면
+                .build();
     }
 }
 

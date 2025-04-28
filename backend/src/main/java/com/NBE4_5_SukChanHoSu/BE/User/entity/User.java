@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.User.entity;
 
 import com.NBE4_5_SukChanHoSu.BE.User.enums.Gender;
+import com.NBE4_5_SukChanHoSu.BE.User.enums.Provider;
 import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,6 +27,13 @@ public class User extends BaseTime {
     @Column(nullable = false, unique = true, length = 100)
     private String email;
 
+    @Column(length = 255)
+    private String password;
+
+    @Enumerated(EnumType.STRING)
+    @Column(columnDefinition = "VARCHAR(20)")
+    private Provider provider;
+
     private LocalDate birthdate;
 
     @Enumerated(EnumType.STRING)
@@ -40,5 +48,8 @@ public class User extends BaseTime {
 
     @Column
     private Double longitude;
+
+    @Column(nullable = false)
+    private Integer distance;
 
 }

@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.User.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileUpdateRequestDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -60,7 +61,7 @@ public class UserProfileController {
 
     @Operation(summary = "프로필 수정", description = "사용자의 닉네임, 이메일, 성별, 위치 등 프로필을 수정합니다.")
     @PutMapping
-    public RsData<UserProfileDto> updateProfile(@RequestParam Long userId, @Valid @RequestBody UserProfileDto dto) {
+    public RsData<ProfileUpdateRequestDto> updateProfile(@RequestParam Long userId, @Valid @RequestBody ProfileUpdateRequestDto dto) {
         userProfileService.updateProfile(userId, dto);
         return new RsData<>("200", "프로필 수정 완료", dto);
     }

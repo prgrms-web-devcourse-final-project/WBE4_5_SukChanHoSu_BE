@@ -5,12 +5,18 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.validation.constraints.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class ProfileRequestDto {
 
     @NotBlank
@@ -35,7 +41,7 @@ public class ProfileRequestDto {
     private LocalDate birthdate;
 
     @Min(0)
-    @Max(100)
+    @Max(50)
     private Integer distance; // 상대방과의 허용 거리 (km)
 
     @NotBlank(message = "인생 영화는 필수입니다.")
