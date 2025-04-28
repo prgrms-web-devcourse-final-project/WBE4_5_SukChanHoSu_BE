@@ -34,7 +34,7 @@ jobs:
         shell: bash
 
       - name: Build with Gradle with test profile
-        run: ./gradlew build -Pprofile=test
+        run: ./gradlew build -Dspring.profiles.active=test
         working-directory: backend/
         shell: bash
 
