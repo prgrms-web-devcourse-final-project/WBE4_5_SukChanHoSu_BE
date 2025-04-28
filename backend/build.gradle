@@ -40,6 +40,12 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
+    // JUnit 5 (기본적인 단위 테스트)
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.2'
+    // Mockito (Mock 객체를 만들기 위함)
+    testImplementation 'org.mockito:mockito-core:5.10.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.10.0'
+    testImplementation 'org.assertj:assertj-core:3.25.3'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
@@ -48,4 +54,8 @@ dependencies {
 tasks.named('test') {
         useJUnitPlatform()
     }
+}
+
+test {
+    useJUnitPlatform() // JUnit5로 테스트 실행
 }
