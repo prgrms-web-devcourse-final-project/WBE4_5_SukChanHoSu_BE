@@ -7,6 +7,6 @@ import java.util.List;
 
 @Data
 public class UserLikeResponse {
-//    private UserProfile user;
+    private int size;
     private List<UserProfile> UserLikes;
 }

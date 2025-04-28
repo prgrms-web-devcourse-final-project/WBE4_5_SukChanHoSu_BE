@@ -1,12 +1,12 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.dto;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.Matching;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import lombok.Data;
-
-import java.time.LocalDateTime;
 
 @Data
 public class MatchingResponse {
-    private String user1Nickname;
-    private String user2Nickname;
-    private LocalDateTime matchingTime;
+    private Matching matching;
+    private UserProfile user1;
+    private UserProfile user2;
 }

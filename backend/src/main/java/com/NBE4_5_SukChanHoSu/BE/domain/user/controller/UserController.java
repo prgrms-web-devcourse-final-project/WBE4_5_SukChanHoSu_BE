@@ -37,19 +37,13 @@ public class UserController {
         // 매칭 확인
         if(userService.isMatched(fromUser,toUser)){
             MatchingResponse response = userService.matching(fromUser,toUser);
-            return new RsData<>("200", "매칭 성공", response);
+            return new RsData<>("200", fromUser.getNickName()+"과(와)"+toUser.getNickName()+"이 매칭 되었습니다.", response);
         }
 
         LikeResponse likeResponse = new LikeResponse();
-//        likeResponse.setFromUserId(fromUser.getUserId());
-//        likeResponse.setFromUserNickname(fromUser.getNickName());
-//        likeResponse.setFromUserLikes(userService.getUserLikes(fromUser)); // user1의 좋아요 목록
-//        likeResponse.setToUserId(toUser.getUserId());
-//        likeResponse.setToUserNickname(toUser.getNickName());
-//        likeResponse.setToUserLikedBy(userService.getUserLiked(toUser)); // user2를 좋아요한 사용자 목록
-        likeResponse.setMessage(fromUser.getNickName() + "->" + toUser.getNickName());
+        likeResponse.setFromUser(fromUser);
         likeResponse.setToUser(toUser);
-        return new RsData<>("200", "좋아요 성공", likeResponse);
+        return new RsData<>("200", fromUser.getNickName()+ " 가 "+toUser.getNickName()+ "님 에게 좋아요를 보냈습니다", likeResponse);
     }
 
     @GetMapping("/like/{userId}")
@@ -57,10 +51,8 @@ public class UserController {
     public RsData<UserLikeResponse> getUserLikes(@PathVariable Long userId) {
         UserProfile user = userService.findUser(userId);
         UserLikeResponse response = new UserLikeResponse();
-//        response.setUserId(user.getUserId());
-//        response.setUserNickname(user.getNickName());
-//        response.setUser(user);
         response.setUserLikes(userService.getUserLikes(user));
+        response.setSize(response.getUserLikes().size());
 
         if(response.getUserLikes().isEmpty()){
             return new RsData<>("404", "like한 사용자가 없습니다.");
@@ -74,10 +66,8 @@ public class UserController {
     public RsData<UserLikeResponse> getUserLiked(@PathVariable Long userId) {
         UserProfile user = userService.findUser(userId);
         UserLikeResponse response = new UserLikeResponse();
-//        response.setUserId(user.getUserId());
-//        response.setUserNickname(user.getNickName());
-//        response.setUser(user);
         response.setUserLikes(userService.getUserLiked(user));
+        response.setSize(response.getUserLikes().size());
 
         if(response.getUserLikes().isEmpty()){
             return new RsData<>("404", "나를 like하는 사용자가 없습니다.");
@@ -94,7 +84,7 @@ public class UserController {
         if(response.isEmpty()){
             return new RsData<>("404", "매칭된 사용자가 없습니다.",new Empty());
         }
-        return new RsData<>("200","매칭된 사용자 목록 조회",response);
+        return new RsData<>("200","매칭된 사용자 목록 조회("+response.size()+")",response);
     }
 
 }

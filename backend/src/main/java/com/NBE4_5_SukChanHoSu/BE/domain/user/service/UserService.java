@@ -59,10 +59,9 @@ public class UserService {
         userLikesRepository.deleteByFromUserAndToUser(fromUser,toUser);
         // 응답 생성
         MatchingResponse matchingResponse = new MatchingResponse();
-        matchingResponse.setUser1Nickname(fromUser.getNickName());
-        matchingResponse.setUser2Nickname(toUser.getNickName());
-        matchingResponse.setMatchingTime(LocalDateTime.now());
-
+        matchingResponse.setMatching(matching);
+        matchingResponse.setUser1(matching.getUser1());
+        matchingResponse.setUser2(matching.getUser2());
         return matchingResponse;
     }
 
