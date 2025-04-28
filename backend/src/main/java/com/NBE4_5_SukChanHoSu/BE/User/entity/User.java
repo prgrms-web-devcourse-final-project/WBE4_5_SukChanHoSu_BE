@@ -20,23 +20,23 @@ public class User extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long id;  //oauth 용
+
+    @Column(length = 100, unique = true)
+    private String loginId;  //폼 로그인용
 
     @Column(unique = true, length = 50)
     private String nickname;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(unique = true, length = 100)
     private String email;
 
     @Column(length = 255)
-    private String password;
+    private String password; //폼 로그인만
 
     @Enumerated(EnumType.STRING)
     @Column(columnDefinition = "VARCHAR(20)")
     private Provider provider;
-
-    @Column(length = 100, unique = true)
-    private String loginId;
 
     private LocalDate birthdate;
 
