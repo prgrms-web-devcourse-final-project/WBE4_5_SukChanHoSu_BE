@@ -1,7 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.member.entity;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 @Getter
 public enum MemberErrorCode {
