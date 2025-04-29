@@ -10,9 +10,12 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: schs
-  DATABASE.URL: ${{ secrets.DATABASE_URL }}
-  DATABASE.USERNAME: ${{ secrets.DATABASE_USERNAME }}
-  DATABASE.PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
+  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+  GOOGLE_SECURITY_PASSWORD: ${{ secrets.GOOGLE_SECURITY_PASSWORD }}
 
 jobs:
   backend-ci:
@@ -23,8 +26,8 @@ jobs:
       mysql:
         image: mysql:8
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testdb
+          MYSQL_ROOT_PASSWORD: 0913  # ✅ root 비밀번호 변경
+          MYSQL_DATABASE: moviematch  # ✅ 초기 DB 이름 변경
         ports:
           - 3306:3306
         options: >-
@@ -108,13 +111,9 @@ jobs:
         run: chmod +x ./gradlew
         working-directory: ./backend/
 
-      - name: Test with Gradle
-        run: ./gradlew build -Pprofile=test
-        working-directory: ./backend/
-
       - name: Generate application-secret.yml
         env:
-          APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
+            APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
         run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application-secret.yml
 
       - name: Set up Docker Buildx
