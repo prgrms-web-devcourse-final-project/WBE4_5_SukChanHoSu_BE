@@ -55,10 +55,9 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-    testImplementation 'org.awaitility:awaitility:4.2.0'
 
 
-tasks.named('test') {
+    tasks.named('test') {
         useJUnitPlatform()
     }
 }
