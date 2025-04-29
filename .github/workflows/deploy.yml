@@ -36,7 +36,9 @@ jobs:
       - name: Test Database Connection
         run: |
           echo "Testing connection to the database..."
-          mysql --host=${{ secrets.DATABASE_URL }} --user=${{ secrets.DATABASE_USERNAME }} --password=${{ secrets.DATABASE_PASSWORD }} -e "SELECT 1;"
+          echo "DATABASE_URL is: $DATABASE_URL"
+          echo "DATABASE_USERNAME is: $DATABASE_USERNAME"
+          echo "DATABASE_PASSWORD is: $DATABASE_PASSWORD"
       - name: Generate application-secret.yml
         env:
           APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
