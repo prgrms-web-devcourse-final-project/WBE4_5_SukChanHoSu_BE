@@ -109,7 +109,7 @@ jobs:
         working-directory: ./backend/
 
       - name: Test with Gradle
-        run: ./gradlew build -Pprofile=test
+        run: ./gradlew build
         working-directory: ./backend/
 
       - name: Generate application-secret.yml
