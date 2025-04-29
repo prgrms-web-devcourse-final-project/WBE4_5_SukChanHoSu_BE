@@ -113,6 +113,7 @@ jobs:
 
       - name: Run Tests
         run: ./gradlew test && ./gradlew test --info
+        working-directory: ./backend/
 
       - name: Test with Gradle
         run: ./gradlew build -Pprofile=test
