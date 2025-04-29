@@ -73,8 +73,8 @@ public class UserService {
         matchingRepository.save(matching);
 
         // 좋아요 관계 삭제
-        userLikesRepository.deleteByFromUserAndToUser(toUser,fromUser);
-        userLikesRepository.deleteByFromUserAndToUser(fromUser,toUser);
+        cancelLikes(fromUser, toUser);
+        cancelLikes(toUser, fromUser);
         // 응답 생성
         MatchingResponse matchingResponse = new MatchingResponse();
         matchingResponse.setMatching(matching);

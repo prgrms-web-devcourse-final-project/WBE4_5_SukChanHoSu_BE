@@ -206,6 +206,78 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.message",containsString("이미 매칭된 상태입니다.")));
     }
 
+    @Test
+    @DisplayName("like 취소 - like 상태")
+    void cancelLikeUser() throws Exception {
+        // given
+        setUpLike(1L,2L);
 
+        // when
+        ResultActions action = mvc.perform(delete("/api/users/like")
+                        .param("fromUserId","1")
+                        .param("toUserId","2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
 
+        // then
+        action
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("like 취소")));
+    }
+
+    @Test
+    @DisplayName("like 취소 - matching 상태")
+    void cancelMatchUser() throws Exception {
+        // given
+        setUpLike(1L,2L);
+        setUpLike(2L,1L);
+
+        // when
+        ResultActions action = mvc.perform(delete("/api/users/like")
+                        .param("fromUserId","1")
+                        .param("toUserId","2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // then
+        action
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("매칭 취소")));
+    }
+
+    @Test
+    @DisplayName("like 취소 후, 데이터 조회x")
+    void cancelMatchGetLikes() throws Exception {
+        // given
+        setUpLike(1L, 2L);
+        setUpLike(2L, 1L);
+
+        mvc.perform(delete("/api/users/like")
+                        .param("fromUserId", "1")
+                        .param("toUserId", "2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // when
+        ResultActions getMatching = mvc.perform(get("/api/users/matching/1") // TempUser1의 매칭 데이터 가져오기
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+        // then
+        getMatching
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("404"))
+                .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
+
+        await().atMost(2, SECONDS).untilAsserted(() -> {
+            ResultActions getLikes = mvc.perform(get("/api/users/like/1") // TempUser1의 Likes 데이터 가져오기
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andDo(print());
+            getLikes
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.code").value("404"))
+                    .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
+        });
+    }
 }
