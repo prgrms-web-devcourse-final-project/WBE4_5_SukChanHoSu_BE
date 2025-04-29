@@ -53,9 +53,7 @@ public class MemberService {
                 .role(Role.USER)
                 .build();
 
-        memberRepository.save(member);
-
-        return member;
+        return memberRepository.save(member);
     }
 
     public JwtTokenDto login(MemberLoginRequestDto requestDto) {

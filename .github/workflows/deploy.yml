@@ -23,8 +23,8 @@ jobs:
       mysql:
         image: mysql:8
         env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: testdb
+          MYSQL_ROOT_PASSWORD: 0913  # ✅ root 비밀번호 변경
+          MYSQL_DATABASE: moviematch  # ✅ 초기 DB 이름 변경
         ports:
           - 3306:3306
         options: >-
@@ -33,6 +33,12 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
+      - name: Generate application-secret.yml
+        env:
+          APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
+        run: |
+          mkdir -p backend/src/main/resources
+          echo "$APPLICATION_SECRET" > backend/src/main/resources/application-secret.yml
       - name: Checkout
         uses: actions/checkout@v4.2.2
         with:

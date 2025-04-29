@@ -7,18 +7,8 @@ server:
 
 spring:
   profiles:
-    active: dev
+    active: dev # dev
     include: secret  # ✅ 추가 설정 파일 포함
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE.CLIENT_ID}
-            client-secret: ${GOOGLE.SECURITY_PASSWORD}
-            scope:
-              - profile
-              - email
 
   datasource:
     url: jdbc:h2:./db_dev;MODE=MySQL
@@ -44,22 +34,22 @@ logging:
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
 
-custom:
-  appName: app4  # ✅ 앱 이름 변경 가능
-  prod:
-    domain: qwas.shop  # ✅ 운영 도메인 변경 가능
-    backUrl: "https://api.${custom.appName}.${custom.prod.domain}"
-    frontUrl: "https://www.${custom.appName}.${custom.prod.domain}"
-
-  dev:
-    domain: localhost  # ✅ 개발 도메인 변경 가능
-    backUrl: "http://${custom.dev.domain}:${server.port}"
-    frontUrl: "http://${custom.dev.domain}:3000"
-
-  site:
-    domain: "${custom.prod.domain}"
-    backUrl: "${custom.prod.backUrl}"
-    frontUrl: "${custom.prod.frontUrl}"
+#custom:
+#  appName: app4  # ✅ 앱 이름 변경 가능
+#  prod:
+#    domain: qwas.shop  # ✅ 운영 도메인 변경 가능
+#    backUrl: "https://api.${custom.appName}.${custom.prod.domain}"
+#    frontUrl: "https://www.${custom.appName}.${custom.prod.domain}"
+#
+#  dev:
+#    domain: localhost  # ✅ 개발 도메인 변경 가능
+#    backUrl: "http://${custom.dev.domain}:${server.port}"
+#    frontUrl: "http://${custom.dev.domain}:3000"
+#
+#  site:
+#    domain: "${custom.prod.domain}"
+#    backUrl: "${custom.prod.backUrl}"
+#    frontUrl: "${custom.prod.frontUrl}"
 
   jwt:
     secret: ${JWT.SECRET}
