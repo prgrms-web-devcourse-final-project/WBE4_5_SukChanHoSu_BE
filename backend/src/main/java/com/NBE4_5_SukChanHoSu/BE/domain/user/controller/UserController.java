@@ -31,13 +31,20 @@ public class UserController {
         UserProfile fromUser = userService.findUser(fromUserId);
         UserProfile toUser = userService.findUser(toUserId);
 
+        // 매칭 된 사용자인지 검증
+        if(userService.isAlreadyMatched(fromUser,toUser)){
+            return new RsData<>("403", fromUser.getNickName()+ " 와 "+toUser.getNickName()+ "님은 이미 매칭된 상태입니다.");
+        }
+        // 좋아요 한 사용자인지 검증
+        if(userService.isAlreadyLikes(fromUser,toUser)){
+            return new RsData<>("403", toUser.getNickName()+ "님은 이미 like 상태입니다.");
+        }
+
         // 좋아요
-        System.out.println("좋아요 시도");
         userService.likeUser(fromUser,toUser);
 
         // 매칭 확인
-        System.out.println("맞팔 확인");
-        if(userService.isMatched(fromUser,toUser)){
+        if(userService.isAlreadyLiked(fromUser,toUser)){
             MatchingResponse response = userService.matching(fromUser,toUser);
             return new RsData<>("200", fromUser.getNickName()+"과(와)"+toUser.getNickName()+"이 매칭 되었습니다.", response);
         }

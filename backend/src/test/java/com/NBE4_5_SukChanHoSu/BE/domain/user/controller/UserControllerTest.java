@@ -105,7 +105,6 @@ public class UserControllerTest {
     void getUserMatch() throws Exception {
         //given
         setUpLike(1L,2L);
-        System.out.println("===================================================0");
 
         // user2 -> user1 맞팔해서 매칭
         ResultActions action = mvc.perform(post("/api/users/like")
@@ -113,13 +112,11 @@ public class UserControllerTest {
                         .param("toUserId","1")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
-        System.out.println("===================================================1");
         // 매칭 응답 검증
         action.andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message").value("TempUser2과(와)TempUser1이 매칭 되었습니다."))
                 .andExpect(jsonPath("$.data.matching").exists());
-        System.out.println("===================================================");
         //when
         ResultActions action2 = mvc.perform(get("/api/users/matching/1") // TempUser1의 매칭 데이터 가져오기
                         .contentType(MediaType.APPLICATION_JSON))

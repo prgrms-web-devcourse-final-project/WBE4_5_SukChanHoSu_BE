@@ -43,8 +43,14 @@ public class UserService {
         userLikesRepository.save(like);
     }
 
-    public boolean isMatched(UserProfile fromUser, UserProfile toUser) {
+    // 상대방이 나를 좋아하는지 검증
+    public boolean isAlreadyLiked(UserProfile fromUser, UserProfile toUser) {
         return userLikesRepository.existsByFromUserAndToUser(toUser,fromUser);
+    }
+
+    // 이미 좋아요한 상황인지 검증
+    public boolean isAlreadyLikes(UserProfile fromUser, UserProfile toUser) {
+        return userLikesRepository.existsByFromUserAndToUser(fromUser,toUser);
     }
 
     // like -> 매칭
@@ -133,4 +139,14 @@ public class UserService {
     public boolean isMale(UserProfile user) {
         return user.getGender().equals(Gender.Male);
     }
+
+    // 매칭테이블에 이미 있는지 검증
+    public boolean isAlreadyMatched(UserProfile fromUser, UserProfile toUser) {
+        if(isMale(fromUser)){
+            return matchingRepository.existsByMaleUserOrFemaleUser(fromUser,toUser);
+        }else{
+            return matchingRepository.existsByMaleUserOrFemaleUser(toUser,fromUser);
+        }
+    }
+
 }
