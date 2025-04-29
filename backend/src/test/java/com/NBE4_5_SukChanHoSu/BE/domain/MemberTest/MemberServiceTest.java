@@ -8,140 +8,89 @@ import com.NBE4_5_SukChanHoSu.BE.domain.member.repository.MemberRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.member.service.MemberService;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
-import com.NBE4_5_SukChanHoSu.BE.global.jwt.TokenProvider;
-import com.NBE4_5_SukChanHoSu.BE.global.util.CookieUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-@ExtendWith(MockitoExtension.class)
 public class MemberServiceTest {
-    @InjectMocks
+
+    @Autowired
     private MemberService memberService;
 
-    @Mock
+    @Autowired
     private MemberRepository memberRepository;
 
-    @Mock
+    @Autowired
     private PasswordEncoder passwordEncoder;
-
-    @Mock
-    private AuthenticationManagerBuilder authenticationManagerBuilder;
-
-    @Mock
-    private TokenProvider tokenProvider;
-
-    @Mock
-    private CookieUtil util;
-
-    @Mock
-    private AuthenticationManager authenticationManager;
 
     @Test
     @DisplayName("회원가입 성공")
     void joinSuccess() {
         // given
         MemberSignUpRequestDto requestDto = new MemberSignUpRequestDto();
-        requestDto.setEmail("test@example.com");
-        requestDto.setPassword("plainPassword");
-        requestDto.setPasswordConfirm("plainPassword");
-
-        when(memberRepository.findByEmail(requestDto.getEmail())).thenReturn(null);
-        when(passwordEncoder.encode(requestDto.getPassword())).thenReturn("encodedPassword");
-
-        Member expectedMember = Member.builder()
-                .email(requestDto.getEmail())
-                .password("encodedPassword")
-                .role(Role.USER)
-                .build();
-
-        when(memberRepository.save(any(Member.class))).thenReturn(expectedMember);
+        requestDto.setEmail("testuser@example.com");
+        requestDto.setPassword("testPassword123!");
+        requestDto.setPasswordConfirm("testPassword123!");
 
         // when
-        Member actualMember = memberService.join(requestDto);
+        Member savedMember = memberService.join(requestDto);
 
         // then
         assertAll(
-                () -> assertNotNull(actualMember),
-                () -> assertEquals("test@example.com", actualMember.getEmail()),
-                () -> assertEquals("encodedPassword", actualMember.getPassword()),
-                () -> assertEquals(Role.USER, actualMember.getRole())
+                () -> assertNotNull(savedMember.getId()),
+                () -> assertEquals(requestDto.getEmail(), savedMember.getEmail()),
+                () -> assertTrue(passwordEncoder.matches(requestDto.getPassword(), savedMember.getPassword())),
+                () -> assertEquals(Role.USER, savedMember.getRole())
         );
-        verify(memberRepository).save(any(Member.class));
     }
 
     @Test
     @DisplayName("로그인 성공")
     void loginSuccess() {
         // given
-        MemberLoginRequestDto requestDto = new MemberLoginRequestDto();
-        requestDto.setEmail("test@example.com");
-        requestDto.setPassword("plainPassword");
+        String email = "loginuser@example.com";
+        String rawPassword = "testPassword123!";
 
-        Member foundMember = Member.builder()
-                .email(requestDto.getEmail())
-                .password("encodedPassword")
-                .role(Role.USER)
-                .build();
+        // 회원가입 먼저
+        MemberSignUpRequestDto signUpDto = new MemberSignUpRequestDto();
+        signUpDto.setEmail(email);
+        signUpDto.setPassword(rawPassword);
+        signUpDto.setPasswordConfirm(rawPassword);
+        memberService.join(signUpDto);
 
-        when(memberRepository.findByEmail(requestDto.getEmail())).thenReturn(foundMember);
-        when(passwordEncoder.matches(requestDto.getPassword(), foundMember.getPassword())).thenReturn(true);
-
-        Authentication authentication = mock(Authentication.class);
-        JwtTokenDto expectedToken = new JwtTokenDto(
-                "auth",
-                "accessToken",
-                "refreshToken"
-        );
-
-        when(authenticationManagerBuilder.getObject()).thenReturn(authenticationManager);
-        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class))).thenReturn(authentication);
-        when(tokenProvider.generateToken(authentication)).thenReturn(expectedToken);
+        // 로그인 시도
+        MemberLoginRequestDto loginDto = new MemberLoginRequestDto();
+        loginDto.setEmail(email);
+        loginDto.setPassword(rawPassword);
 
         // when
-        JwtTokenDto actualToken = memberService.login(requestDto);
+        JwtTokenDto tokenDto = memberService.login(loginDto);
 
         // then
         assertAll(
-                () -> assertNotNull(actualToken),
-                () -> assertEquals("accessToken", actualToken.getAccessToken()),
-                () -> assertEquals("refreshToken", actualToken.getRefreshToken())
+                () -> assertNotNull(tokenDto),
+                () -> assertNotNull(tokenDto.getAccessToken()),
+                () -> assertNotNull(tokenDto.getRefreshToken())
         );
-        verify(util).addCookie("access_token", "accessToken");
-        verify(util).addCookie("refresh_token", "refreshToken");
     }
-
 
     @Test
     @DisplayName("로그인 실패 - 존재하지 않는 이메일")
     void loginFail_EmailNotFound() {
         // given
-        MemberLoginRequestDto requestDto = new MemberLoginRequestDto();
-        requestDto.setEmail("nonexistent@example.com");
-        requestDto.setPassword("anyPassword");
-
-        given(memberRepository.findByEmail(requestDto.getEmail()))
-                .willReturn(null);
+        MemberLoginRequestDto loginDto = new MemberLoginRequestDto();
+        loginDto.setEmail("nonexistent@example.com");
+        loginDto.setPassword("somePassword");
 
         // when & then
-        ServiceException exception = assertThrows(ServiceException.class, () -> memberService.login(requestDto));
+        ServiceException exception = assertThrows(ServiceException.class, () -> memberService.login(loginDto));
         assertEquals("존재하지 않는 이메일입니다.", exception.getMessage());
     }
 
@@ -149,25 +98,24 @@ public class MemberServiceTest {
     @DisplayName("로그인 실패 - 비밀번호 불일치")
     void loginFail_InvalidPassword() {
         // given
-        MemberLoginRequestDto requestDto = new MemberLoginRequestDto();
-        requestDto.setEmail("test@example.com");
-        requestDto.setPassword("wrongPassword");
+        String email = "wrongpassword@example.com";
+        String correctPassword = "correctPassword123!";
+        String wrongPassword = "wrongPassword";
 
-        Member foundMember = Member.builder()
-                .email(requestDto.getEmail())
-                .password("encodedPassword")
-                .role(Role.USER)
-                .build();
+        // 회원가입 먼저
+        MemberSignUpRequestDto signUpDto = new MemberSignUpRequestDto();
+        signUpDto.setEmail(email);
+        signUpDto.setPassword(correctPassword);
+        signUpDto.setPasswordConfirm(correctPassword);
+        memberService.join(signUpDto);
 
-        given(memberRepository.findByEmail(requestDto.getEmail()))
-                .willReturn(foundMember);
-        given(passwordEncoder.matches(requestDto.getPassword(), foundMember.getPassword()))
-                .willReturn(false);
+        // 잘못된 비밀번호로 로그인 시도
+        MemberLoginRequestDto loginDto = new MemberLoginRequestDto();
+        loginDto.setEmail(email);
+        loginDto.setPassword(wrongPassword);
 
         // when & then
-        ServiceException exception = assertThrows(ServiceException.class, () -> memberService.login(requestDto));
+        ServiceException exception = assertThrows(ServiceException.class, () -> memberService.login(loginDto));
         assertEquals("비밀번호가 일치하지 않습니다.", exception.getMessage());
     }
-
-
 }
