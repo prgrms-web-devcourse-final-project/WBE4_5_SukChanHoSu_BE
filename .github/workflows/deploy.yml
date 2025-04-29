@@ -53,7 +53,7 @@ jobs:
         shell: bash
 
       - name: Build with Gradle with test profile
-        run: ./gradlew build -Dspring.profiles.active=test -i
+        run: ./gradlew build -Dspring.profiles.active=test
         working-directory: backend/
         shell: bash
 
@@ -110,6 +110,9 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
         working-directory: ./backend/
+
+      - name: Run Tests
+        run: ./gradlew test && ./gradlew test --info
 
       - name: Test with Gradle
         run: ./gradlew build -Pprofile=test
