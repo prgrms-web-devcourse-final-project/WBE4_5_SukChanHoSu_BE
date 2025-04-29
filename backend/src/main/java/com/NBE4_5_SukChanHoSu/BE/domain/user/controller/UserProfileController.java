@@ -1,15 +1,15 @@
-package com.NBE4_5_SukChanHoSu.BE.User.controller;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileUpdateRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileUpdateRequestDto;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import com.NBE4_5_SukChanHoSu.BE.User.dto.NicknameCheckResponseDto;
-import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileRequestDto;
-import com.NBE4_5_SukChanHoSu.BE.User.dto.UserProfileDto;
-import com.NBE4_5_SukChanHoSu.BE.User.service.UserProfileService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.NicknameCheckResponseDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileResponseDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -75,8 +75,8 @@ public class UserProfileController {
 
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보를 조회합니다.")
     @GetMapping("/me")
-    public RsData<UserProfileDto> getMyProfile(@RequestParam Long userId) {
-        UserProfileDto profile = userProfileService.getMyProfile(userId);
+    public RsData<ProfileResponseDto> getMyProfile(@RequestParam Long userId) {
+        ProfileResponseDto profile = userProfileService.getMyProfile(userId);
         return new RsData<>("200", "프로필 조회 성공", profile);
     }
 

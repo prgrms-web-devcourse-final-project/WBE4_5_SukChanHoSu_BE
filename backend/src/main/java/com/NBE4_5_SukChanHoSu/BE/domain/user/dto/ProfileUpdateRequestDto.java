@@ -1,6 +1,6 @@
-package com.NBE4_5_SukChanHoSu.BE.User.dto;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.dto;
 
-import com.NBE4_5_SukChanHoSu.BE.User.enums.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.enums.Gender;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -47,4 +47,8 @@ public class ProfileUpdateRequestDto {
     private List<String> watchedMovies;
 
     private List<String> preferredTheaters;
+
+    @NotBlank(message = "자기소개는 필수입니다.")
+    private String introduce;
+
 }

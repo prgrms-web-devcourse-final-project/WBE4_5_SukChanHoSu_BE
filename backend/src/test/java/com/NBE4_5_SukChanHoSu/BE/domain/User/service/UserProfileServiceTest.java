@@ -1,20 +1,20 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.User.service;
 
-import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileRequestDto;
-import com.NBE4_5_SukChanHoSu.BE.User.dto.ProfileUpdateRequestDto;
-import com.NBE4_5_SukChanHoSu.BE.User.dto.UserProfileDto;
-import com.NBE4_5_SukChanHoSu.BE.User.entity.User;
-import com.NBE4_5_SukChanHoSu.BE.User.enums.Gender;
-import com.NBE4_5_SukChanHoSu.BE.User.repository.UserRepository;
-import com.NBE4_5_SukChanHoSu.BE.User.service.UserProfileService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileResponseDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileUpdateRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
-
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.*;
@@ -23,93 +23,148 @@ import static org.mockito.Mockito.*;
 class UserProfileServiceTest {
 
     @Mock
-    private UserRepository userRepository;
+    private UserProfileRepository userProfileRepository;
 
     @InjectMocks
     private UserProfileService userProfileService;
 
-    private User user;
-
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        user = new User();
-        user.setId(1L);
     }
 
-    @Test
-    void createProfile_성공() {
-        // given
-        ProfileRequestDto dto = ProfileRequestDto.builder().nickname("testnick").email("test@example.com").gender(Gender.MALE).latitude(37.5).longitude(127.0).birthdate(LocalDate.of(1995, 5, 5)).profileImage("image.jpg").build();
+    @Nested
+    @DisplayName("createProfile 테스트")
+    class CreateProfileTest {
+        @Test
+        @DisplayName("정상적으로 프로필을 생성한다.")
+        void createProfile_success() {
+            // given
+            Long userId = 1L;
+            UserProfile userProfile = new UserProfile();
+            ProfileRequestDto dto = ProfileRequestDto.builder()
+                    .nickname("testuser")
+                    .gender(null)
+                    .latitude(37.5665)
+                    .longitude(126.9780)
+                    .birthdate(LocalDate.of(2000, 1, 1))
+                    .profileImage("profile.jpg")
+                    .build();
 
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+            when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
-        // when
-        userProfileService.createProfile(1L, dto);
+            // when
+            userProfileService.createProfile(userId, dto);
 
-        // then
-        assertThat(user.getNickname()).isEqualTo("testnick");
-        assertThat(user.getEmail()).isEqualTo("test@example.com");
-        verify(userRepository).save(user);
+            // then
+            assertThat(userProfile.getNickName()).isEqualTo(dto.getNickname());
+            assertThat(userProfile.getProfileImage()).isEqualTo(dto.getProfileImage());
+            verify(userProfileRepository, times(1)).save(userProfile);
+        }
+
+        @Test
+        @DisplayName("이미 프로필이 등록된 경우 예외를 던진다.")
+        void createProfile_alreadyExists() {
+            // given
+            Long userId = 1L;
+            UserProfile userProfile = new UserProfile();
+            userProfile.setNickName("alreadySet");
+            ProfileRequestDto dto = ProfileRequestDto.builder()
+                    .nickname("testuser")
+                    .build();
+
+            when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+
+            // when & then
+            assertThatThrownBy(() -> userProfileService.createProfile(userId, dto))
+                    .isInstanceOf(IllegalStateException.class)
+                    .hasMessage("이미 프로필이 등록된 사용자입니다.");
+        }
     }
 
-    @Test
-    void createProfile_이미등록된프로필_실패() {
-        // given
-        user.setNickname("alreadySet");
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+    @Nested
+    @DisplayName("updateProfile 테스트")
+    class UpdateProfileTest {
+        @Test
+        @DisplayName("정상적으로 프로필을 수정한다.")
+        void updateProfile_success() {
+            // given
+            Long userId = 1L;
+            UserProfile userProfile = new UserProfile();
+            ProfileUpdateRequestDto dto = ProfileUpdateRequestDto.builder()
+                    .nickname("newnickname")
+                    .introduce("새로운 소개")
+                    .build();
 
-        ProfileRequestDto dto = ProfileRequestDto.builder().nickname("newNick").build();
+            when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
-        // when & then
-        assertThatThrownBy(() -> userProfileService.createProfile(1L, dto)).isInstanceOf(IllegalStateException.class).hasMessage("이미 프로필이 등록된 사용자입니다.");
+            // when
+            userProfileService.updateProfile(userId, dto);
+
+            // then
+            assertThat(userProfile.getNickName()).isEqualTo(dto.getNickname());
+            assertThat(userProfile.getIntroduce()).isEqualTo(dto.getIntroduce());
+            verify(userProfileRepository, times(1)).save(userProfile);
+        }
     }
 
-    @Test
-    void updateProfile_성공() {
-        // given
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+    @Nested
+    @DisplayName("isNicknameDuplicated 테스트")
+    class NicknameDuplicateTest {
+        @Test
+        @DisplayName("닉네임이 중복인 경우 true를 반환한다.")
+        void nicknameDuplicated_true() {
+            // given
+            String nickname = "duplicateNickname";
+            when(userProfileRepository.existsByNickName(nickname)).thenReturn(true);
 
-        ProfileUpdateRequestDto dto = ProfileUpdateRequestDto.builder().nickname("updatedNick").gender(Gender.FEMALE).latitude(36.5).longitude(128.0).birthdate(LocalDate.of(2000, 1, 1)).profileImage("newImage.jpg").build();
+            // when
+            boolean result = userProfileService.isNicknameDuplicated(nickname);
 
-        // when
-        userProfileService.updateProfile(1L, dto);
+            // then
+            assertThat(result).isTrue();
+        }
 
-        // then
-        assertThat(user.getNickname()).isEqualTo("updatedNick");
-        verify(userRepository).save(user);
+        @Test
+        @DisplayName("닉네임이 중복이 아닌 경우 false를 반환한다.")
+        void nicknameDuplicated_false() {
+            // given
+            String nickname = "uniqueNickname";
+            when(userProfileRepository.existsByNickName(nickname)).thenReturn(false);
+
+            // when
+            boolean result = userProfileService.isNicknameDuplicated(nickname);
+
+            // then
+            assertThat(result).isFalse();
+        }
     }
 
-    @Test
-    void isNicknameDuplicated_닉네임_중복_확인() {
-        // given
-        when(userRepository.existsByNickname("testnick")).thenReturn(true);
+    @Nested
+    @DisplayName("getMyProfile 테스트")
+    class GetMyProfileTest {
+        @Test
+        @DisplayName("내 프로필을 정상 조회한다.")
+        void getMyProfile_success() {
+            // given
+            Long userId = 1L;
+            UserProfile userProfile = new UserProfile();
+            userProfile.setNickName("nickname");
+            userProfile.setGender(null);
+            userProfile.setProfileImage("profile.jpg");
+            userProfile.setLatitude(37.5665);
+            userProfile.setLongitude(126.9780);
+            userProfile.setBirthdate(LocalDate.of(2000, 1, 1));
+            userProfile.setIntroduce("소개입니다.");
 
-        // when
-        boolean result = userProfileService.isNicknameDuplicated("testnick");
+            when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
-        // then
-        assertThat(result).isTrue();
-    }
+            // when
+            ProfileResponseDto result = userProfileService.getMyProfile(userId);
 
-    @Test
-    void getMyProfile_성공() {
-        // given
-        user.setNickname("usernick");
-        user.setEmail("user@example.com");
-        user.setGender(Gender.MALE);
-        user.setLatitude(37.5);
-        user.setLongitude(127.0);
-        user.setBirthdate(LocalDate.of(1990, 10, 10));
-        user.setProfileImage("profile.jpg");
-
-        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-
-        // when
-        UserProfileDto result = userProfileService.getMyProfile(1L);
-
-        // then
-        assertThat(result.getNickname()).isEqualTo("usernick");
-        assertThat(result.getEmail()).isEqualTo("user@example.com");
+            // then
+            assertThat(result.getNickname()).isEqualTo("nickname");
+            assertThat(result.getIntroduce()).isEqualTo("소개입니다.");
+        }
     }
 }

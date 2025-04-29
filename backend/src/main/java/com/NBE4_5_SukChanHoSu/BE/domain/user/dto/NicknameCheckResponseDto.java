@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.User.dto;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
