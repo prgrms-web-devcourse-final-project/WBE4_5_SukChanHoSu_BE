@@ -20,16 +20,6 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE_CLIENT_ID}
-            client-secret: ${GOOGLE_SECURITY_PASSWORD}
-            scope:
-              - profile
-              - email
 jwt:
   secret: ${JWT_SECRET}
 

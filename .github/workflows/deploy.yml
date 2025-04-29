@@ -33,10 +33,11 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-      - name: Check DATABASE_URL and DATABASE_USERNAME
+      - name: Test Database Connection
         run: |
-          echo "DATABASE_URL is set to: $DATABASE_URL"
-          echo "DATABASE_USERNAME is set to: $DATABASE_USERNAME"
+          echo "Testing connection to the database..."
+          mysql --host=${{ secrets.DATABASE_URL }} --user=${{ secrets.DATABASE_USERNAME }} --password=${{ secrets.DATABASE_PASSWORD }} -e "SELECT 1;"
+
       - name: Generate application-secret.yml
         env:
           APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
