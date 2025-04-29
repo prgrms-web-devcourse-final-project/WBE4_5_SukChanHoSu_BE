@@ -25,9 +25,6 @@ public class MemberServiceTest {
     private MemberService memberService;
 
     @Autowired
-    private MemberRepository memberRepository;
-
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Test
