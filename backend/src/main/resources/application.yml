@@ -9,16 +9,6 @@ spring:
   profiles:
     active: dev
     include: secret  # ✅ 추가 설정 파일 포함
-  security:
-    oauth2:
-      client:
-        registration:
-          google:
-            client-id: ${GOOGLE.CLIENT_ID}
-            client-secret: ${GOOGLE.SECURITY_PASSWORD}
-            scope:
-              - profile
-              - email
 
   datasource:
     url: jdbc:h2:./db_dev;MODE=MySQL
