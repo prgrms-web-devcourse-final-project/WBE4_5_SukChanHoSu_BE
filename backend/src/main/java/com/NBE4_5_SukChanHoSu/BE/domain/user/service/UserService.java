@@ -10,6 +10,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
+import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,12 +21,12 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
-@Transactional(readOnly = true)
 public class UserService {
 
     private final UserProfileRepository userProfileRepository;
     private final UserLikesRepository userLikesRepository;
     private final MatchingRepository matchingRepository;
+    private final EntityManager entityManager;
 
     public UserProfile findUser(Long userId) {
         UserProfile userProfile =  userProfileRepository.findById(userId)
@@ -43,7 +44,7 @@ public class UserService {
         userLikesRepository.save(like);
     }
 
-    // 상대방이 나를 좋아하는지 검증
+    // to -> from 관계도 존재하는지 확인
     public boolean isAlreadyLiked(UserProfile fromUser, UserProfile toUser) {
         return userLikesRepository.existsByFromUserAndToUser(toUser,fromUser);
     }
@@ -75,6 +76,7 @@ public class UserService {
         // 좋아요 관계 삭제
         cancelLikes(fromUser, toUser);
         cancelLikes(toUser, fromUser);
+
         // 응답 생성
         MatchingResponse matchingResponse = new MatchingResponse();
         matchingResponse.setMatching(matching);
@@ -151,6 +153,13 @@ public class UserService {
     @Transactional
     public void cancelLikes(UserProfile fromUser, UserProfile toUser) {
         userLikesRepository.deleteByFromUserAndToUser(fromUser,toUser);
+        /*
+         DB 반영
+         삭제 연산 수행 후, 남아있는 엔티티 정보를 제거
+         detach 상태로 변경 -> DB에서 새로운 데이터를 가져오도록 보장
+         */
+        entityManager.flush();
+        entityManager.clear();
     }
 
     @Transactional

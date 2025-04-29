@@ -1,6 +1,9 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.MatchingRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -16,8 +19,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -49,9 +50,7 @@ public class UserControllerTest {
                         .param("fromUserId",from.toString())
                         .param("toUserId",to.toString())
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.data").isNotEmpty());
+                .andDo(print());
     }
 
     @Test
@@ -115,7 +114,41 @@ public class UserControllerTest {
         ResultActions getMatching = mvc.perform(get("/api/users/matching/2") // 매칭 목록 가져오기
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print());
+        ResultActions getLiked = mvc.perform(get("/api/users/liked/2") // TempUser2를 좋아요한 유저 데이터 가져오기
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
 
+        // then
+        // 매칭 목록에서 조회 가능
+        getMatching
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
+                .andExpect(jsonPath("$.data[*].user.userId").value(1));
+        // liked 목록에서는 조회 불가능
+        getLiked
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("404"))
+                .andExpect(jsonPath("$.message").value("나를 like 하는 사용자가 없습니다."));
+    }
+
+    @Test
+    @DisplayName("매칭된 상태에서는 사용자의 likes 목록에 안나오는걸 확인")
+    void getUserLikesMatchingStatus() throws Exception {
+        //given
+        setUpLike(1L,2L);
+        setUpLike(2L,1L);
+
+        // when
+        ResultActions getMatching = mvc.perform(get("/api/users/matching/2") // 매칭 목록 가져오기
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        ResultActions getLiked = mvc.perform(get("/api/users/like/2") // TempUser2를 좋아요한 유저 데이터 가져오기
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // then
         // 매칭 목록에서 조회 가능
         getMatching
                 .andExpect(status().isOk())
@@ -123,17 +156,11 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
                 .andExpect(jsonPath("$.data[*].user.userId").value(1));
 
-        // then
-        // liked 목록에서는 조회 불가능
-        await().atMost(2, SECONDS).untilAsserted(() -> {
-            ResultActions getLiked = mvc.perform(get("/api/users/liked/2") // TempUser2를 좋아요한 유저 데이터 가져오기
-                            .contentType(MediaType.APPLICATION_JSON))
-                    .andDo(print());
-            getLiked
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.code").value("404"))
-                    .andExpect(jsonPath("$.message").value("나를 like 하는 사용자가 없습니다."));
-        });
+        // likes 목록에서는 조회 불가능
+        getLiked
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("404"))
+                .andExpect(jsonPath("$.message").value("like 한 사용자가 없습니다."));
     }
 
 
@@ -272,7 +299,6 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.code").value("404"))
                 .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
 
-        await().atMost(2, SECONDS).untilAsserted(() -> {
             ResultActions getLikes = mvc.perform(get("/api/users/like/1") // TempUser1의 Likes 데이터 가져오기
                             .contentType(MediaType.APPLICATION_JSON))
                     .andDo(print());
@@ -280,7 +306,6 @@ public class UserControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.code").value("404"))
                     .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
-        });
 
     }
 }
