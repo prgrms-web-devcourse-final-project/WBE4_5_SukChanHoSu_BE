@@ -279,5 +279,6 @@ public class UserControllerTest {
                     .andExpect(jsonPath("$.code").value("404"))
                     .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
         });
+
     }
 }
