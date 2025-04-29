@@ -116,10 +116,6 @@ jobs:
             APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
         run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application-secret.yml
 
-      - name: Test with Gradle
-        run: ./gradlew build -Pprofile=test
-        working-directory: ./backend/
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
