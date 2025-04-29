@@ -7,7 +7,7 @@ server:
 
 spring:
   profiles:
-    active: dev
+#    active: dev
     include: secret  # ✅ 추가 설정 파일 포함
   security:
     oauth2:
