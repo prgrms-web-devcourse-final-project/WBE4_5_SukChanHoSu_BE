@@ -6,12 +6,13 @@ import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.MatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.UserMatchingResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
-import jakarta.transaction.Transactional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -19,6 +20,7 @@ import java.util.List;
 
 @Service
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class UserService {
 
     private final UserProfileRepository userProfileRepository;
@@ -49,8 +51,19 @@ public class UserService {
     @Transactional
     public MatchingResponse matching(UserProfile fromUser, UserProfile toUser) {
         Matching matching = new Matching();
-        matching.setUser1(fromUser);
-        matching.setUser2(toUser);
+        System.out.println("매칭시도");
+
+        // fromUser가 남자인 경우
+        if(isMale(fromUser)){
+            matching.setMaleUser(fromUser);
+            matching.setFemaleUser(toUser);
+        }
+        // fromUser가 여자인 경우(toUser가 남자인 경우)
+        else {
+            matching.setMaleUser(toUser);
+            matching.setFemaleUser(fromUser);
+        }
+
         matching.setMatchingTime(LocalDateTime.now());
         matchingRepository.save(matching);
 
@@ -60,8 +73,8 @@ public class UserService {
         // 응답 생성
         MatchingResponse matchingResponse = new MatchingResponse();
         matchingResponse.setMatching(matching);
-        matchingResponse.setUser1(matching.getUser1());
-        matchingResponse.setUser2(matching.getUser2());
+        matchingResponse.setMaleUser(matching.getMaleUser());
+        matchingResponse.setFemaleUser(matching.getFemaleUser());
         return matchingResponse;
     }
 
@@ -95,22 +108,29 @@ public class UserService {
 
     // match 목록 조회
     public List<UserMatchingResponse> getUserMatches(UserProfile user) {
-        List<Matching> matches = matchingRepository.findByUser1OrUser2(user,user);
-        List<UserMatchingResponse> userMatchingRespons = new ArrayList<>();
 
-        for(Matching match : matches) {
-            UserMatchingResponse response = new UserMatchingResponse();
-            if(match.getUser1().equals(user)) {
-                response.setUserId(match.getUser2().getUserId());
-                response.setUserNickname(match.getUser2().getNickName());
-                response.setMatchingTime(match.getMatchingTime());
-            }else {
-                response.setUserId(match.getUser1().getUserId());
-                response.setUserNickname(match.getUser1().getNickName());
-                response.setMatchingTime(match.getMatchingTime());
+        List<UserMatchingResponse> responses = new ArrayList<>();
+        // 남자 유저
+        if(isMale(user)){
+            List<Matching> matches = matchingRepository.findByMaleUser(user);
+            for(Matching matching: matches) {
+                // 매칭된 여자 유저 리스트에 등록
+                responses.add(new UserMatchingResponse(matching.getFemaleUser(),matching));
             }
-            userMatchingRespons.add(response);
         }
-        return userMatchingRespons;
+        // 여자 유저
+        else {
+            List<Matching> matches = matchingRepository.findByFemaleUser(user);
+            for(Matching matching: matches) {
+                // 매칭된 남자 유저 리스트에 등록
+                responses.add(new UserMatchingResponse(matching.getMaleUser(),matching));
+            }
+        }
+        return responses;
+    }
+
+    // 남자인지 검증 (남자:true,여자:false)
+    public boolean isMale(UserProfile user) {
+        return user.getGender().equals(Gender.Male);
     }
 }

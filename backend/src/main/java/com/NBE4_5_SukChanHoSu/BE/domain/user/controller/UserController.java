@@ -32,9 +32,11 @@ public class UserController {
         UserProfile toUser = userService.findUser(toUserId);
 
         // 좋아요
+        System.out.println("좋아요 시도");
         userService.likeUser(fromUser,toUser);
 
         // 매칭 확인
+        System.out.println("맞팔 확인");
         if(userService.isMatched(fromUser,toUser)){
             MatchingResponse response = userService.matching(fromUser,toUser);
             return new RsData<>("200", fromUser.getNickName()+"과(와)"+toUser.getNickName()+"이 매칭 되었습니다.", response);

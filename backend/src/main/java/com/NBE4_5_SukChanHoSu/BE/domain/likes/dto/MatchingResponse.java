@@ -7,6 +7,6 @@ import lombok.Data;
 @Data
 public class MatchingResponse {
     private Matching matching;
-    private UserProfile user1;
-    private UserProfile user2;
+    private UserProfile maleUser;
+    private UserProfile femaleUser;
 }
