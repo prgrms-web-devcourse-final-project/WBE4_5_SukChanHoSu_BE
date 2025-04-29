@@ -55,6 +55,14 @@ jobs:
         working-directory: backend/
         shell: bash
 
+      - name: Wait for MySQL to be ready
+        run: |
+          until mysqladmin ping -h 127.0.0.1 -P 3306 --silent; do
+            echo "Waiting for MySQL to be ready..."
+            sleep 2
+          done
+
+
       - name: Build with Gradle with test profile
         run: ./gradlew build
         working-directory: backend/
