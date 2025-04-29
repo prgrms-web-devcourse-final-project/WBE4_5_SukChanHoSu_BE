@@ -2,6 +2,7 @@ package com.NBE4_5_SukChanHoSu.BE.global.init;
 
 import java.util.List;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
@@ -17,7 +18,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Configuration
-@Profile("!monitor")
 @RequiredArgsConstructor
 public class BaseInitData {
 
@@ -42,7 +42,7 @@ public class BaseInitData {
 			// 임시 유저 프로필 생성
 			UserProfile userProfile = new UserProfile();
 			userProfile.setNickName("TempUser" + i);
-			userProfile.setGender(i % 2 == 0 ? "Female" : "Male");
+			userProfile.setGender(i % 2 == 0 ? Gender.Female : Gender.Male);
 			userProfile.setProfileImage("https://example.com/profile" + i + ".jpg");
 
 			// Enum으로 장르를 설정 (임의로 Action, Comedy, Drama 선택)

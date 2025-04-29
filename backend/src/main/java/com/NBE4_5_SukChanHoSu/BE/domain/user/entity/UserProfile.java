@@ -25,8 +25,11 @@ public class UserProfile {
 
     @Column(nullable = false)
     private String nickName;
+
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String gender;
+    private Gender gender;
+
     @Column(nullable = false)
     private String profileImage;
 

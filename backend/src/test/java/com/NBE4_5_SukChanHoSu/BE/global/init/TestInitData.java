@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.global.init;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
@@ -21,7 +22,7 @@ public class TestInitData {
             for (int i = 1; i <= 10; i++) {
                 UserProfile userProfile = new UserProfile();
                 userProfile.setNickName("TestUser" + i);
-                userProfile.setGender(i % 2 == 0 ? "Female" : "Male");
+                userProfile.setGender(i % 2 == 0 ? Gender.Female : Gender.Male);
                 userProfile.setProfileImage("https://example.com/test_profile" + i + ".jpg");
                 // 여기에 장르를 설정합니다 (임의로 Action, Comedy, Drama 선택)
                 List<Genre> genres = List.of(Genre.ACTION, Genre.COMEDY, Genre.DRAMA);
