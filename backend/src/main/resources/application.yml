@@ -10,13 +10,13 @@ spring:
     active: dev # dev
     include: secret  # ✅ 추가 설정 파일 포함
 
-  datasource:
-    url: jdbc:h2:./db_dev;MODE=MySQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-    hikari:
-      auto-commit: false
+  ##datasource:
+    ##url: jdbc:h2:./db_dev;MODE=MySQL
+    ##username: sa
+    ##password:
+    ##driver-class-name: org.h2.Driver
+    ##hikari:
+      ##auto-commit: false
     jpa:
       hibernate:
         ddl-auto: update
