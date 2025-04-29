@@ -10,9 +10,9 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: schs
-  DATABASE.URL: ${{ secrets.DATABASE_URL }}
-  DATABASE.USERNAME: ${{ secrets.DATABASE_USERNAME }}
-  DATABASE.PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
+  DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
+  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
 jobs:
   backend-ci:
@@ -37,7 +37,6 @@ jobs:
         run: |
           echo "Testing connection to the database..."
           mysql --host=${{ secrets.DATABASE_URL }} --user=${{ secrets.DATABASE_USERNAME }} --password=${{ secrets.DATABASE_PASSWORD }} -e "SELECT 1;"
-
       - name: Generate application-secret.yml
         env:
           APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
