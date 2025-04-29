@@ -57,7 +57,6 @@ public class UserService {
     @Transactional
     public MatchingResponse matching(UserProfile fromUser, UserProfile toUser) {
         Matching matching = new Matching();
-        System.out.println("매칭시도");
 
         // fromUser가 남자인 경우
         if(isMale(fromUser)){

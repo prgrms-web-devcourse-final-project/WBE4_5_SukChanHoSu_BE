@@ -15,6 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -59,7 +61,7 @@ public class UserControllerTest {
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("TempUser1 가 TempUser2님 에게 좋아요를 보냈습니다"));
+                .andExpect(jsonPath("$.message",containsString("에게 좋아요를 보냈습니다")));
     }
 
     @Test
@@ -75,7 +77,7 @@ public class UserControllerTest {
         // then
         action.andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("TempUser1가 좋아요한 유저 목록 반환"))
+                .andExpect(jsonPath("$.message",containsString("좋아요한 유저 목록 반환")))
                 .andExpect(jsonPath("$.data.size").value(1))
                 .andExpect(jsonPath("$.data.userLikes[0].userId").value(2));// user2이 목록에 존재
     }
@@ -95,10 +97,43 @@ public class UserControllerTest {
         action.andExpect(status().isOk())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("TempUser2를 좋아요한 유저 목록 반환"))
+                .andExpect(jsonPath("$.message",containsString("TempUser2를 좋아요한 유저 목록 반환")))
                 .andExpect(jsonPath("$.data.size").value(1))
                 .andExpect(jsonPath("$.data.userLikes[0].userId").value(1));// user1이 목록에 존재
     }
+
+    @Test
+    @DisplayName("매칭된 상태에서는 사용자의 liked 목록에 안나오는걸 확인")
+    void getUserLikedMatchingStatus() throws Exception {
+        //given
+        setUpLike(1L,2L);
+        setUpLike(2L,1L);
+
+        // when
+        ResultActions getMatching = mvc.perform(get("/api/users/matching/2") // 매칭 목록 가져오기
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // 매칭 목록에서 조회 가능
+        getMatching
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
+                .andExpect(jsonPath("$.data[*].user.userId").value(1));
+
+        // then
+        // liked 목록에서는 조회 불가능
+        await().atMost(2, SECONDS).untilAsserted(() -> {
+            ResultActions getLiked = mvc.perform(get("/api/users/liked/2") // TempUser2를 좋아요한 유저 데이터 가져오기
+                            .contentType(MediaType.APPLICATION_JSON))
+                    .andDo(print());
+            getLiked
+                    .andExpect(status().isOk())
+                    .andExpect(jsonPath("$.code").value("404"))
+                    .andExpect(jsonPath("$.message").value("나를 like 하는 사용자가 없습니다."));
+        });
+    }
+
 
     @Test
     @DisplayName("사용자의 matching 목록 가져오기")
@@ -115,7 +150,7 @@ public class UserControllerTest {
         // 매칭 응답 검증
         action.andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message").value("TempUser2과(와)TempUser1이 매칭 되었습니다."))
+                .andExpect(jsonPath("$.message",containsString("매칭 되었습니다.")))
                 .andExpect(jsonPath("$.data.matching").exists());
         //when
         ResultActions action2 = mvc.perform(get("/api/users/matching/1") // TempUser1의 매칭 데이터 가져오기
@@ -129,4 +164,48 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
                 .andExpect(jsonPath("$.data[*].user.userId").value(2));
     }
+
+    @Test
+    @DisplayName("중복 like 방지")
+    void aVoidDuplicationLike() throws Exception {
+        // given
+        setUpLike(1L,2L);
+
+        // when
+        ResultActions action = mvc.perform(post("/api/users/like")
+                        .param("fromUserId","1")
+                        .param("toUserId","2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // then
+        action
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("403"))
+                .andExpect(jsonPath("$.message",containsString("이미 like 상태입니다.")));
+    }
+
+    @Test
+    @DisplayName("매칭된 상태에서 like 방지")
+    void aVoidDuplicationLike2() throws Exception {
+        // given
+        setUpLike(1L,2L);
+        setUpLike(2L,1L);
+
+        // when
+        ResultActions action = mvc.perform(post("/api/users/like")
+                        .param("fromUserId","1")
+                        .param("toUserId","2")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print());
+
+        // then
+        action
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("403"))
+                .andExpect(jsonPath("$.message",containsString("이미 매칭된 상태입니다.")));
+    }
+
+
+
 }

@@ -64,7 +64,7 @@ public class UserController {
         response.setSize(response.getUserLikes().size());
 
         if(response.getUserLikes().isEmpty()){
-            return new RsData<>("404", "like한 사용자가 없습니다.");
+            return new RsData<>("404", "like 한 사용자가 없습니다.");
         }
 
         return new RsData<>("200",user.getNickName()+"가 좋아요한 유저 목록 반환",response);
@@ -79,7 +79,7 @@ public class UserController {
         response.setSize(response.getUserLikes().size());
 
         if(response.getUserLikes().isEmpty()){
-            return new RsData<>("404", "나를 like하는 사용자가 없습니다.");
+            return new RsData<>("404", "나를 like 하는 사용자가 없습니다.");
         }
 
         return new RsData<>("200",user.getNickName()+"를 좋아요한 유저 목록 반환",response);
