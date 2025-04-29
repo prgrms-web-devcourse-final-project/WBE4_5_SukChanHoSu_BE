@@ -55,3 +55,4 @@ logging:
     secret: ${JWT.SECRET}
   genFile:
     dirPath: c:/temp/glog_dev  # ✅ 파일 저장 경로 (리눅스면 /tmp 등으로 변경 가능)
+
