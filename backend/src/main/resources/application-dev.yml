@@ -1,9 +1,9 @@
 spring:
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DATABASE.URL}  # ✅ 환경 변수로 MySQL 설정 가능
-    username: ${DATABASE.USERNAME}
-    password: ${DATABASE.PASSWORD}
+      url: jdbc:mysql://localhost:3306/moviematch
+      username: root
+      password: 0913
+      driver-class-name: com.mysql.cj.jdbc.Driver
   jpa:
     hibernate:
       ddl-auto: update
