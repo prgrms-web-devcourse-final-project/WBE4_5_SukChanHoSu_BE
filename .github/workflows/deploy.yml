@@ -44,9 +44,14 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Download wait-for-it script
+        run: curl -o wait-for-it.sh https://raw.githubusercontent.com/vishnubob/wait-for-it/master/wait-for-it.sh
+
+      - name: Give permission to execute wait-for-it
+        run: chmod +x wait-for-it.sh
+
       - name: Wait for MySQL to be ready
-        run: |
-          ./wait-for-it.sh mysql:3306 --timeout=30 --strict -- echo "MySQL is up"
+        run: ./wait-for-it.sh 127.0.0.1:3306 --timeout=30 --strict -- echo "MySQL is up"
 
       - name: Check MySQL logs
         run: docker logs mysql
