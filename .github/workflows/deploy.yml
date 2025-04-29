@@ -33,6 +33,10 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
+      - name: Check DATABASE_URL and DATABASE_USERNAME
+        run: |
+          echo "DATABASE_URL is set to: $DATABASE_URL"
+          echo "DATABASE_USERNAME is set to: $DATABASE_USERNAME"
       - name: Generate application-secret.yml
         env:
           APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
