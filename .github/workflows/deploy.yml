@@ -10,9 +10,9 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: schs
-  DATABASE.URL: jdbc:mysql://localhost:3306/moviematch?serverTimezone=UTC&characterEncoding=UTF-8
-  DATABASE.USERNAME: root
-  DATABASE.PASSWORD: 0913
+  DATABASE.URL: ${{ secrets.DATABASE_URL }}
+  DATABASE.USERNAME: ${{ secrets.DATABASE_USERNAME }}
+  DATABASE.PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
 
 jobs:
   backend-ci:
@@ -43,6 +43,13 @@ jobs:
         uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 1
+
+      - name: Wait for MySQL to be ready
+        run: |
+          ./wait-for-it.sh mysql:3306 --timeout=30 --strict -- echo "MySQL is up"
+
+      - name: Check MySQL logs
+        run: docker logs mysql
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4.7.0
