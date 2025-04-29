@@ -17,22 +17,22 @@ logging:
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
 
-#custom:
-#  appName: app4  # ✅ 앱 이름 변경 가능
-#  prod:
-#    domain: qwas.shop  # ✅ 운영 도메인 변경 가능
-#    backUrl: "https://api.${custom.appName}.${custom.prod.domain}"
-#    frontUrl: "https://www.${custom.appName}.${custom.prod.domain}"
-#
-#  dev:
-#    domain: localhost  # ✅ 개발 도메인 변경 가능
-#    backUrl: "http://${custom.dev.domain}:${server.port}"
-#    frontUrl: "http://${custom.dev.domain}:3000"
-#
-#  site:
-#    domain: "${custom.prod.domain}"
-#    backUrl: "${custom.prod.backUrl}"
-#    frontUrl: "${custom.prod.frontUrl}"
+custom:
+  appName: app4  # ✅ 앱 이름 변경 가능
+  prod:
+    domain: qwas.shop  # ✅ 운영 도메인 변경 가능
+    backUrl: "https://api.${custom.appName}.${custom.prod.domain}"
+    frontUrl: "https://www.${custom.appName}.${custom.prod.domain}"
+
+  dev:
+    domain: localhost  # ✅ 개발 도메인 변경 가능
+    backUrl: "http://${custom.dev.domain}:${server.port}"
+    frontUrl: "http://${custom.dev.domain}:3000"
+
+  site:
+    domain: "${custom.prod.domain}"
+    backUrl: "${custom.prod.backUrl}"
+    frontUrl: "${custom.prod.frontUrl}"
 
   genFile:
     dirPath: c:/temp/glog_dev  # ✅ 파일 저장 경로 (리눅스면 /tmp 등으로 변경 가능)

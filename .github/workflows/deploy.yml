@@ -33,12 +33,6 @@ jobs:
           --health-timeout=5s
           --health-retries=3
     steps:
-      - name: Wait for MySQL to be ready
-        run: sleep 50s
-#      - name: Check MySQL access
-#        run: |
-#          docker exec -it $(docker ps -q -f "ancestor=mysql:8") mysql -u root -p0913 -h 127.0.0.1 -P 3306 -e "SHOW DATABASES;"
-#          continue-on-error: true
       - name: Checkout
         uses: actions/checkout@v4.2.2
         with:
@@ -56,7 +50,7 @@ jobs:
         shell: bash
 
       - name: Build with Gradle with test profile
-        run: ./gradlew build -Dspring.profiles.active=test -q
+        run: ./gradlew build -Dspring.profiles.active=test
         working-directory: backend/
         shell: bash
 
