@@ -142,10 +142,23 @@ public class UserService {
     // 매칭테이블에 이미 있는지 검증
     public boolean isAlreadyMatched(UserProfile fromUser, UserProfile toUser) {
         if(isMale(fromUser)){
-            return matchingRepository.existsByMaleUserOrFemaleUser(fromUser,toUser);
+            return matchingRepository.existsByMaleUser(fromUser);
         }else{
-            return matchingRepository.existsByMaleUserOrFemaleUser(toUser,fromUser);
+            return matchingRepository.existsByFemaleUser(fromUser);
         }
     }
 
+    @Transactional
+    public void cancelLikes(UserProfile fromUser, UserProfile toUser) {
+        userLikesRepository.deleteByFromUserAndToUser(fromUser,toUser);
+    }
+
+    @Transactional
+    public void cancelMatch(UserProfile fromUser, UserProfile toUser) {
+        if(isMale(fromUser)){
+            matchingRepository.deleteByMaleUserAndFemaleUser(fromUser,toUser);
+        }else{
+            matchingRepository.deleteByMaleUserAndFemaleUser(toUser,fromUser);
+        }
+    }
 }

@@ -8,6 +8,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.Empty;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.like.RelationNotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
@@ -96,4 +97,25 @@ public class UserController {
         return new RsData<>("200","매칭된 사용자 목록 조회("+response.size()+")",response);
     }
 
+    @DeleteMapping("/like")
+    @Operation(summary = "like/matching 취소", description = "like/matching 취소")
+    // todo: 인증 구현시 파라미터에서 인증정보로 변경
+    public RsData<?> cancelLikeUser(@RequestParam Long fromUserId, @RequestParam Long toUserId){
+        // 유저 탐색
+        UserProfile fromUser = userService.findUser(fromUserId);
+        UserProfile toUser = userService.findUser(toUserId);
+
+        // 매칭 된 사용자인지 검증
+        if(userService.isAlreadyMatched(fromUser,toUser)){
+            // 매칭 취소
+            userService.cancelMatch(fromUser,toUser);
+            return new RsData<>("200", "매칭 취소");
+        }
+        // 좋아요 한 사용자인지 검증
+        else if(userService.isAlreadyLikes(fromUser,toUser)){
+            userService.cancelLikes(fromUser,toUser);
+            return new RsData<>("200", "like 취소");
+        }
+        throw new RelationNotFoundException("404", "관계 없는 사용자입니다.");
+    }
 }
