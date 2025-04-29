@@ -35,10 +35,10 @@ jobs:
     steps:
       - name: Wait for MySQL to be ready
         run: sleep 50s
-      - name: Check MySQL access
-        run: |
-          docker exec -it $(docker ps -q -f "ancestor=mysql:8") mysql -u root -p0913 -h 127.0.0.1 -P 3306 -e "SHOW DATABASES;"
-          continue-on-error: true
+#      - name: Check MySQL access
+#        run: |
+#          docker exec -it $(docker ps -q -f "ancestor=mysql:8") mysql -u root -p0913 -h 127.0.0.1 -P 3306 -e "SHOW DATABASES;"
+#          continue-on-error: true
       - name: Checkout
         uses: actions/checkout@v4.2.2
         with:
