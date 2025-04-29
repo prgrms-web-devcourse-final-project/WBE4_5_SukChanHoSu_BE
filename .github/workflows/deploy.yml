@@ -10,9 +10,9 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: schs
-  DATABASE.URL: ${{ secrets.DATABASE_URL }}
-  DATABASE.USERNAME: ${{ secrets.DATABASE_USERNAME }}
-  DATABASE.PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+  DATABASE.URL: jdbc:mysql://localhost:3306/moviematch
+  DATABASE.USERNAME: root
+  DATABASE.PASSWORD: 0913
 
 jobs:
   backend-ci:
