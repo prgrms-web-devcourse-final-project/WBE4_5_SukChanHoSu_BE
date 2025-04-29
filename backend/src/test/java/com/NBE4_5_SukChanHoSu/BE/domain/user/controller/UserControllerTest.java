@@ -3,7 +3,9 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.MatchingRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -36,6 +38,8 @@ public class UserControllerTest {
     private MockMvc mvc;
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserProfileRepository userProfileRepository;
 
     private ObjectMapper objectMapper;
 
@@ -306,6 +310,39 @@ public class UserControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.code").value("404"))
                     .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
+    }
+
+    @Test
+    @DisplayName("게이 방지")
+    void aVoidGay() throws Exception {
+        //given
+        long male = userProfileRepository.findByGender(Gender.Male).get(0).getUserId();
+        long male2 = userProfileRepository.findByGender(Gender.Male).get(1).getUserId();
+        long female = userProfileRepository.findByGender(Gender.Female).get(0).getUserId();
+        long female2 = userProfileRepository.findByGender(Gender.Female).get(1).getUserId();
+
+        // when
+        ResultActions maleAction =mvc.perform(post("/api/users/like")
+                        .param("fromUserId", String.valueOf(male))
+                        .param("toUserId",String.valueOf(male2))
+                        .contentType(MediaType.APPLICATION_JSON));
+
+        ResultActions femaleAction =mvc.perform(post("/api/users/like")
+                .param("fromUserId", String.valueOf(female))
+                .param("toUserId",String.valueOf(female2))
+                .contentType(MediaType.APPLICATION_JSON));
+        // then
+        maleAction
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("403"))
+                .andExpect(jsonPath("$.message",containsString("이성간 매칭만 허용")));
+
+        femaleAction
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("403"))
+                .andExpect(jsonPath("$.message",containsString("이성간 매칭만 허용")));
 
     }
+
+
 }

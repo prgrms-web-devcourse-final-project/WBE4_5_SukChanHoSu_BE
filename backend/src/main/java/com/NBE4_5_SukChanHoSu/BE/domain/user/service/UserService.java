@@ -170,4 +170,9 @@ public class UserService {
             matchingRepository.deleteByMaleUserAndFemaleUser(toUser,fromUser);
         }
     }
+
+    // 성별 동일
+    public boolean isSameGender(UserProfile fromUser, UserProfile toUser) {
+        return fromUser.getGender().equals(toUser.getGender());
+    }
 }

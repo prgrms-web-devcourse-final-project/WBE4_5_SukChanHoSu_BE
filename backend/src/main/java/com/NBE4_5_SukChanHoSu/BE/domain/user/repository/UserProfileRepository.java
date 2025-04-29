@@ -1,9 +1,15 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.repository;
 
 
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
 
+    List<UserProfile> findTopByGender(Gender gender);
+
+    List<UserProfile> findByGender(Gender gender);
 }
