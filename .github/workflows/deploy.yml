@@ -10,9 +10,6 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: schs
-  DATABASE.URL: jdbc:mysql://localhost:3306/moviematch
-  DATABASE.USERNAME: root
-  DATABASE.PASSWORD: 0913
 
 jobs:
   backend-ci:
@@ -23,7 +20,7 @@ jobs:
       mysql:
         image: mysql:8
         env:
-          MYSQL_ROOT_PASSWORD: 0913
+          MYSQL_ROOT_PASSWORD: abcd
           MYSQL_DATABASE: moviematch
         ports:
           - 3306:3306
