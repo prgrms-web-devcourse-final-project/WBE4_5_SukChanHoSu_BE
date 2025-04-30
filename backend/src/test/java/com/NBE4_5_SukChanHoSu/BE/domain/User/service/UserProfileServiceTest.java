@@ -1,9 +1,9 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.User.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Request.ProfileRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Response.ProfileResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Request.ProfileUpdateRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;

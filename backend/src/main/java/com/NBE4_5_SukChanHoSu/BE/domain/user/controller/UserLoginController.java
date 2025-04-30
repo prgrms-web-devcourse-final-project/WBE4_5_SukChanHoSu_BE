@@ -1,15 +1,14 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Response.UserResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Request.UserLoginRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Request.UserSignUpRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserSuccessCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;

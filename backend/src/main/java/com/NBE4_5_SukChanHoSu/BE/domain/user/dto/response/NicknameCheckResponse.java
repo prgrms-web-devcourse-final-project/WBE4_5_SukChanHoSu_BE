@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Response;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

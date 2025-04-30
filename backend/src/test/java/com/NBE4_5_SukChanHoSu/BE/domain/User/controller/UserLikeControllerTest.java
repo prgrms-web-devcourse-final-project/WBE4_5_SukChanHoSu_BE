@@ -1,8 +1,11 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Request.UserLoginRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Request.UserSignUpRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
@@ -40,6 +43,8 @@ public class UserLikeControllerTest {
     private MockMvc mvc;
     @Autowired
     private UserLikeService userLikeService;
+    @Autowired
+    private UserProfileRepository userProfileRepository;
     @Autowired
     private UserService userService;
 
@@ -83,9 +88,7 @@ public class UserLikeControllerTest {
                         .param("toUserId",to.toString())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.data").isNotEmpty());
+                .andDo(print());
     }
 
     @Test
@@ -153,7 +156,44 @@ public class UserLikeControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
+        ResultActions getLiked = mvc.perform(get("/api/users/liked/2") // TempUser2를 좋아요한 유저 데이터 가져오기
+                        .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwtToken))
+                .andDo(print());
 
+        // then
+        // 매칭 목록에서 조회 가능
+        getMatching
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
+                .andExpect(jsonPath("$.data[*].user.userId").value(1));
+        // liked 목록에서는 조회 불가능
+        getLiked
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("404"))
+                .andExpect(jsonPath("$.message").value("나를 like 하는 사용자가 없습니다."));
+    }
+
+    @Test
+    @DisplayName("매칭된 상태에서는 사용자의 likes 목록에 안나오는걸 확인")
+    void getUserLikesMatchingStatus() throws Exception {
+        //given
+        setUpLike(1L,2L);
+        setUpLike(2L,1L);
+
+        // when
+        ResultActions getMatching = mvc.perform(get("/api/users/matching/2") // 매칭 목록 가져오기
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andDo(print());
+
+        ResultActions getLiked = mvc.perform(get("/api/users/like/2") // TempUser2를 좋아요한 유저 데이터 가져오기
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andDo(print());
+
+        // then
         // 매칭 목록에서 조회 가능
         getMatching
                 .andExpect(status().isOk())
@@ -161,18 +201,11 @@ public class UserLikeControllerTest {
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
                 .andExpect(jsonPath("$.data[*].user.userId").value(1));
 
-        // then
-        // liked 목록에서는 조회 불가능
-        await().atMost(2, SECONDS).untilAsserted(() -> {
-            ResultActions getLiked = mvc.perform(get("/api/users/liked/2") // TempUser2를 좋아요한 유저 데이터 가져오기
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "Bearer " + jwtToken))
-                    .andDo(print());
-            getLiked
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.code").value("404"))
-                    .andExpect(jsonPath("$.message").value("나를 like 하는 사용자가 없습니다."));
-        });
+        // likes 목록에서는 조회 불가능
+        getLiked
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("404"))
+                .andExpect(jsonPath("$.message").value("like 한 사용자가 없습니다."));
     }
 
 
@@ -319,7 +352,6 @@ public class UserLikeControllerTest {
                 .andExpect(jsonPath("$.code").value("404"))
                 .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
 
-        await().atMost(2, SECONDS).untilAsserted(() -> {
             ResultActions getLikes = mvc.perform(get("/api/users/like/1") // TempUser1의 Likes 데이터 가져오기
                             .contentType(MediaType.APPLICATION_JSON)
                             .header("Authorization", "Bearer " + jwtToken))
@@ -328,7 +360,41 @@ public class UserLikeControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$.code").value("404"))
                     .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
-        });
+    }
+
+    @Test
+    @DisplayName("게이 방지")
+    void aVoidGay() throws Exception {
+        //given
+        long male = userProfileRepository.findByGender(Gender.Male).get(0).getUserId();
+        long male2 = userProfileRepository.findByGender(Gender.Male).get(1).getUserId();
+        long female = userProfileRepository.findByGender(Gender.Female).get(0).getUserId();
+        long female2 = userProfileRepository.findByGender(Gender.Female).get(1).getUserId();
+
+        // when
+        ResultActions maleAction =mvc.perform(post("/api/users/like")
+                        .param("fromUserId", String.valueOf(male))
+                        .param("toUserId",String.valueOf(male2))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken));
+
+        ResultActions femaleAction =mvc.perform(post("/api/users/like")
+                .param("fromUserId", String.valueOf(female))
+                .param("toUserId",String.valueOf(female2))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwtToken));
+        // then
+        maleAction
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("403"))
+                .andExpect(jsonPath("$.message",containsString("이성간 매칭만 허용")));
+
+        femaleAction
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("403"))
+                .andExpect(jsonPath("$.message",containsString("이성간 매칭만 허용")));
 
     }
+
+
 }

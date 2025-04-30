@@ -1,7 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Request.UserLoginRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Request.UserSignUpRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
