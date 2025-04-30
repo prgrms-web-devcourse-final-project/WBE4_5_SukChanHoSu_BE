@@ -147,7 +147,6 @@ public class UserProfileService {
     @Transactional
     public void setRadius(UserProfile userProfile, Integer radius) {
         userProfile.setSearchRadius(radius);
-        userProfileRepository.save(userProfile);
     }
 
 }
