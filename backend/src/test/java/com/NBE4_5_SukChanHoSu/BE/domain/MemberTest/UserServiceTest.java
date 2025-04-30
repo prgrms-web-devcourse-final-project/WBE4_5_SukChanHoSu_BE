@@ -6,7 +6,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
-import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,7 +67,7 @@ public class UserServiceTest {
         loginDto.setPassword(rawPassword);
 
         // when
-        JwtTokenDto tokenDto = userService.login(loginDto);
+        LoginResponse tokenDto = userService.login(loginDto);
 
         // then
         assertAll(
