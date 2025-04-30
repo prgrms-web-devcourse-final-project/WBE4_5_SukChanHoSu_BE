@@ -1,6 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.dto;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.enums.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

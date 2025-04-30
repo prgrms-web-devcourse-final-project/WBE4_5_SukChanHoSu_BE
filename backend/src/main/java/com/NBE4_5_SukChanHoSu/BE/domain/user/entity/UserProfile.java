@@ -2,7 +2,7 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.Matching;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.enums.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
