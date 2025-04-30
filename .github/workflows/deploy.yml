@@ -10,12 +10,6 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: schs
-  DATABASE_URL: ${{ secrets.DATABASE_URL }}
-  DATABASE_USERNAME: ${{ secrets.DATABASE_USERNAME }}
-  DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
-  JWT_SECRET: ${{ secrets.JWT_SECRET }}
-  GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-  GOOGLE_SECURITY_PASSWORD: ${{ secrets.GOOGLE_SECURITY_PASSWORD }}
 
 jobs:
   backend-ci:
@@ -26,7 +20,7 @@ jobs:
       mysql:
         image: mysql:8
         env:
-          MYSQL_ROOT_PASSWORD: 0913  # ✅ root 비밀번호 변경
+          MYSQL_ROOT_PASSWORD: ${{secrets.DATABASE_PASSWORD}}  # ✅ root 비밀번호 변경
           MYSQL_DATABASE: moviematch  # ✅ 초기 DB 이름 변경
         ports:
           - 3306:3306
@@ -165,11 +159,8 @@ jobs:
             docker stop app1 2>/dev/null || true && \
             docker rm app1 2>/dev/null || true && \
             docker run -d \
-                --name app1 \
-                --network common \
-                -p 8080:8080 \
-                -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
-                -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
-                -e GOOGLE_SECURITY_PASSWORD=${{ secrets.GOOGLE_SECURITY_PASSWORD }}
-                ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest && \
-                docker rmi $(docker images -f "dangling=true" -q) || true
+            --name app1 \
+            --network common \
+            -p 8080:8080 \
+            ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest && \
+            docker rmi $(docker images -f "dangling=true" -q) || true
