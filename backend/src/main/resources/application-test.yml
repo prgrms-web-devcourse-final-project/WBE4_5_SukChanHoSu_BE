@@ -1,4 +1,8 @@
 spring:
+  data:
+    redis:
+      host: ${REDIS.HOST}
+      port: ${REDIS.PORT}
   h2:
     console:
       enabled: true
