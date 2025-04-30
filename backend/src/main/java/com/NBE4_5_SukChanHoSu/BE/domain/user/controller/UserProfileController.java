@@ -102,6 +102,15 @@ public class UserProfileController {
         return new RsData<>("200", "거리 조회 성공", responses);
     }
 
+    @Operation(summary = "범위 이내 사용자 조회", description = "범위 내에 있는 사용자만 조회")
+    @GetMapping("/withinRadius")
+    public RsData<List<UserProfileResponse>> getProfileWithinRadius(@RequestParam Long profileId) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        int radius = userProfile.getSearchRadius();
+
+        List<UserProfileResponse> responses  = userProfileService.findProfileWithinRadius(userProfile,radius);
+        return new RsData<>("200", "거리 조회 성공", responses);
+    }
 
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
     @GetMapping("/me")
@@ -110,11 +119,4 @@ public class UserProfileController {
         UserProfile userProfile = userProfileService.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
-
-
-
-
-
-
-
 }

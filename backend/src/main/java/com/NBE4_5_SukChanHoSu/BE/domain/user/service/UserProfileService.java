@@ -102,6 +102,21 @@ public class UserProfileService {
                 .toList();
     }
 
+    public List<UserProfileResponse> findProfileWithinRadius(UserProfile userProfile, Integer radius) {
+        // 이성으로 필터링
+        List<UserProfile> profileByGender = findProfileByGender(userProfile);
+
+        // 거리 계산
+        List<UserProfileResponse> responses = new ArrayList<>();
+        for (UserProfile profile : profileByGender) {
+            int distance = calDistance(userProfile, profile); // 거리 계산
+            if (distance <= radius) { // 거리가 범위 이내인 경우만 추가
+                responses.add(new UserProfileResponse(profile, distance));
+            }
+        }
+        return responses;
+    }
+
     static final double EARTH_RADIUS = 6371; // 지구의 반지름 (단위: km)
     // 거리 계산
     public int calDistance(UserProfile userProfile1, UserProfile userProfile2) {
