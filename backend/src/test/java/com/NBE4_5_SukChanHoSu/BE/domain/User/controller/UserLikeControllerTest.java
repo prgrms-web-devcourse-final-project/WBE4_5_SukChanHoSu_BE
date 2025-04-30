@@ -55,15 +55,8 @@ public class UserLikeControllerTest {
     @DisplayName("로그인")
     void login() {
         // given
-        String email = "test@example.com";
+        String email = "testuser1@example.com";
         String rawPassword = "testPassword123!";
-
-        // 회원가입
-        UserSignUpRequest signUpDto = new UserSignUpRequest();
-        signUpDto.setEmail(email);
-        signUpDto.setPassword(rawPassword);
-        signUpDto.setPasswordConfirm(rawPassword);
-        userService.join(signUpDto);
 
         // 로그인
         UserLoginRequest loginDto = new UserLoginRequest();
