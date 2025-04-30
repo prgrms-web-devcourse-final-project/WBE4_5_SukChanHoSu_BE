@@ -5,7 +5,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileRequestDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileUpdateRequestDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.enums.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.member.repository.MemberRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
@@ -54,7 +54,7 @@ class UserProfileServiceTest {
             UserProfile userProfile = new UserProfile();
             userProfile.setUserId(userId);
             userProfile.setNickName(null);
-            userProfile.setGender(Gender.MALE);
+            userProfile.setGender(Gender.Male);
             userProfile.setProfileImage("default.jpg");
             userProfile.setLatitude(0.0);
             userProfile.setLongitude(0.0);
@@ -65,7 +65,7 @@ class UserProfileServiceTest {
 
             ProfileRequestDto dto = ProfileRequestDto.builder()
                     .nickname("testuser")
-                    .gender(Gender.MALE)
+                    .gender(Gender.Male)
                     .latitude(37.5665)
                     .longitude(126.9780)
                     .birthdate(LocalDate.of(2000, 1, 1))
@@ -113,7 +113,7 @@ class UserProfileServiceTest {
             userProfile.setIntroduce("oldIntroduce");
 
             // 필수 필드 추가 설정 (서비스 로직에서 null이면 에러날 수 있음)
-            userProfile.setGender(Gender.MALE);
+            userProfile.setGender(Gender.Male);
             userProfile.setProfileImage("old.jpg");
             userProfile.setLatitude(37.0);
             userProfile.setLongitude(127.0);
@@ -122,7 +122,7 @@ class UserProfileServiceTest {
             ProfileUpdateRequestDto dto = ProfileUpdateRequestDto.builder()
                     .nickname("newnickname")
                     .introduce("새로운 소개")
-                    .gender(Gender.FEMALE)
+                    .gender(Gender.Female)
                     .profileImage("new.jpg")
                     .latitude(38.0)
                     .longitude(128.0)
