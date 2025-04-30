@@ -46,12 +46,12 @@ public class UserProfileController {
         return new RsData<>("200", "프로필 수정 완료", response);
     }
 
-//    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
-//    @GetMapping("/me")
-//    public RsData<ProfileResponse> getMyProfile(@AuthenticationPrincipal User actor) {
-//        ProfileResponse response = userProfileService.getMyProfile(actor.getId());
-//        return new RsData<>("200", "프로필 조회 성공", response);
-//    }
+    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
+    @GetMapping("/me")
+    public RsData<ProfileResponse> getMyProfile(@AuthenticationPrincipal User actor) {
+        ProfileResponse response = userProfileService.getMyProfile(actor.getId());
+        return new RsData<>("200", "프로필 조회 성공", response);
+    }
 
     @Operation(summary = "닉네임 중복 검사", description = "사용 가능한 닉네임인지 확인합니다.")
     @GetMapping("/check-nickname")
@@ -85,9 +85,9 @@ public class UserProfileController {
         return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
 
-    @Operation(summary = "거리 조회", description = "나와 다른 유저들 간의 거리 전체 조회")
-    @GetMapping("/getDistance")
-    public RsData<List<UserProfileResponse>> getDistance(@RequestParam Long profileId) {
+    @Operation(summary = "이성 조회(거리포함)", description = "거리를 포함한 이성 친구만 조회")
+    @GetMapping("/profiles/gender")
+    public RsData<List<UserProfileResponse>> getProfileByGenderWithDistance(@RequestParam Long profileId) {
         UserProfile userProfile = userProfileService.findUser(profileId);
         List<UserProfile> profileByGender = userProfileService.findProfileByGender(userProfile);
 
@@ -113,8 +113,8 @@ public class UserProfileController {
     }
 
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
-    @GetMapping("/me")
-    //todo 임시 이후 삭제
+    @GetMapping("/profile/me")
+    //todo 임시, 이후 삭제
     public RsData<UserProfile> getMyProfile(@RequestParam Long profileId) {
         UserProfile userProfile = userProfileService.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", userProfile);

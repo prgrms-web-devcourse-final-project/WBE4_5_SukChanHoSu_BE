@@ -184,16 +184,34 @@ class UserProfileControllerTest {
                 .andExpect(jsonPath("$.message",containsString("성공")))
                 .andExpect(jsonPath("$.data.searchRadius").value(radius));
 
-        mvc.perform(get("/api/profile/me")
+        mvc.perform(get("/api/profile/profile/me")
                         .param("profileId","1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
                         .andExpect(jsonPath("$.code").value("200"))
                         .andExpect(jsonPath("$.message",containsString("성공")))
                         .andExpect(jsonPath("$.data.searchRadius").value(radius));
-
     }
 
+    @Test
+    @DisplayName("이성 조회(거리 포함)")
+    void findProfileByGender() throws Exception {
+        // given
+
+        // when
+        ResultActions action = mvc.perform(get("/api/profile/profiles/gender")
+                        .param("profileId","1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andDo(print());
+
+        // then
+        action.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("성공")))
+                .andExpect(jsonPath("$.data[*].distance").exists());
+
+    }
 
 }
 
