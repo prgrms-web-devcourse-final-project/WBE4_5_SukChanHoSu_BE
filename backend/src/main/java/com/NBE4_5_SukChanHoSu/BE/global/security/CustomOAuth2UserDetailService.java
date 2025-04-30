@@ -1,8 +1,8 @@
 package com.NBE4_5_SukChanHoSu.BE.global.security;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Member;
-import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Role;
-import com.NBE4_5_SukChanHoSu.BE.domain.member.repository.MemberRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
@@ -31,10 +31,10 @@ public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
         String email = oAuth2UserInfo.getProviderEmail();
         String name = oAuth2UserInfo.getProviderName();
 
-        Member member = memberRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email);
 
-        if (member == null) {
-            member = Member.builder()
+        if (user == null) {
+            user = User.builder()
                     .password(provider)
                     .email(email)
                     .role(Role.USER)
@@ -42,9 +42,9 @@ public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
                     .provider(provider)
                     .providerId(providerId)
                     .build();
-            memberRepository.save(member);
+            userRepository.save(user);
         }
 
-        return new PrincipalDetails(member, oAuth2User.getAttributes());
+        return new PrincipalDetails(user, oAuth2User.getAttributes());
     }
 }

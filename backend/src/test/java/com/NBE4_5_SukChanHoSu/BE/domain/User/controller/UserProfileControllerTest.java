@@ -3,7 +3,7 @@
 //import com.NBE4_5_SukChanHoSu.BE.domain.member.dto.request.MemberLoginRequestDto;
 //import com.NBE4_5_SukChanHoSu.BE.domain.member.dto.request.MemberSignUpRequestDto;
 //import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Member;
-//import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Role;
+//import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
 //import com.NBE4_5_SukChanHoSu.BE.domain.member.repository.MemberRepository;
 //import com.NBE4_5_SukChanHoSu.BE.domain.member.service.MemberService;
 //import com.NBE4_5_SukChanHoSu.BE.domain.user.controller.UserProfileController;
