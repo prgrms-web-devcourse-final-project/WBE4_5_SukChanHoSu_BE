@@ -6,6 +6,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.LikeResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.Empty;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.like.RelationNotFoundException;
@@ -23,14 +24,15 @@ import java.util.List;
 public class UserLikeController {
 
     private final UserLikeService userLikeService;
+    private final UserProfileService userProfileService;
 
     @PostMapping("/like")
     @Operation(summary = "like 전송", description = "toUser에게 like 전송")
     // todo: 인증 구현시 파라미터에서 인증정보로 변경
     public RsData<?> likeUser(@RequestParam Long fromUserId,@RequestParam Long toUserId) {
         // 유저 탐색
-        UserProfile fromUser = userLikeService.findUser(fromUserId);
-        UserProfile toUser = userLikeService.findUser(toUserId);
+        UserProfile fromUser = userProfileService.findUser(fromUserId);
+        UserProfile toUser = userProfileService.findUser(toUserId);
 
         // 매칭 된 사용자인지 검증
         if(userLikeService.isAlreadyMatched(fromUser,toUser)){
@@ -59,7 +61,7 @@ public class UserLikeController {
     @GetMapping("/like/{userId}")
     @Operation(summary = "like 테이블 조회", description = "사용자의 like 테이블 조회")
     public RsData<UserLikeResponse> getUserLikes(@PathVariable Long userId) {
-        UserProfile user = userLikeService.findUser(userId);
+        UserProfile user = userProfileService.findUser(userId);
         UserLikeResponse response = new UserLikeResponse();
         response.setUserLikes(userLikeService.getUserLikes(user));
         response.setSize(response.getUserLikes().size());
@@ -74,7 +76,7 @@ public class UserLikeController {
     @GetMapping("/liked/{userId}")
     @Operation(summary = "liked 테이블 조회", description = "사용자의 liked 테이블 조회")
     public RsData<UserLikeResponse> getUserLiked(@PathVariable Long userId) {
-        UserProfile user = userLikeService.findUser(userId);
+        UserProfile user = userProfileService.findUser(userId);
         UserLikeResponse response = new UserLikeResponse();
         response.setUserLikes(userLikeService.getUserLiked(user));
         response.setSize(response.getUserLikes().size());
@@ -89,7 +91,7 @@ public class UserLikeController {
     @GetMapping("/matching/{userId}")
     @Operation(summary = "match 테이블 조회", description = "사용자의 match 테이블 조회")
     public RsData<?> getUserMatch(@PathVariable Long userId) {
-        UserProfile user = userLikeService.findUser(userId);
+        UserProfile user = userProfileService.findUser(userId);
         List<UserMatchingResponse> response = userLikeService.getUserMatches(user);
         if(response.isEmpty()){
             return new RsData<>("404", "매칭된 사용자가 없습니다.",new Empty());
@@ -102,8 +104,8 @@ public class UserLikeController {
     // todo: 인증 구현시 파라미터에서 인증정보로 변경
     public RsData<?> cancelLikeUser(@RequestParam Long fromUserId, @RequestParam Long toUserId){
         // 유저 탐색
-        UserProfile fromUser = userLikeService.findUser(fromUserId);
-        UserProfile toUser = userLikeService.findUser(toUserId);
+        UserProfile fromUser = userProfileService.findUser(fromUserId);
+        UserProfile toUser = userProfileService.findUser(toUserId);
 
         // 매칭 된 사용자인지 검증
         if(userLikeService.isAlreadyMatched(fromUser,toUser)){

@@ -9,7 +9,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
-import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,15 +22,8 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class UserLikeService {
 
-    private final UserProfileRepository userProfileRepository;
     private final UserLikesRepository userLikesRepository;
     private final MatchingRepository matchingRepository;
-
-    public UserProfile findUser(Long userId) {
-        UserProfile userProfile =  userProfileRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
-        return userProfile;
-    }
 
     @Transactional
     public void likeUser(UserProfile fromUser, UserProfile toUser) {

@@ -2,6 +2,8 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Request.ProfileUpdateRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.security.PrincipalDetails;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +27,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
+    private final UserService userService;
 
     @Operation(summary = "프로필 등록", description = "회원가입 후 최초 프로필 등록")
     @PostMapping
@@ -57,11 +60,18 @@ public class UserProfileController {
 
     @Operation(summary = "프로필로 유저 객체 조회", description = "프로필 엔티티를 이용하여 유저 정보 가져오는지 확인")
     @GetMapping("/user")
-    @PreAuthorize("isAuthenticated()")
-    public RsData<User> getUser() {
-        User user = userProfileService.getUser(actor.getId());
-        return new RsData<>("200", "프로필 조회 성공", user);
+    // todo: 프로바이더 제공되면 파라미터에서 헤더로 변경
+    public RsData<User> getUser(@RequestParam Long profileId) {
+        UserProfile profile = userProfileService.findUser(profileId);
+        return new RsData<>("200", "프로필 조회 성공", profile.getUser());
     }
 
+    @Operation(summary = "유저로 프로필 객체 조회", description = "유저 엔티티를 이용하여 프로필 정보 가져오는지 확인")
+    @GetMapping("/userProfile")
+    // todo: 프로바이더 제공되면 파라미터에서 헤더로 변경
+    public RsData<UserProfile> getProfile(@RequestParam Long userId) {
+        User user = userService.getUserById(userId);
+        return new RsData<>("200", "프로필 조회 성공", user.getUserProfile());
+    }
 
 }

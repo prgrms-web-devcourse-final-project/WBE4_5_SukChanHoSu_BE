@@ -24,7 +24,6 @@ import java.util.List;
 @Table(name = "user_profile")
 public class UserProfile extends BaseTime {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
     @Column(nullable = false)

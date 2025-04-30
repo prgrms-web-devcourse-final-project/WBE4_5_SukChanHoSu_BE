@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 
 import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,5 +26,6 @@ public class User {
     private String providerId;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference // 직렬화
     private UserProfile userProfile;
 }

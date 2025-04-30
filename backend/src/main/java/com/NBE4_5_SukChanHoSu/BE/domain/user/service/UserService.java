@@ -5,8 +5,10 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.TokenProvider;
 import com.NBE4_5_SukChanHoSu.BE.global.util.CookieUtil;
@@ -87,6 +89,12 @@ public class UserService {
             log.error("예외 발생 -> ", e);
             throw e;
         }
+    }
+
+    public User getUserById(Long userId) {
+        User user =  userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
+        return user;
     }
 
 

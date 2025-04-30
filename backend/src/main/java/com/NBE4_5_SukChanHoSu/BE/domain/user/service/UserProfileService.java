@@ -84,9 +84,9 @@ public class UserProfileService {
                 .build();
     }
 
-    public User getUser(Long id) {
-        UserProfile profile = userProfileRepository.findById(id)
-                .orElseThrow(() -> new UserNotFoundException("404","존재하지 않는 유저"));
-        return profile.getUser();
+    public UserProfile findUser(Long userId) {
+        UserProfile userProfile =  userProfileRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
+        return userProfile;
     }
 }
