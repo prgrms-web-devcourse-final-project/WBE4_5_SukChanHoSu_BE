@@ -26,11 +26,13 @@ public class UserProfile extends BaseTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
-    @Column(unique = true,nullable = false)
+    @Column(nullable = false)
     private String nickName;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Gender gender;
+
     @Column(nullable = false)
     private String profileImage;
 
@@ -56,8 +58,11 @@ public class UserProfile extends BaseTime {
     @JsonManagedReference
     private List<UserLikes> likedBy = new ArrayList<>(); // 사용자를 좋아요한 목록
 
-    @OneToMany(mappedBy = "user1", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "maleUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<Matching> matchings = new ArrayList<>(); // 매칭된 사용자 목록
+    private List<Matching> maleMatchings = new ArrayList<>(); // 매칭된 남자 사용자 목록
 
+    @OneToMany(mappedBy = "femaleUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Matching> femaleMatchings = new ArrayList<>(); // 매칭된 여자 사용자 목록
 }
