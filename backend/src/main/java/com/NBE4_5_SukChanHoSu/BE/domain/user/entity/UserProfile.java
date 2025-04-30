@@ -51,6 +51,9 @@ public class UserProfile extends BaseTime {
     @Column(nullable = false)
     private double longitude;
 
+    @Column(nullable = false)
+    private int searchRadius = 20;
+
     @OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<UserLikes> likes = new ArrayList<>(); // 사용자가 누른 좋아요 목록
