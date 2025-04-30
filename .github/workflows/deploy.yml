@@ -169,5 +169,7 @@ jobs:
                 --network common \
                 -p 8080:8080 \
                 -e JWT_SECRET=${{ secrets.JWT_SECRET }} \
+                -e GOOGLE_CLIENT_ID=${{ secrets.GOOGLE_CLIENT_ID }} \
+                -e GOOGLE_SECURITY_PASSWORD=${{ secrets.GOOGLE_SECURITY_PASSWORD }}
                 ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest && \
-              docker rmi $(docker images -f "dangling=true" -q) || true
+                docker rmi $(docker images -f "dangling=true" -q) || true
