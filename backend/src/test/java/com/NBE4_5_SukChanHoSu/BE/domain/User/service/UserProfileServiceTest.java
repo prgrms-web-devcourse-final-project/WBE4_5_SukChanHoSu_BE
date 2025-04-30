@@ -1,13 +1,13 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.User.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Member;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileRequestDto;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileResponseDto;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileUpdateRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.enums.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.member.repository.MemberRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -29,7 +29,7 @@ class UserProfileServiceTest {
     private UserProfileRepository userProfileRepository;
 
     @Mock
-    private MemberRepository memberRepository;
+    private UserRepository userRepository;
 
     @InjectMocks
     private UserProfileService userProfileService;
@@ -45,7 +45,7 @@ class UserProfileServiceTest {
         void createProfile_success() {
             Long userId = 1L;
 
-            Member member = Member.builder()
+            User user = User.builder()
                     .id(userId)
                     .email("test@example.com")
                     .name("Test User")
@@ -54,18 +54,18 @@ class UserProfileServiceTest {
             UserProfile userProfile = new UserProfile();
             userProfile.setUserId(userId);
             userProfile.setNickName(null);
-            userProfile.setGender(Gender.MALE);
+            userProfile.setGender(Gender.Male);
             userProfile.setProfileImage("default.jpg");
             userProfile.setLatitude(0.0);
             userProfile.setLongitude(0.0);
 
-            when(memberRepository.findById(userId)).thenReturn(Optional.of(member));
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
             when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
             when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
 
-            ProfileRequestDto dto = ProfileRequestDto.builder()
+            ProfileRequest dto = ProfileRequest.builder()
                     .nickname("testuser")
-                    .gender(Gender.MALE)
+                    .gender(Gender.Male)
                     .latitude(37.5665)
                     .longitude(126.9780)
                     .birthdate(LocalDate.of(2000, 1, 1))
@@ -84,7 +84,7 @@ class UserProfileServiceTest {
             Long userId = 1L;
             UserProfile userProfile = new UserProfile();
             userProfile.setNickName("alreadySet");
-            ProfileRequestDto dto = ProfileRequestDto.builder()
+            ProfileRequest dto = ProfileRequest.builder()
                     .nickname("testuser")
                     .build();
 
@@ -113,16 +113,16 @@ class UserProfileServiceTest {
             userProfile.setIntroduce("oldIntroduce");
 
             // 필수 필드 추가 설정 (서비스 로직에서 null이면 에러날 수 있음)
-            userProfile.setGender(Gender.MALE);
+            userProfile.setGender(Gender.Male);
             userProfile.setProfileImage("old.jpg");
             userProfile.setLatitude(37.0);
             userProfile.setLongitude(127.0);
             userProfile.setBirthdate(LocalDate.of(1990, 1, 1));
 
-            ProfileUpdateRequestDto dto = ProfileUpdateRequestDto.builder()
+            ProfileUpdateRequest dto = ProfileUpdateRequest.builder()
                     .nickname("newnickname")
                     .introduce("새로운 소개")
-                    .gender(Gender.FEMALE)
+                    .gender(Gender.Female)
                     .profileImage("new.jpg")
                     .latitude(38.0)
                     .longitude(128.0)
@@ -134,7 +134,7 @@ class UserProfileServiceTest {
             when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
 
             // when
-            ProfileResponseDto responseDto = userProfileService.updateProfile(userId, dto);
+            ProfileResponse responseDto = userProfileService.updateProfile(userId, dto);
 
             // then
             assertThat(responseDto.getNickname()).isEqualTo(dto.getNickname());
@@ -202,7 +202,7 @@ class UserProfileServiceTest {
             when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
 
             // when
-            ProfileResponseDto result = userProfileService.getMyProfile(userId);
+            ProfileResponse result = userProfileService.getMyProfile(userId);
 
             // then
             assertThat(result.getNickname()).isEqualTo("nickname");

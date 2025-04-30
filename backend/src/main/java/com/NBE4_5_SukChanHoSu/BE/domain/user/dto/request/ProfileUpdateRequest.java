@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.dto;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import jakarta.validation.constraints.*;
@@ -14,47 +14,41 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProfileResponseDto {
+public class ProfileUpdateRequest {
 
     @NotBlank
     @Pattern(regexp = "^[가-힣a-zA-Z]{2,10}$", message = "닉네임은 한글 또는 영어 2~10자만 가능합니다.")
     private String nickname;
 
-    @Email
-    private String email;
-
-    @NotBlank
     private Gender gender;
 
     private String profileImage;
 
-    @DecimalMin("-90.0")
-    @DecimalMax("90.0")
+    @DecimalMin(value = "-90.0", inclusive = true)
+    @DecimalMax(value = "90.0", inclusive = true)
     private Double latitude;
 
-    @DecimalMin("-180.0")
-    @DecimalMax("180.0")
+    @DecimalMin(value = "-180.0", inclusive = true)
+    @DecimalMax(value = "180.0", inclusive = true)
     private Double longitude;
 
     private LocalDate birthdate;
 
     @Min(0)
     @Max(50)
-    private Integer distance; // 상대방과의 허용 거리 (km)
+    private Integer distance;
 
-    @NotBlank(message = "인생 영화는 필수입니다.")
+    @NotBlank
     private String lifeMovie;
 
-    private List<String> favoriteGenres; // 선호 장르
+    private List<String> favoriteGenres;
 
-    @Size(max = 4, message = "재밌게 본 영화는 최대 4개까지 등록 가능합니다.")
+    @Size(max = 4)
     private List<String> watchedMovies;
 
-    private List<String> preferredTheaters; // 선호 영화관
+    private List<String> preferredTheaters;
 
     @NotBlank(message = "자기소개는 필수입니다.")
     private String introduce;
 
 }
-
-
