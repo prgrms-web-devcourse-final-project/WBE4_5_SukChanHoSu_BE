@@ -48,7 +48,7 @@ public class BaseInitData {
 	public void profileInit() {
 		for (int i = 1; i <= 10; i++) {
 			UserSignUpRequest signUpDto = new UserSignUpRequest();
-			signUpDto.setEmail("user" + i + "@example.com");
+			signUpDto.setEmail("initUser" + i + "@example.com");
 			signUpDto.setPassword("testPassword123!");
 			signUpDto.setPasswordConfirm("testPassword123!");
 			User user = userService.join(signUpDto);

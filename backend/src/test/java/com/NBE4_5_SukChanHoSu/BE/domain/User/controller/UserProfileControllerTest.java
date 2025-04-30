@@ -104,7 +104,7 @@ class UserProfileControllerTest {
     @DisplayName("로그인")
     void login() {
         // given
-        String email = "testuser1@example.com";
+        String email = "testUser1@example.com";
         String rawPassword = "testPassword123!";
 
         // 로그인

@@ -22,7 +22,7 @@ public class TestInitData {
             // 테스트 데이터 생성
             for (int i = 1; i <= 10; i++) {
                 UserSignUpRequest signUpDto = new UserSignUpRequest();
-                signUpDto.setEmail("testuser" + i + "@example.com");
+                signUpDto.setEmail("testUser" + i + "@example.com");
                 signUpDto.setPassword("testPassword123!");
                 signUpDto.setPasswordConfirm("testPassword123!");
                 User user =userService.join(signUpDto);
