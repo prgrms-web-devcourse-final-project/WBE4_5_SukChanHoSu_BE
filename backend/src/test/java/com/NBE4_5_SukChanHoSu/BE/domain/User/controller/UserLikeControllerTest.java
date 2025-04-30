@@ -1,11 +1,13 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 
-import com.NBE4_5_SukChanHoSu.BE.domain.member.dto.request.MemberLoginRequestDto;
-import com.NBE4_5_SukChanHoSu.BE.domain.member.dto.request.MemberSignUpRequestDto;
-import com.NBE4_5_SukChanHoSu.BE.domain.member.service.MemberService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -21,7 +23,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import static java.util.concurrent.TimeUnit.SECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -32,14 +37,16 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @BaseTestConfig
 @Transactional
-public class UserControllerTest {
+public class UserLikeControllerTest {
 
     @Autowired
     private MockMvc mvc;
     @Autowired
+    private UserLikeService userLikeService;
+    @Autowired
     private UserProfileRepository userProfileRepository;
     @Autowired
-    private MemberService memberService;
+    private UserService userService;
 
     private ObjectMapper objectMapper;
     private String jwtToken;
@@ -57,19 +64,19 @@ public class UserControllerTest {
         String rawPassword = "testPassword123!";
 
         // 회원가입
-        MemberSignUpRequestDto signUpDto = new MemberSignUpRequestDto();
+        UserSignUpRequest signUpDto = new UserSignUpRequest();
         signUpDto.setEmail(email);
         signUpDto.setPassword(rawPassword);
         signUpDto.setPasswordConfirm(rawPassword);
-        memberService.join(signUpDto);
+        userService.join(signUpDto);
 
         // 로그인
-        MemberLoginRequestDto loginDto = new MemberLoginRequestDto();
+        UserLoginRequest loginDto = new UserLoginRequest();
         loginDto.setEmail(email);
         loginDto.setPassword(rawPassword);
 
         // when
-        JwtTokenDto tokenDto = memberService.login(loginDto);
+        JwtTokenDto tokenDto = userService.login(loginDto);
         this.jwtToken = tokenDto.getAccessToken();
 
     }

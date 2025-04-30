@@ -1,10 +1,11 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileRequestDto;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileResponseDto;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileUpdateRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,7 +18,7 @@ public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
 
     @Transactional
-    public ProfileResponseDto createProfile(Long userId, ProfileRequestDto dto) {
+    public ProfileResponse createProfile(Long userId, ProfileRequest dto) {
         UserProfile userProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
@@ -30,7 +31,7 @@ public class UserProfileService {
     }
 
     @Transactional
-    public ProfileResponseDto updateProfile(Long userId, ProfileUpdateRequestDto dto) {
+    public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto) {
         UserProfile userProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
@@ -42,13 +43,13 @@ public class UserProfileService {
         return userProfileRepository.existsByNickName(nickname);
     }
 
-    public ProfileResponseDto getMyProfile(Long userId) {
+    public ProfileResponse getMyProfile(Long userId) {
         UserProfile userProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         return toDto(userProfile);
     }
 
-    private void updateEntityFromRequest(UserProfile profile, ProfileRequestDto dto) {
+    private void updateEntityFromRequest(UserProfile profile, ProfileRequest dto) {
         profile.setNickName(dto.getNickname());
         profile.setGender(dto.getGender());
         profile.setProfileImage(dto.getProfileImage());
@@ -59,7 +60,7 @@ public class UserProfileService {
         // TODO: Favorite genres, lifeMovie, watchedMovies, preferredTheaters, distance 등 매핑 추가
     }
 
-    private void updateEntityFromUpdateRequest(UserProfile profile, ProfileUpdateRequestDto dto) {
+    private void updateEntityFromUpdateRequest(UserProfile profile, ProfileUpdateRequest dto) {
         if (dto.getNickname() != null) profile.setNickName(dto.getNickname());
         if (dto.getGender() != null) profile.setGender(dto.getGender());
         if (dto.getProfileImage() != null) profile.setProfileImage(dto.getProfileImage());
@@ -70,8 +71,8 @@ public class UserProfileService {
         // TODO: 생략된 필드 동일하게 적용
     }
 
-    private ProfileResponseDto toDto(UserProfile userProfile) {
-        return ProfileResponseDto.builder()
+    private ProfileResponse toDto(UserProfile userProfile) {
+        return ProfileResponse.builder()
                 .nickname(userProfile.getNickName())
                 .gender(userProfile.getGender())
                 .profileImage(userProfile.getProfileImage())
@@ -80,5 +81,11 @@ public class UserProfileService {
                 .birthdate(userProfile.getBirthdate())
                 .introduce(userProfile.getIntroduce())
                 .build();
+    }
+
+    public UserProfile findUser(Long userId) {
+        UserProfile userProfile =  userProfileRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
+        return userProfile;
     }
 }
