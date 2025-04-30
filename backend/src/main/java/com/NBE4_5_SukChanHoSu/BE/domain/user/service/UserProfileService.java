@@ -95,9 +95,10 @@ public class UserProfileService {
     }
 
     // 이성만 조회
-    public List<UserProfile> findAll(UserProfile userProfile) {
+    public List<UserProfile> findProfileByGender(UserProfile userProfile) {
         return userProfileRepository.findAll().stream()
                 .filter(profile -> !profile.getUserId().equals(userProfile.getUserId())) // 자신 제외
+                .filter(profile -> !profile.getGender().equals(userProfile.getGender())) // 성별이 다른 유저 필터링
                 .toList();
     }
 
@@ -126,6 +127,12 @@ public class UserProfileService {
 
         // 소수 첫째 자리에서 반올림 후 int형으로 반환
         return (int) Math.round(distance); // 반올림하여 int형으로 반환
+    }
+
+    @Transactional
+    public void setRadius(UserProfile userProfile, Integer radius) {
+        userProfile.setSearchRadius(radius);
+        userProfileRepository.save(userProfile);
     }
 
 }

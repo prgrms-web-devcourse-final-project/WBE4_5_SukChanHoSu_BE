@@ -76,11 +76,20 @@ public class UserProfileController {
         return new RsData<>("200", "프로필 조회 성공", user.getUserProfile());
     }
 
+    @Operation(summary = "범위 조절", description = "탐색 범위 조절")
+    @PutMapping("/radius")
+    public RsData<?> setRadius(@RequestParam Long profileId, @RequestParam Integer radius) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        userProfileService.setRadius(userProfile,radius);
+
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
+    }
+
     @Operation(summary = "거리 조회", description = "나와 다른 유저들 간의 거리 전체 조회")
     @GetMapping("/getDistance")
     public RsData<List<UserProfileResponse>> getDistance(@RequestParam Long profileId) {
         UserProfile userProfile = userProfileService.findUser(profileId);
-        List<UserProfile> profileByGender = userProfileService.findAll(userProfile);
+        List<UserProfile> profileByGender = userProfileService.findProfileByGender(userProfile);
 
         List<UserProfileResponse> responses = new ArrayList<>();
 
@@ -101,5 +110,11 @@ public class UserProfileController {
         UserProfile userProfile = userProfileService.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
+
+
+
+
+
+
 
 }

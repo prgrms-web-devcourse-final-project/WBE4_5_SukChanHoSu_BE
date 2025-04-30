@@ -3,7 +3,6 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
