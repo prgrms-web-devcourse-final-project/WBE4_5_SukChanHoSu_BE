@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
@@ -17,6 +18,9 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -42,12 +46,12 @@ public class UserProfileController {
         return new RsData<>("200", "프로필 수정 완료", response);
     }
 
-    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
-    @GetMapping("/me")
-    public RsData<ProfileResponse> getMyProfile(@AuthenticationPrincipal User actor) {
-        ProfileResponse response = userProfileService.getMyProfile(actor.getId());
-        return new RsData<>("200", "프로필 조회 성공", response);
-    }
+//    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
+//    @GetMapping("/me")
+//    public RsData<ProfileResponse> getMyProfile(@AuthenticationPrincipal User actor) {
+//        ProfileResponse response = userProfileService.getMyProfile(actor.getId());
+//        return new RsData<>("200", "프로필 조회 성공", response);
+//    }
 
     @Operation(summary = "닉네임 중복 검사", description = "사용 가능한 닉네임인지 확인합니다.")
     @GetMapping("/check-nickname")
@@ -70,6 +74,32 @@ public class UserProfileController {
     public RsData<UserProfile> getProfile(@RequestParam Long userId) {
         User user = userService.getUserById(userId);
         return new RsData<>("200", "프로필 조회 성공", user.getUserProfile());
+    }
+
+    @Operation(summary = "거리 조회", description = "나와 다른 유저들 간의 거리 전체 조회")
+    @GetMapping("/getDistance")
+    public RsData<List<UserProfileResponse>> getDistance(@RequestParam Long profileId) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        List<UserProfile> profileByGender = userProfileService.findAll(userProfile);
+
+        List<UserProfileResponse> responses = new ArrayList<>();
+
+        for (UserProfile profile : profileByGender) {
+            int distance = userProfileService.calDistance(userProfile, profile);
+            // UserProfileResponse로 변환하여 리스트에 추가
+            responses.add(new UserProfileResponse(profile, distance));
+        }
+
+        return new RsData<>("200", "거리 조회 성공", responses);
+    }
+
+
+    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
+    @GetMapping("/me")
+    //todo 임시 이후 삭제
+    public RsData<UserProfile> getMyProfile(@RequestParam Long profileId) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
 
 }
