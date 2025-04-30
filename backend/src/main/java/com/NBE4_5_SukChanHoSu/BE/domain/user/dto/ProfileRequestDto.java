@@ -3,9 +3,9 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.dto;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.enums.Gender;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 public class ProfileRequestDto {
 
     @NotBlank

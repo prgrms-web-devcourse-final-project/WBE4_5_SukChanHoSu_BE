@@ -17,7 +17,7 @@ public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
 
     @Transactional
-    public void createProfile(Long userId, ProfileRequestDto dto) {
+    public ProfileResponseDto createProfile(Long userId, ProfileRequestDto dto) {
         UserProfile userProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
@@ -25,30 +25,17 @@ public class UserProfileService {
             throw new IllegalStateException("이미 프로필이 등록된 사용자입니다.");
         }
 
-        userProfile.setNickName(dto.getNickname());
-        userProfile.setGender(dto.getGender());
-        userProfile.setLatitude(dto.getLatitude());
-        userProfile.setLongitude(dto.getLongitude());
-        userProfile.setBirthdate(dto.getBirthdate());
-        userProfile.setProfileImage(dto.getProfileImage());
-
-        userProfileRepository.save(userProfile);
+        updateEntityFromRequest(userProfile, dto);
+        return toDto(userProfileRepository.save(userProfile));
     }
 
     @Transactional
-    public void updateProfile(Long userId, ProfileUpdateRequestDto dto) {
+    public ProfileResponseDto updateProfile(Long userId, ProfileUpdateRequestDto dto) {
         UserProfile userProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        if (dto.getNickname() != null) userProfile.setNickName(dto.getNickname());
-        if (dto.getGender() != null) userProfile.setGender(dto.getGender());
-        if (dto.getProfileImage() != null) userProfile.setProfileImage(dto.getProfileImage());
-        if (dto.getLatitude() != null) userProfile.setLatitude(dto.getLatitude());
-        if (dto.getLongitude() != null) userProfile.setLongitude(dto.getLongitude());
-        if (dto.getBirthdate() != null) userProfile.setBirthdate(dto.getBirthdate());
-        if (dto.getIntroduce() != null) userProfile.setIntroduce(dto.getIntroduce());
-
-        userProfileRepository.save(userProfile);
+        updateEntityFromUpdateRequest(userProfile, dto);
+        return toDto(userProfileRepository.save(userProfile));
     }
 
     public boolean isNicknameDuplicated(String nickname) {
@@ -58,7 +45,32 @@ public class UserProfileService {
     public ProfileResponseDto getMyProfile(Long userId) {
         UserProfile userProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        return toDto(userProfile);
+    }
 
+    private void updateEntityFromRequest(UserProfile profile, ProfileRequestDto dto) {
+        profile.setNickName(dto.getNickname());
+        profile.setGender(dto.getGender());
+        profile.setProfileImage(dto.getProfileImage());
+        profile.setLatitude(dto.getLatitude());
+        profile.setLongitude(dto.getLongitude());
+        profile.setBirthdate(dto.getBirthdate());
+        profile.setIntroduce(dto.getIntroduce());
+        // TODO: Favorite genres, lifeMovie, watchedMovies, preferredTheaters, distance 등 매핑 추가
+    }
+
+    private void updateEntityFromUpdateRequest(UserProfile profile, ProfileUpdateRequestDto dto) {
+        if (dto.getNickname() != null) profile.setNickName(dto.getNickname());
+        if (dto.getGender() != null) profile.setGender(dto.getGender());
+        if (dto.getProfileImage() != null) profile.setProfileImage(dto.getProfileImage());
+        if (dto.getLatitude() != null) profile.setLatitude(dto.getLatitude());
+        if (dto.getLongitude() != null) profile.setLongitude(dto.getLongitude());
+        if (dto.getBirthdate() != null) profile.setBirthdate(dto.getBirthdate());
+        if (dto.getIntroduce() != null) profile.setIntroduce(dto.getIntroduce());
+        // TODO: 생략된 필드 동일하게 적용
+    }
+
+    private ProfileResponseDto toDto(UserProfile userProfile) {
         return ProfileResponseDto.builder()
                 .nickname(userProfile.getNickName())
                 .gender(userProfile.getGender())
@@ -67,7 +79,6 @@ public class UserProfileService {
                 .longitude(userProfile.getLongitude())
                 .birthdate(userProfile.getBirthdate())
                 .introduce(userProfile.getIntroduce())
-                // .favoriteGenres(userProfile.getFavoriteGenres())
                 .build();
     }
 }

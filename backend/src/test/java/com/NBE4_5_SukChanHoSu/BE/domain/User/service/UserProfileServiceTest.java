@@ -1,10 +1,13 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.User.service;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Member;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileRequestDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.ProfileUpdateRequestDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.enums.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.member.repository.MemberRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,6 +28,9 @@ class UserProfileServiceTest {
     @Mock
     private UserProfileRepository userProfileRepository;
 
+    @Mock
+    private MemberRepository memberRepository;
+
     @InjectMocks
     private UserProfileService userProfileService;
 
@@ -36,32 +42,41 @@ class UserProfileServiceTest {
     @Nested
     @DisplayName("createProfile 테스트")
     class CreateProfileTest {
-        @Test
-        @DisplayName("정상적으로 프로필을 생성한다.")
         void createProfile_success() {
-            // given
             Long userId = 1L;
+
+            Member member = Member.builder()
+                    .id(userId)
+                    .email("test@example.com")
+                    .name("Test User")
+                    .build();
+
             UserProfile userProfile = new UserProfile();
+            userProfile.setUserId(userId);
+            userProfile.setNickName(null);
+            userProfile.setGender(Gender.MALE);
+            userProfile.setProfileImage("default.jpg");
+            userProfile.setLatitude(0.0);
+            userProfile.setLongitude(0.0);
+
+            when(memberRepository.findById(userId)).thenReturn(Optional.of(member));
+            when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+            when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
+
             ProfileRequestDto dto = ProfileRequestDto.builder()
                     .nickname("testuser")
-                    .gender(null)
+                    .gender(Gender.MALE)
                     .latitude(37.5665)
                     .longitude(126.9780)
                     .birthdate(LocalDate.of(2000, 1, 1))
                     .profileImage("profile.jpg")
                     .build();
 
-            when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
-
-            // when
             userProfileService.createProfile(userId, dto);
 
-            // then
             assertThat(userProfile.getNickName()).isEqualTo(dto.getNickname());
-            assertThat(userProfile.getProfileImage()).isEqualTo(dto.getProfileImage());
-            verify(userProfileRepository, times(1)).save(userProfile);
+            verify(userProfileRepository, times(1)).save(any(UserProfile.class));
         }
-
         @Test
         @DisplayName("이미 프로필이 등록된 경우 예외를 던진다.")
         void createProfile_alreadyExists() {
@@ -85,28 +100,55 @@ class UserProfileServiceTest {
     @Nested
     @DisplayName("updateProfile 테스트")
     class UpdateProfileTest {
+
         @Test
         @DisplayName("정상적으로 프로필을 수정한다.")
         void updateProfile_success() {
             // given
             Long userId = 1L;
+
             UserProfile userProfile = new UserProfile();
+            userProfile.setUserId(userId); // ★ 꼭 필요!
+            userProfile.setNickName("oldNickname");
+            userProfile.setIntroduce("oldIntroduce");
+
+            // 필수 필드 추가 설정 (서비스 로직에서 null이면 에러날 수 있음)
+            userProfile.setGender(Gender.MALE);
+            userProfile.setProfileImage("old.jpg");
+            userProfile.setLatitude(37.0);
+            userProfile.setLongitude(127.0);
+            userProfile.setBirthdate(LocalDate.of(1990, 1, 1));
+
             ProfileUpdateRequestDto dto = ProfileUpdateRequestDto.builder()
                     .nickname("newnickname")
                     .introduce("새로운 소개")
+                    .gender(Gender.FEMALE)
+                    .profileImage("new.jpg")
+                    .latitude(38.0)
+                    .longitude(128.0)
+                    .birthdate(LocalDate.of(2000, 1, 1))
                     .build();
 
+            // mock 동작 정의
             when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+            when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
 
             // when
-            userProfileService.updateProfile(userId, dto);
+            ProfileResponseDto responseDto = userProfileService.updateProfile(userId, dto);
 
             // then
-            assertThat(userProfile.getNickName()).isEqualTo(dto.getNickname());
-            assertThat(userProfile.getIntroduce()).isEqualTo(dto.getIntroduce());
+            assertThat(responseDto.getNickname()).isEqualTo(dto.getNickname());
+            assertThat(responseDto.getIntroduce()).isEqualTo(dto.getIntroduce());
+            assertThat(responseDto.getGender()).isEqualTo(dto.getGender());
+            assertThat(responseDto.getProfileImage()).isEqualTo(dto.getProfileImage());
+            assertThat(responseDto.getLatitude()).isEqualTo(dto.getLatitude());
+            assertThat(responseDto.getLongitude()).isEqualTo(dto.getLongitude());
+            assertThat(responseDto.getBirthdate()).isEqualTo(dto.getBirthdate());
+
             verify(userProfileRepository, times(1)).save(userProfile);
         }
     }
+
 
     @Nested
     @DisplayName("isNicknameDuplicated 테스트")
