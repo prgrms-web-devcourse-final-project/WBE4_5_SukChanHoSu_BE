@@ -32,6 +32,10 @@ public class UserController {
         UserProfile fromUser = userService.findUser(fromUserId);
         UserProfile toUser = userService.findUser(toUserId);
 
+        if(userService.isSameGender(fromUser,toUser)){
+            return new RsData<>("403","이성간 매칭만 허용합니다.");
+        }
+
         // 매칭 된 사용자인지 검증
         if(userService.isAlreadyMatched(fromUser,toUser)){
             return new RsData<>("403", fromUser.getNickName()+ " 와 "+toUser.getNickName()+ "님은 이미 매칭된 상태입니다.");
