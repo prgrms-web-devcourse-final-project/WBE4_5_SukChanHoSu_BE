@@ -66,4 +66,8 @@ public class UserProfile extends BaseTime {
     @OneToMany(mappedBy = "femaleUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
     private List<Matching> femaleMatchings = new ArrayList<>(); // 매칭된 여자 사용자 목록
+
+    @OneToOne
+    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    private User user;
 }

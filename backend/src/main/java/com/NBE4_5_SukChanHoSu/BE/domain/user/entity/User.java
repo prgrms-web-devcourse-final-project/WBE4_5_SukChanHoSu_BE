@@ -1,9 +1,8 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.member.entity;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +13,8 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Member {
+@Table(name = "member")
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -24,4 +24,8 @@ public class Member {
     private String name;
     private String provider;
     private String providerId;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonBackReference // 직렬화
+    private UserProfile userProfile;
 }

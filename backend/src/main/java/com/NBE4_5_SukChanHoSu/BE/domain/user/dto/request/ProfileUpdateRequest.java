@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.dto;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import jakarta.validation.constraints.*;
@@ -14,7 +14,7 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ProfileUpdateRequestDto {
+public class ProfileUpdateRequest {
 
     @NotBlank
     @Pattern(regexp = "^[가-힣a-zA-Z]{2,10}$", message = "닉네임은 한글 또는 영어 2~10자만 가능합니다.")

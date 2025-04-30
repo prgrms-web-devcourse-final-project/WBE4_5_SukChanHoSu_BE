@@ -1,7 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.global.security;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Member;
-import com.NBE4_5_SukChanHoSu.BE.domain.member.repository.MemberRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,14 +13,14 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
-    private final MemberRepository memberRepository;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member member = memberRepository.findByEmail(email);
-        if (member == null) {
+        User user = userRepository.findByEmail(email);
+        if (user == null) {
             throw new UsernameNotFoundException("사용자를 찾을 수 없습니다: " + email);
         }
-        return new PrincipalDetails(member);
+        return new PrincipalDetails(user);
     }
 }
