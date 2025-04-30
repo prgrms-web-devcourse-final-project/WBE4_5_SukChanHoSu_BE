@@ -9,6 +9,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -31,12 +32,12 @@ public class UserLoginController {
         );
     }
 
-//    @PostMapping("/login")
-//    public RsData<JwtTokenDto> login(@RequestBody UserLoginRequest requestDto) {
-//        return new RsData<>(
-//                UserSuccessCode.LOGIN_SUCCESS.getCode(),
-//                UserSuccessCode.LOGIN_SUCCESS.getMessage(),
-//                userService.login(requestDto)
-//        );
-//    }
+    @PostMapping("/login")
+    public RsData<JwtTokenDto> login(@RequestBody UserLoginRequest requestDto) {
+        return new RsData<>(
+                UserSuccessCode.LOGIN_SUCCESS.getCode(),
+                UserSuccessCode.LOGIN_SUCCESS.getMessage(),
+                userService.login(requestDto)
+        );
+    }
 }
