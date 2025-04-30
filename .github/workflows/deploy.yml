@@ -113,7 +113,7 @@ jobs:
 
       - name: Generate application-secret.yml
         env:
-            APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET }}
+            APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET_YML }}
         run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application-secret.yml
 
       - name: Set up Docker Buildx

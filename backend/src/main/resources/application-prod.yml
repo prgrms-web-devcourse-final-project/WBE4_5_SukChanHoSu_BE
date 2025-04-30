@@ -14,6 +14,16 @@ spring:
         format_sql: false
         highlight_sql: false
         use_sql_comments: false
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE.CLIENT_ID}
+            client-secret: ${GOOGLE.SECURITY_PASSWORD}
+            scope:
+              - profile
+              - email
 
   logging:
     level:
@@ -30,3 +40,6 @@ spring:
       frontUrl: "${custom.prod.frontUrl}"
     genFile:
       dirPath: /gen
+
+  jwt:
+    secret: ${JWT.SECRET}
