@@ -1,8 +1,14 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 
+import com.NBE4_5_SukChanHoSu.BE.domain.member.dto.request.MemberLoginRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.member.dto.request.MemberSignUpRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Member;
+import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Role;
+import com.NBE4_5_SukChanHoSu.BE.domain.member.service.MemberService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
+import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -19,6 +25,8 @@ import org.springframework.test.web.servlet.ResultActions;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -35,12 +43,40 @@ public class UserControllerTest {
     private MockMvc mvc;
     @Autowired
     private UserService userService;
+    @Autowired
+    private MemberService memberService;
 
     private ObjectMapper objectMapper;
+    private String jwtToken;
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
+        login();
+    }
+
+    @DisplayName("로그인 성공")
+    void login() {
+        // given
+        String email = "test@example.com";
+        String rawPassword = "testPassword123!";
+
+        // 회원가입
+        MemberSignUpRequestDto signUpDto = new MemberSignUpRequestDto();
+        signUpDto.setEmail(email);
+        signUpDto.setPassword(rawPassword);
+        signUpDto.setPasswordConfirm(rawPassword);
+        memberService.join(signUpDto);
+
+        // 로그인
+        MemberLoginRequestDto loginDto = new MemberLoginRequestDto();
+        loginDto.setEmail(email);
+        loginDto.setPassword(rawPassword);
+
+        // when
+        JwtTokenDto tokenDto = memberService.login(loginDto);
+        this.jwtToken = tokenDto.getAccessToken();
+
     }
 
     @DisplayName("like 셋업")
@@ -48,7 +84,8 @@ public class UserControllerTest {
         mvc.perform(post("/api/users/like")
                         .param("fromUserId",from.toString())
                         .param("toUserId",to.toString())
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.data").isNotEmpty());
@@ -60,7 +97,8 @@ public class UserControllerTest {
         mvc.perform(post("/api/users/like")
                 .param("fromUserId","1")
                 .param("toUserId","2")
-                .contentType(MediaType.APPLICATION_JSON))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("에게 좋아요를 보냈습니다")));
@@ -74,7 +112,8 @@ public class UserControllerTest {
 
         //when
         ResultActions action = mvc.perform(get("/api/users/like/1") // TempUser1의 like 데이터 가져오기
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
         // then
         action.andExpect(status().isOk())
@@ -92,7 +131,8 @@ public class UserControllerTest {
 
         // when
         ResultActions action = mvc.perform(get("/api/users/liked/2") // TempUser2를 좋아요한 유저 데이터 가져오기
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
 
         // then
@@ -113,7 +153,8 @@ public class UserControllerTest {
 
         // when
         ResultActions getMatching = mvc.perform(get("/api/users/matching/2") // 매칭 목록 가져오기
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
 
         // 매칭 목록에서 조회 가능
@@ -127,7 +168,8 @@ public class UserControllerTest {
         // liked 목록에서는 조회 불가능
         await().atMost(2, SECONDS).untilAsserted(() -> {
             ResultActions getLiked = mvc.perform(get("/api/users/liked/2") // TempUser2를 좋아요한 유저 데이터 가져오기
-                            .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + jwtToken))
                     .andDo(print());
             getLiked
                     .andExpect(status().isOk())
@@ -147,7 +189,8 @@ public class UserControllerTest {
         ResultActions action = mvc.perform(post("/api/users/like")
                         .param("fromUserId","2")
                         .param("toUserId","1")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
         // 매칭 응답 검증
         action.andExpect(status().isOk())
@@ -156,7 +199,8 @@ public class UserControllerTest {
                 .andExpect(jsonPath("$.data.matching").exists());
         //when
         ResultActions action2 = mvc.perform(get("/api/users/matching/1") // TempUser1의 매칭 데이터 가져오기
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
 
         // then
@@ -177,7 +221,8 @@ public class UserControllerTest {
         ResultActions action = mvc.perform(post("/api/users/like")
                         .param("fromUserId","1")
                         .param("toUserId","2")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
 
         // then
@@ -198,7 +243,8 @@ public class UserControllerTest {
         ResultActions action = mvc.perform(post("/api/users/like")
                         .param("fromUserId","1")
                         .param("toUserId","2")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
 
         // then
@@ -218,7 +264,8 @@ public class UserControllerTest {
         ResultActions action = mvc.perform(delete("/api/users/like")
                         .param("fromUserId","1")
                         .param("toUserId","2")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
 
         // then
@@ -239,7 +286,8 @@ public class UserControllerTest {
         ResultActions action = mvc.perform(delete("/api/users/like")
                         .param("fromUserId","1")
                         .param("toUserId","2")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
 
         // then
@@ -259,12 +307,14 @@ public class UserControllerTest {
         mvc.perform(delete("/api/users/like")
                         .param("fromUserId", "1")
                         .param("toUserId", "2")
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
 
         // when
         ResultActions getMatching = mvc.perform(get("/api/users/matching/1") // TempUser1의 매칭 데이터 가져오기
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
         // then
         getMatching
@@ -274,7 +324,8 @@ public class UserControllerTest {
 
         await().atMost(2, SECONDS).untilAsserted(() -> {
             ResultActions getLikes = mvc.perform(get("/api/users/like/1") // TempUser1의 Likes 데이터 가져오기
-                            .contentType(MediaType.APPLICATION_JSON))
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .header("Authorization", "Bearer " + jwtToken))
                     .andDo(print());
             getLikes
                     .andExpect(status().isOk())
