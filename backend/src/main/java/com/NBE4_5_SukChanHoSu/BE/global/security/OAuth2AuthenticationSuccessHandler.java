@@ -1,9 +1,8 @@
 package com.NBE4_5_SukChanHoSu.BE.global.security;
 
-import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
-import com.NBE4_5_SukChanHoSu.BE.global.jwt.TokenProvider;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
+import com.NBE4_5_SukChanHoSu.BE.global.jwt.service.TokenService;
 import com.NBE4_5_SukChanHoSu.BE.global.util.CookieUtil;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,15 +15,15 @@ import java.io.IOException;
 @Component
 @RequiredArgsConstructor
 public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccessHandler {
-    private final CookieUtil util;
-    private final TokenProvider tokenProvider;
+    private final CookieUtil cookieUtil;
+    private final TokenService tokenService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        JwtTokenDto token = tokenProvider.generateToken(authentication);
+        LoginResponse token = tokenService.generateToken(authentication);
 
-        util.addCookie("accessToken", token.getAccessToken());
-        util.addCookie("refreshToken", token.getRefreshToken());
+        cookieUtil.addAccessCookie(token.getAccessToken(), response);
+        cookieUtil.addRefreshCookie(token.getRefreshToken(), response);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
