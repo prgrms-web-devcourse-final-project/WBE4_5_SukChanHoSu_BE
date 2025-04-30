@@ -3,15 +3,9 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.member.dto.request.MemberLoginRequestDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.member.dto.request.MemberSignUpRequestDto;
-import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Member;
-import com.NBE4_5_SukChanHoSu.BE.domain.member.entity.Role;
 import com.NBE4_5_SukChanHoSu.BE.domain.member.service.MemberService;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.MatchingRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,11 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -46,8 +36,6 @@ public class UserControllerTest {
 
     @Autowired
     private MockMvc mvc;
-    @Autowired
-    private UserService userService;
     @Autowired
     private UserProfileRepository userProfileRepository;
     @Autowired

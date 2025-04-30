@@ -9,7 +9,5 @@ import java.util.List;
 
 public interface UserProfileRepository extends JpaRepository<UserProfile, Long> {
 
-    List<UserProfile> findTopByGender(Gender gender);
-
     List<UserProfile> findByGender(Gender gender);
 }
