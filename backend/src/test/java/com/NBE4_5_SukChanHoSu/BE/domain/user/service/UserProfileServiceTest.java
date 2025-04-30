@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.User.service;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
@@ -8,7 +8,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

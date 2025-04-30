@@ -1,4 +1,4 @@
-//package com.NBE4_5_SukChanHoSu.BE.domain.User.controller;
+//package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 //
 //import com.NBE4_5_SukChanHoSu.BE.domain.member.dto.request.MemberLoginRequestDto;
 //import com.NBE4_5_SukChanHoSu.BE.domain.member.dto.request.MemberSignUpRequestDto;
