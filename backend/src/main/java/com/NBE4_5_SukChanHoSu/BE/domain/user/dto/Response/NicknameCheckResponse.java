@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.dto;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.dto.Response;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 @Getter
 @AllArgsConstructor
 @Schema(description = "닉네임 중복 검사 응답 DTO")
-public class NicknameCheckResponseDto {
+public class NicknameCheckResponse {
 
     @Schema(description = "요청한 닉네임", example = "닉넴1")
     private String nickname;

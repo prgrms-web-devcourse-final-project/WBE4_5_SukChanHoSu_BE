@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.likes.dto;
+package com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.Matching;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
