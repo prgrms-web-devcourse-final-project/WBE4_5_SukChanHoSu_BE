@@ -1,8 +1,8 @@
 spring:
   data:
     redis:
-      host: ${REDIS.HOST}
-      port: ${REDIS.PORT}
+      host: localhost
+      port: 6379
   h2:
     console:
       enabled: true
