@@ -28,9 +28,9 @@ spring:
               - email
   data:
     redis:
-      host: ${REDIS_HOST}
-      port: ${REDIS_PORT}
-      password: ${REDIS_PASSWORD}
+      host: ${REDIS.HOST}
+      port: ${REDIS.PORT}
+      password: ${REDIS.PASSWORD}
   logging:
     level:
       com.example: INFO
