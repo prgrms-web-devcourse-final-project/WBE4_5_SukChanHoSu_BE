@@ -17,6 +17,16 @@ jobs:
     outputs:
       test-result: ${{ steps.upload-test-report.outputs.artifact }}
     services:
+      redis:
+        image: redis:latest
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
       mysql:
         image: mysql:8
         env:
@@ -49,7 +59,7 @@ jobs:
         working-directory: backend/
 
       - name: Build with Gradle with test profile
-        run: ./gradlew build -Dspring.profiles.active=test
+        run: ./gradlew build -Dspring.profiles.active=test -i
         working-directory: backend/
 
       - name: Upload test report if it exists

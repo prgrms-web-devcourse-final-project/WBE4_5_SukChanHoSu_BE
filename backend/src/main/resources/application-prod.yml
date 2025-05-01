@@ -1,4 +1,8 @@
 spring:
+  data:
+    redis:
+      host: ${REDIS.HOST}
+      port: ${REDIS.PORT}
   datasource:
     url: ${DATABASE.URL}  # ✅ 환경 변수로 MySQL 설정 가능
     username: ${DATABASE.USERNAME}
@@ -43,3 +47,8 @@ spring:
 
   jwt:
     secret: ${JWT.SECRET}
+    expiration:
+      access-token: ${JWT.EXPIRATION.ACCESS_TOKEN}
+      refresh-token: ${JWT.EXPIRATION.REFRESH_TOKEN}
+    cookie-domain: ${JWT.COOKIE_DOMAIN} # 도메인
+    cookie-path: ${JWT.COOKIE_PATH}
