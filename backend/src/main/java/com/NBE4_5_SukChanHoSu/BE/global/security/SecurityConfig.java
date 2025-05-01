@@ -63,6 +63,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
         configuration.addAllowedOriginPattern("*");
+        configuration.addAllowedOrigin("https://www.app4.qwas.shop");
+        configuration.addAllowedOrigin("https://login.aleph.kr");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
 
