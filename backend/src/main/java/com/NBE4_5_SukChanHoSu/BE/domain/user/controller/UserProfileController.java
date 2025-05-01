@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
@@ -17,6 +18,9 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -72,4 +76,47 @@ public class UserProfileController {
         return new RsData<>("200", "프로필 조회 성공", user.getUserProfile());
     }
 
+    @Operation(summary = "범위 조절", description = "탐색 범위 조절")
+    @PutMapping("/radius")
+    public RsData<?> setRadius(@RequestParam Long profileId, @RequestParam Integer radius) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        userProfileService.setRadius(userProfile,radius);
+
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
+    }
+
+    @Operation(summary = "이성 조회(거리포함)", description = "거리를 포함한 이성 친구만 조회")
+    @GetMapping("/profiles/gender")
+    public RsData<List<UserProfileResponse>> getProfileByGenderWithDistance(@RequestParam Long profileId) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        List<UserProfile> profileByGender = userProfileService.findProfileByGender(userProfile);
+
+        List<UserProfileResponse> responses = new ArrayList<>();
+
+        for (UserProfile profile : profileByGender) {
+            int distance = userProfileService.calDistance(userProfile, profile);
+            // UserProfileResponse로 변환하여 리스트에 추가
+            responses.add(new UserProfileResponse(profile, distance));
+        }
+
+        return new RsData<>("200", "거리 조회 성공", responses);
+    }
+
+    @Operation(summary = "범위 이내 사용자 조회", description = "범위 내에 있는 사용자만 조회")
+    @GetMapping("/withinRadius")
+    public RsData<List<UserProfileResponse>> getProfileWithinRadius(@RequestParam Long profileId) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        int radius = userProfile.getSearchRadius();
+
+        List<UserProfileResponse> responses  = userProfileService.findProfileWithinRadius(userProfile,radius);
+        return new RsData<>("200", "거리 조회 성공", responses);
+    }
+
+    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
+    @GetMapping("/profile/me")
+    //todo 임시, 이후 삭제
+    public RsData<UserProfile> getMyProfile(@RequestParam Long profileId) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
+    }
 }
