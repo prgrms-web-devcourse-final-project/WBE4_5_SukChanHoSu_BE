@@ -1,9 +1,19 @@
 spring:
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   datasource:
-    driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb;MODE=MYSQL
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MYSQL
     username: sa
     password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      auto-commit: false
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -14,8 +24,30 @@ spring:
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE.CLIENT_ID}
+            client-secret: ${GOOGLE.SECURITY_PASSWORD}
+            scope:
+              - profile
+              - email
 
 logging:
   level:
+    root: INFO
+    org.springframework: DEBUG
     org.hibernate.SQL: DEBUG
     org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "[TEST PROFILE] %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+jwt:
+  secret: ${JWT.SECRET}
+  expiration:
+    access-token: ${JWT.EXPIRATION.ACCESS_TOKEN}
+    refresh-token: ${JWT.EXPIRATION.REFRESH_TOKEN}
+  cookie-domain: ${JWT.COOKIE_DOMAIN} # 도메인
+  cookie-path: ${JWT.COOKIE_PATH}
