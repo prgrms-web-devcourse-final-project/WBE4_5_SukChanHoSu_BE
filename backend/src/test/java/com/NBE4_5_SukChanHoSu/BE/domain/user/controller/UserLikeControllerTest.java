@@ -1,17 +1,13 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
-
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
-import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,10 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,7 +29,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @BaseTestConfig
-@Transactional
 public class UserLikeControllerTest {
 
     @Autowired
@@ -57,18 +49,11 @@ public class UserLikeControllerTest {
         login();
     }
 
-    @DisplayName("로그인 성공")
+    @DisplayName("로그인")
     void login() {
         // given
-        String email = "test@example.com";
+        String email = "testUser1@example.com";
         String rawPassword = "testPassword123!";
-
-        // 회원가입
-        UserSignUpRequest signUpDto = new UserSignUpRequest();
-        signUpDto.setEmail(email);
-        signUpDto.setPassword(rawPassword);
-        signUpDto.setPasswordConfirm(rawPassword);
-        userService.join(signUpDto);
 
         // 로그인
         UserLoginRequest loginDto = new UserLoginRequest();
@@ -76,9 +61,8 @@ public class UserLikeControllerTest {
         loginDto.setPassword(rawPassword);
 
         // when
-        JwtTokenDto tokenDto = userService.login(loginDto);
+        LoginResponse tokenDto = userService.login(loginDto);
         this.jwtToken = tokenDto.getAccessToken();
-
     }
 
     @DisplayName("like 셋업")
@@ -95,10 +79,10 @@ public class UserLikeControllerTest {
     @DisplayName("다른 사용자에게 like 요청")
     void likeUser() throws Exception {
         mvc.perform(post("/api/users/like")
-                .param("fromUserId","1")
-                .param("toUserId","2")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + jwtToken))
+                        .param("fromUserId","1")
+                        .param("toUserId","2")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("에게 좋아요를 보냈습니다")));
@@ -158,7 +142,7 @@ public class UserLikeControllerTest {
                 .andDo(print());
         ResultActions getLiked = mvc.perform(get("/api/users/liked/2") // TempUser2를 좋아요한 유저 데이터 가져오기
                         .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + jwtToken))
+                        .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
 
         // then
@@ -352,14 +336,14 @@ public class UserLikeControllerTest {
                 .andExpect(jsonPath("$.code").value("404"))
                 .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
 
-            ResultActions getLikes = mvc.perform(get("/api/users/like/1") // TempUser1의 Likes 데이터 가져오기
-                            .contentType(MediaType.APPLICATION_JSON)
-                            .header("Authorization", "Bearer " + jwtToken))
-                    .andDo(print());
-            getLikes
-                    .andExpect(status().isOk())
-                    .andExpect(jsonPath("$.code").value("404"))
-                    .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
+        ResultActions getLikes = mvc.perform(get("/api/users/like/1") // TempUser1의 Likes 데이터 가져오기
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andDo(print());
+        getLikes
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("404"))
+                .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
     }
 
     @Test
@@ -373,10 +357,10 @@ public class UserLikeControllerTest {
 
         // when
         ResultActions maleAction =mvc.perform(post("/api/users/like")
-                        .param("fromUserId", String.valueOf(male))
-                        .param("toUserId",String.valueOf(male2))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtToken));
+                .param("fromUserId", String.valueOf(male))
+                .param("toUserId",String.valueOf(male2))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + jwtToken));
 
         ResultActions femaleAction =mvc.perform(post("/api/users/like")
                 .param("fromUserId", String.valueOf(female))

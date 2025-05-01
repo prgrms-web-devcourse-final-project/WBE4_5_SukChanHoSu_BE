@@ -1,7 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.global.security;
 
-import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtAuthenticationFilter;
-import com.NBE4_5_SukChanHoSu.BE.global.jwt.TokenProvider;
+import com.NBE4_5_SukChanHoSu.BE.global.jwt.service.JwtAuthenticationFilter;
+import com.NBE4_5_SukChanHoSu.BE.global.jwt.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,8 +10,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.header.writers.frameoptions.XFrameOptionsHeaderWriter;
@@ -19,13 +17,11 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final TokenProvider tokenProvider;
+    private final TokenService tokenService;
     private final CustomOAuth2UserDetailService customOAuth2UserDetailService;
     private final OAuth2AuthenticationSuccessHandler successHandler;
 
@@ -57,7 +53,7 @@ public class SecurityConfig {
                         .successHandler(successHandler)
                 )
                 // JWT 인증을 위한 필터 추가 (UsernamePasswordAuthenticationFilter 전에 실행)
-                .addFilterBefore(new JwtAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(tokenService), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
@@ -67,6 +63,8 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
         configuration.addAllowedOriginPattern("*");
+        configuration.addAllowedOrigin("https://www.app4.qwas.shop");
+        configuration.addAllowedOrigin("https://login.aleph.kr");
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
 
