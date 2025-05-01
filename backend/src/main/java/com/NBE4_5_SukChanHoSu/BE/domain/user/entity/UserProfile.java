@@ -13,6 +13,7 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @AllArgsConstructor
@@ -72,4 +73,17 @@ public class UserProfile extends BaseTime {
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserProfile that = (UserProfile) o;
+        return Objects.equals(userId, that.userId); // 사용자 ID로 동등성 비교
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(userId); // 사용자 ID로 해시코드 생성
+    }
 }
