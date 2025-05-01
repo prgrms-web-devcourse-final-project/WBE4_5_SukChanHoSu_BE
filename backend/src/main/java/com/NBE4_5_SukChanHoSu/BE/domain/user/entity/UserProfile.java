@@ -6,10 +6,8 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 
 import java.time.LocalDate;
@@ -21,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @Setter
+@SuperBuilder
 @Table(name = "user_profile")
 public class UserProfile extends BaseTime {
     @Id
