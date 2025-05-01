@@ -18,9 +18,9 @@ logging:
     org.springframework.transaction.interceptor: TRACE
 
 custom:
-  appName: app4  # ✅ 앱 이름 변경 가능
+  appName: app.mm  # ✅ 앱 이름 변경 가능
   prod:
-    domain: qwas.shop  # ✅ 운영 도메인 변경 가능
+    domain: ts0608.life  # ✅ 운영 도메인 변경 가능
     backUrl: "https://api.${custom.appName}.${custom.prod.domain}"
     frontUrl: "https://www.${custom.appName}.${custom.prod.domain}"
 
