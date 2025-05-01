@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>채팅 테스트</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
+    <script src="/webjars/stomp-websocket/2.3.4/stomp.min.js"></script>
+
+    <!--    <script src="/webjars/jquery/3.6.0/jquery.min.js"></script>-->
+<!--    <script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>-->
+<!--    <script src="/webjars/stomp-websocket/2.3.4/stomp.min.js"></script>-->
+</head>
+<body>
+<div>
+    <input type="text" id="sender" placeholder="보내는 사람 이름" />
+    <input type="text" id="message" placeholder="메시지 내용" />
+    <button onclick="sendMessage()">보내기</button>
+</div>
+<div id="chat-box"></div>
+
+<script>
+    let stompClient = null;
+
+    function connect() {
+      //  const socket = new SockJS('/ws-stomp', null, {sessionId: () => new Date().getTime()});
+         const socket = new SockJS('/ws-stomp');  // WebSocket 연결
+        stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, function (frame) {
+            console.log('Connected: ' + frame);
+
+            stompClient.subscribe('/sub/chat/room', function (message) {
+                showMessage(JSON.parse(message.body));
+            });
+        });
+    }
+
+    function sendMessage() {
+        const sender = $('#sender').val();
+        const message = $('#message').val();
+
+        stompClient.send("/pub/chat/message", {}, JSON.stringify({
+            sender: sender,
+            message: message
+        }));
+    }
+
+    function showMessage(message) {
+        $('#chat-box').append('<div><b>' + message.sender + ':</b> ' + message.message + '</div>');
+    }
+
+    $(document).ready(function () {
+        connect();
+    });
+</script>
+</body>
+</html>
