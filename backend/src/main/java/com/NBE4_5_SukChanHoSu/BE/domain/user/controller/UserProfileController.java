@@ -129,4 +129,14 @@ public class UserProfileController {
 
         return new RsData<>("200", "프로필 조회 성공", responses);
     }
+
+    @Operation(summary = "추천", description = "유사도가 가장 높은 순서로 추천")
+    @GetMapping("/recommend")
+    public RsData<UserProfileResponse> getRecommend(@RequestParam Long profileId) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        UserProfileResponse response = userProfileService.recommend(userProfile);
+
+        return new RsData<>("200", "추천 사용자",response);
+    }
+
 }
