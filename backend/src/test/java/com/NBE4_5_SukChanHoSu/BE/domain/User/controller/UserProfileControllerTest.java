@@ -2,6 +2,8 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
@@ -22,8 +24,12 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.List;
+import java.util.stream.Stream;
+
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -130,6 +136,8 @@ class UserProfileControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
+
+        // 파싱
         String responseBody = action.andReturn().getResponse().getContentAsString();
         JSONObject jsonResponse = new JSONObject(responseBody);
         JSONArray usersArray = jsonResponse.getJSONArray("data");
@@ -205,6 +213,52 @@ class UserProfileControllerTest {
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("성공")))
                 .andExpect(jsonPath("$.data[*].distance").exists());
+
+    }
+
+    @Test
+    @DisplayName("태그로 프로필 조회")
+    void findProfileByTags() throws Exception {
+        // given
+        UserProfile user =userProfileService.findUser(1L);
+        List<Genre> tags = user.getFavoriteGenres();
+
+        // when
+        ResultActions action = mvc.perform(get("/api/profile/profile/tags")
+                        .param("profileId","1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andDo(print());
+        // 파싱
+        String responseBody = action.andReturn().getResponse().getContentAsString();
+        JSONObject jsonResponse = new JSONObject(responseBody);
+        JSONArray users = jsonResponse.getJSONArray("data");
+
+        // then
+        action.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("성공")));
+
+        // 태그 겹치는지 확인
+        for (int i = 0; i < users.length(); i++) {
+            JSONObject userProfile = users.getJSONObject(i);
+            JSONArray favoriteGenres = userProfile.getJSONArray("favoriteGenres");
+
+            // 장르 비교
+            boolean hasMatchingGenre = false;
+            for (int j = 0; j < favoriteGenres.length(); j++) {
+                Genre genre = Genre.valueOf(favoriteGenres.getString(j));
+                if (tags.contains(genre)) {
+                    hasMatchingGenre = true;
+                    break;
+                }
+            }
+
+            // 하나라도 겹치지 않는 경우 실패
+            if (!hasMatchingGenre) {
+                fail("겹치지 않는 유저가 발견: " + userProfile.toString());
+            }
+        }
 
     }
 
