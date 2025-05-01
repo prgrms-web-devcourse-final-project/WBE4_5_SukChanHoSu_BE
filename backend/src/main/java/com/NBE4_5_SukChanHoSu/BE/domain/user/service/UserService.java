@@ -33,7 +33,7 @@ public class UserService {
     private static final String ACCESS_TOKEN = "access_token";
     private static final String REFRESH_TOKEN = "refresh_token";
 
-    public User join(UserSignUpRequest requestDto) {
+    public static User join(UserSignUpRequest requestDto) {
         if (!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
             throw new ServiceException(
                     UserErrorCode.PASSWORDS_NOT_MATCH.getCode(),
