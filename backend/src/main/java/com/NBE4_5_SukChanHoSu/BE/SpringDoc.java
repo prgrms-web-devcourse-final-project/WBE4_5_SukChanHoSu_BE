@@ -1,46 +1,39 @@
 package com.NBE4_5_SukChanHoSu.BE;
 
+import io.swagger.v3.oas.models.Components;
+import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;
+import io.swagger.v3.oas.models.media.Schema;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
-import org.springdoc.core.customizers.OpenApiCustomizer;
-import org.springdoc.core.customizers.OperationCustomizer;
-import org.springdoc.core.models.GroupedOpenApi;
-
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.actuate.autoconfigure.endpoint.web.WebEndpointProperties;
+import io.swagger.v3.oas.models.security.SecurityScheme;
+import io.swagger.v3.oas.models.servers.Server;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
+import org.springframework.context.annotation.Configuration;
 
-import static org.springdoc.core.utils.Constants.ALL_PATTERN;
-
-
+@Configuration
 public class SpringDoc {
+
     @Bean
-    @Profile("!prod")
-    public GroupedOpenApi actuatorApi(OpenApiCustomizer actuatorOpenApiCustomizer,
-                                      OperationCustomizer actuatorCustomizer,
-                                      WebEndpointProperties endpointProperties,
-                                      @Value("${springdoc.version}") String appVersion) {
-        return GroupedOpenApi.builder()
-                .group("Actuator")
-                .pathsToMatch(endpointProperties.getBasePath() + ALL_PATTERN)
-                .addOpenApiCustomizer(actuatorOpenApiCustomizer)
-                .addOpenApiCustomizer(openApi -> openApi.info(new Info().title("Actuator API").version(appVersion)))
-                .addOperationCustomizer(actuatorCustomizer)
-                .pathsToExclude("/health/*")
-                .build();
+    public OpenAPI openAPI() {
+        return new OpenAPI()
+                .addServersItem(new Server().url("/"))
+                .components(new Components()
+                        .addSecuritySchemes("bearerAuth", new io.swagger.v3.oas.models.security.SecurityScheme()
+                                .type(SecurityScheme.Type.HTTP) // HTTP 타입으로 설정
+                                .scheme("bearer") // Bearer 방식 적용
+                                .bearerFormat("JWT") // JWT 형식 지정
+                                .in(SecurityScheme.In.HEADER)
+                                .name("Authorization"))
+                        .addSchemas("Multipart", new Schema().type("string").format("binary"))) // Multipart 파일 업로드를 위한 스키마 추가)
+                .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
+                .info(apiInfo());
     }
 
-    @Bean
-    public GroupedOpenApi usersGroup(@Value("${springdoc.version}") String appVersion) {
-        return GroupedOpenApi.builder().group("users")
-                .addOperationCustomizer((operation, handlerMethod) -> {
-                    operation.addSecurityItem(new SecurityRequirement().addList("basicScheme"));
-                    return operation;
-                })
-                .addOpenApiCustomizer(openApi -> openApi.info(new Info().title("Users API").version(appVersion)))
-                .packagesToScan("org.springdoc.demo.app2")
-                .pathsToMatch("/user/**")
-                .build();
+    private Info apiInfo() {
+
+        return new Info()
+                .title("API Test")
+                .description("api 테스트입니다.")
+                .version("1.0.0");
     }
 }
