@@ -1,4 +1,8 @@
 spring:
+  data:
+    redis:
+      host: ${REDIS.HOST}
+      port: ${REDIS.PORT}
   datasource:
     url: ${DATABASE.URL}  # ✅ 환경 변수로 MySQL 설정 가능
     username: ${DATABASE.USERNAME}
