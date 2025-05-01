@@ -4,6 +4,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
@@ -149,4 +150,18 @@ public class UserProfileService {
         userProfile.setSearchRadius(radius);
     }
 
+    public List<UserProfileResponse> findProfileByTags(UserProfile userProfile) {
+        // 범위 이내에 있는 사용자만 조회
+        int radius = userProfile.getSearchRadius();
+        List<UserProfileResponse> responses = findProfileWithinRadius(userProfile, radius);
+
+        List<Genre> tags = userProfile.getFavoriteGenres();
+
+        List<UserProfileResponse> filteredResponses = responses.stream()
+                .filter(response -> response.getFavoriteGenres().stream()
+                        .anyMatch(genre -> tags.stream().anyMatch(genre::equals)))
+                .toList();
+
+        return filteredResponses;
+    }
 }
