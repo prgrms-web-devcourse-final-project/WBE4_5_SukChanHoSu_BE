@@ -17,16 +17,6 @@ jobs:
     outputs:
       test-result: ${{ steps.upload-test-report.outputs.artifact }}
     services:
-      redis:
-        image: redis:latest
-        ports:
-          - 6379:6379
-        options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
       mysql:
         image: mysql:8
         env:
@@ -174,14 +164,14 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          instance-ids: ${{ secrets.AWS_EC2_ID }}
+          instance-ids: "i-0f1d272fb3b3c44bf"
           working-directory: /
           comment: Deploy
           command: |
             docker pull ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest && \
             docker stop app1 2>/dev/null || true && \
             docker rm app1 2>/dev/null || true && \
-            docker run \
+            docker run -d \
               --name app1 \
               --network common \
               -p 8080:8080 \
