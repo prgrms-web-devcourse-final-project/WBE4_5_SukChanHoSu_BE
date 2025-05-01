@@ -1,4 +1,6 @@
 spring:
+  config:
+    import: application-secret.yml
   datasource:
     url: ${DATABASE.URL}  # ✅ 환경 변수로 MySQL 설정 가능
     username: ${DATABASE.USERNAME}
@@ -24,7 +26,11 @@ spring:
             scope:
               - profile
               - email
-
+  data:
+    redis:
+      host: ${REDIS.HOST}
+      port: ${REDIS.PORT}
+      password: ${REDIS.PASSWORD}
   logging:
     level:
       com.example: INFO
