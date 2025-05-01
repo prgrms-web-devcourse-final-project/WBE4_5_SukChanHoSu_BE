@@ -5,7 +5,7 @@ spring:
       port: ${REDIS.PORT}
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DATABASE.URL}  # ✅ 환경 변수로 MySQL 설정 가능
+    url: ${DATABASE.URL}
     username: ${DATABASE.USERNAME}
     password: ${DATABASE.PASSWORD}
   jpa:
@@ -33,7 +33,7 @@ jwt:
   expiration:
     access-token: ${JWT.EXPIRATION.ACCESS_TOKEN}
     refresh-token: ${JWT.EXPIRATION.REFRESH_TOKEN}
-  cookie-domain: ${JWT.COOKIE_DOMAIN} # 도메인
+  cookie-domain: ${JWT.COOKIE_DOMAIN}
   cookie-path: ${JWT.COOKIE_PATH}
 
 
