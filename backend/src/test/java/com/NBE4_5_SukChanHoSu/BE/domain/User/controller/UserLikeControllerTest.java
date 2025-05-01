@@ -5,9 +5,8 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,10 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
-import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -36,7 +32,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @BaseTestConfig
-@Transactional
 public class UserLikeControllerTest {
 
     @Autowired
@@ -57,18 +52,11 @@ public class UserLikeControllerTest {
         login();
     }
 
-    @DisplayName("로그인 성공")
+    @DisplayName("로그인")
     void login() {
         // given
-        String email = "test@example.com";
+        String email = "testUser1@example.com";
         String rawPassword = "testPassword123!";
-
-        // 회원가입
-        UserSignUpRequest signUpDto = new UserSignUpRequest();
-        signUpDto.setEmail(email);
-        signUpDto.setPassword(rawPassword);
-        signUpDto.setPasswordConfirm(rawPassword);
-        userService.join(signUpDto);
 
         // 로그인
         UserLoginRequest loginDto = new UserLoginRequest();
@@ -78,7 +66,6 @@ public class UserLikeControllerTest {
         // when
         JwtTokenDto tokenDto = userService.login(loginDto);
         this.jwtToken = tokenDto.getAccessToken();
-
     }
 
     @DisplayName("like 셋업")
