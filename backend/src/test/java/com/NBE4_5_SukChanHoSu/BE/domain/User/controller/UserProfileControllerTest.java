@@ -1,13 +1,12 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
-import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -113,7 +112,7 @@ class UserProfileControllerTest {
         loginDto.setPassword(rawPassword);
 
         // when
-        JwtTokenDto tokenDto = userService.login(loginDto);
+        LoginResponse tokenDto = userService.login(loginDto);
         this.jwtToken = tokenDto.getAccessToken();
     }
 
