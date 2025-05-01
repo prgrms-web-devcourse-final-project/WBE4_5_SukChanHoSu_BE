@@ -49,7 +49,7 @@ jobs:
         working-directory: backend/
 
       - name: Build with Gradle with test profile
-        run: ./gradlew build -Dspring.profiles.active=test
+        run: ./gradlew build -Dspring.profiles.active=test -i
         working-directory: backend/
 
       - name: Upload test report if it exists
