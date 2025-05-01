@@ -1,10 +1,18 @@
-package com.NBE4_5_SukChanHoSu.BE.global.jwt;
+package com.NBE4_5_SukChanHoSu.BE.global.jwt.service;
 
-import io.jsonwebtoken.*;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
+import com.NBE4_5_SukChanHoSu.BE.global.util.JwtUtil;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -17,48 +25,55 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Component
-public class TokenProvider {
+public class TokenService {
+    private final Key key;
+    private final JwtUtil jwtUtil;
+    private final RedisTemplate<String, String> redisTemplate;
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "Bearer";
-    private static final long ACCESS_TOKEN_EXPIRE_TIME = 1000 * 60 * 30;            // 30분
-    private static final long REFRESH_TOKEN_EXPIRE_TIME = 1000 * 60 * 60 * 24 * 7;  // 7일
-    private final Key key;
+    private static final String EMAIL_PREFIX = "email:";
+    private static final String BLACKLIST_PREFIX = "blacklist:";
 
-    // application.yml 에서 secret 값 가져와서 key 에 저장
-    public TokenProvider(@Value("${jwt.secret}") String secretKey) {
+
+    @Value("${jwt.expiration.access-token}")
+    private int accessTokenExpiration;
+
+    @Value("${jwt.expiration.refresh-token}")
+    private int refreshTokenExpiration;
+
+
+    public TokenService(@Value("${jwt.secret}") String secretKey, JwtUtil jwtUtil, RedisTemplate<String, String> redisTemplate) {
+        this.jwtUtil = jwtUtil;
+        this.redisTemplate = redisTemplate;
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Member 정보를 가지고 AccessToken, RefreshToken을 생성하는 메서드
-    public JwtTokenDto generateToken(Authentication authentication) {
-        // 권한 가져오기
+    public LoginResponse generateToken(Authentication authentication) {
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
         long now = (new Date()).getTime();
 
-        // Access Token 생성
-        Date accessTokenExpiresIn = new Date(now + ACCESS_TOKEN_EXPIRE_TIME);
+        Date accessTokenExpiresIn = new Date(now + accessTokenExpiration);
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-
-        // Refresh Token 생성
         String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + REFRESH_TOKEN_EXPIRE_TIME))
+                .setExpiration(new Date(now + refreshTokenExpiration))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        return JwtTokenDto.builder()
+        return LoginResponse.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
@@ -114,5 +129,22 @@ public class TokenProvider {
         }
     }
 
+    public String getEmailFromToken(String token) {
+        return jwtUtil.extractUsername(token);
+    }
+
+    public long getExpirationTimeFromToken(String token) {
+        return jwtUtil.getRemainingTime(token);
+    }
+
+    public void deleteRefreshToken(String email) {
+        String key = EMAIL_PREFIX + email;
+        redisTemplate.delete(key);
+    }
+
+    public void addToBlacklist(String accessToken, long expirationTime) {
+        String key = BLACKLIST_PREFIX + accessToken;
+        redisTemplate.opsForValue().set(key, "blacklist", expirationTime, TimeUnit.MILLISECONDS);
+    }
 }
 

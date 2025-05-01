@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.global.jwt;
+package com.NBE4_5_SukChanHoSu.BE.global.jwt.service;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -20,14 +20,14 @@ public class JwtAuthenticationFilter extends GenericFilterBean {
     private static final String AUTHORIZATION = "Authorization";
     private static final String BEARER_TYPE = "Bearer";
 
-    private final TokenProvider TokenProvider;
+    private final TokenService TokenService;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
         String token = resolveToken((HttpServletRequest) request);
 
-        if (token != null && TokenProvider.validateToken(token)) {
-            Authentication authentication = TokenProvider.getAuthentication(token);
+        if (token != null && TokenService.validateToken(token)) {
+            Authentication authentication = TokenService.getAuthentication(token);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
         chain.doFilter(request, response);

@@ -1,15 +1,14 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
+package com.NBE4_5_SukChanHoSu.BE.domain.User.controller;
 
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
-import com.NBE4_5_SukChanHoSu.BE.global.jwt.JwtTokenDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import org.junit.jupiter.api.BeforeEach;
@@ -23,7 +22,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.awaitility.Awaitility.await;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -76,7 +74,7 @@ public class UserLikeControllerTest {
         loginDto.setPassword(rawPassword);
 
         // when
-        JwtTokenDto tokenDto = userService.login(loginDto);
+        LoginResponse tokenDto = userService.login(loginDto);
         this.jwtToken = tokenDto.getAccessToken();
 
     }
