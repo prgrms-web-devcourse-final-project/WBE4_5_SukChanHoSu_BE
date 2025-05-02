@@ -89,9 +89,8 @@ public class UserLikeService {
         cancelLikes(toUser, fromUser);
 
         // 응답 생성
-        MatchingResponse matchingResponse = new MatchingResponse();
-        matchingResponse.setMatching(matching);
-        return matchingResponse;
+        int distance = userProfileService.calDistance(fromUser, toUser);
+        return new MatchingResponse(matching,distance);
     }
 
     // like 목록 조회
