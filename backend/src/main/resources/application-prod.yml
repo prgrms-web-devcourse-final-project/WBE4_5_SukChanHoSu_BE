@@ -57,6 +57,6 @@ spring:
 
   redis:
     time_to_live:
-      likes: ${REDIS.TIME_TO_LIVE.likes}
-      liked: ${REDIS.TIME_TO_LIVE.liked}
-      matching: ${REDIS.TIME_TO_LIVE.matching}
+      likes: 86400 # 24h
+      liked: 86400 # 24h
+      matching: 3600 # 1h
