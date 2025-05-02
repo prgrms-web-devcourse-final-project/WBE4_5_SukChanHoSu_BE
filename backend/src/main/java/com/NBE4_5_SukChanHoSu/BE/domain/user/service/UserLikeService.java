@@ -243,9 +243,6 @@ public class UserLikeService {
                             System.err.println("JSON 역직렬화 실패: " + e.getMessage());
                             e.printStackTrace();
                         }
-
-                        Matching matching = (Matching) value;
-                        responses.add(new UserMatchingResponse(matching.getFemaleUser(),matching));
                     }
                 }
             }else{
