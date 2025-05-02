@@ -19,12 +19,12 @@ public class SpringDoc {
                 .addServersItem(new Server().url("/"))
                 .components(new Components()
                         .addSecuritySchemes("bearerAuth", new io.swagger.v3.oas.models.security.SecurityScheme()
-                                .type(SecurityScheme.Type.HTTP) // HTTP 타입으로 설정
-                                .scheme("bearer") // Bearer 방식 적용
-                                .bearerFormat("JWT") // JWT 형식 지정
+                                .type(SecurityScheme.Type.HTTP)
+                                .scheme("bearer")
+                                .bearerFormat("JWT")
                                 .in(SecurityScheme.In.HEADER)
                                 .name("Authorization"))
-                        .addSchemas("Multipart", new Schema().type("string").format("binary"))) // Multipart 파일 업로드를 위한 스키마 추가)
+                        .addSchemas("Multipart", new Schema().type("string").format("binary")))
                 .addSecurityItem(new SecurityRequirement().addList("bearerAuth"))
                 .info(apiInfo());
     }
