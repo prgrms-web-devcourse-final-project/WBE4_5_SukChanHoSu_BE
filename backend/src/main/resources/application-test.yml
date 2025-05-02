@@ -1,8 +1,8 @@
 spring:
   data:
     redis:
-      host: ${REDIS.HOST}
-      port: ${REDIS.PORT}
+      host: localhost
+      port: 6379
       time_to_live:
         likes: ${REDIS.TIME_TO_LIVE.likes}
         liked: ${REDIS.TIME_TO_LIVE.liked}
