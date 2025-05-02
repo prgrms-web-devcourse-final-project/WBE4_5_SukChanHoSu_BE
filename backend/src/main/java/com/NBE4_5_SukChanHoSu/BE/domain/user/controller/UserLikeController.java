@@ -1,10 +1,10 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserLikeResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.LikeResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserLikeResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
@@ -57,7 +57,8 @@ public class UserLikeController {
             return new RsData<>("200", fromUser.getNickName()+"과(와)"+toUser.getNickName()+"이 매칭 되었습니다.", response);
         }
 
-        LikeResponse likeResponse = new LikeResponse(like);
+        int radius = userProfileService.calDistance(fromUser,toUser);
+        LikeResponse likeResponse = new LikeResponse(like,toUser,radius);
         return new RsData<>("200", fromUser.getNickName()+ " 가 "+toUser.getNickName()+ "님 에게 좋아요를 보냈습니다", likeResponse);
     }
 
