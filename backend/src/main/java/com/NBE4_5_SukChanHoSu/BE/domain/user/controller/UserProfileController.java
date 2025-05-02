@@ -8,6 +8,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.security.PrincipalDetails;
+import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -37,26 +38,21 @@ public class UserProfileController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public RsData<ProfileResponse> createProfile(@Valid @RequestBody ProfileRequest dto) {
-        UserResponse userResponse = userService.getCurrentUser();
-        ProfileResponse response = userProfileService.createProfile(userResponse.getId(), dto);
+        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto);
         return new RsData<>("201", "프로필 등록 완료", response);
     }
 
     @Operation(summary = "프로필 수정", description = "닉네임, 성별, 위치 등 프로필 정보 수정")
     @PutMapping
     public RsData<ProfileResponse> updateProfile(@Valid @RequestBody ProfileUpdateRequest dto) {
-        UserResponse userResponse = userService.getCurrentUser();
-        ProfileResponse response = userProfileService.updateProfile(userResponse.getId(), dto);
+        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto);
         return new RsData<>("200", "프로필 수정 완료", response);
     }
 
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
     @GetMapping("/me")
     public RsData<ProfileResponse> getMyProfile() {
-        // 현재 인증된 사용자 정보 가져오기
-        UserResponse userResponse = userService.getCurrentUser();
-        // userId를 통해 프로필 정보 조회
-        ProfileResponse response = userProfileService.getMyProfile(userResponse.getId());
+        ProfileResponse response = userProfileService.getMyProfile(SecurityUtil.getCurrentUserId());
         return new RsData<>("200", "프로필 조회 성공", response);
     }
 

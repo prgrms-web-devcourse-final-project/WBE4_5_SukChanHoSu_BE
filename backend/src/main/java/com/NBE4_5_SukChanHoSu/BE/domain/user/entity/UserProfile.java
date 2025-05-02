@@ -62,26 +62,24 @@ public class UserProfile extends BaseTime {
     @Column(nullable = false)
     private double longitude;
 
-    @Min(value = 0, message = "허용 반경은 0km 이상이어야 합니다.")
-    @Max(value = 50, message = "허용 반경은 최대 50km까지만 설정할 수 있습니다.")
     @Column(nullable = false)
-    private int searchRadius;
+    private int searchRadius = 20;
 
     @OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<UserLikes> likes = new ArrayList<>();
+    private List<UserLikes> likes = new ArrayList<>();// 사용자가 누른 좋아요 목록
 
     @OneToMany(mappedBy = "toUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<UserLikes> likedBy = new ArrayList<>();
+    private List<UserLikes> likedBy = new ArrayList<>();// 사용자를 좋아요한 목록
 
     @OneToMany(mappedBy = "maleUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<Matching> maleMatchings = new ArrayList<>();
+    private List<Matching> maleMatchings = new ArrayList<>();// 매칭된 남자 사용자 목록
 
     @OneToMany(mappedBy = "femaleUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    private List<Matching> femaleMatchings = new ArrayList<>();
+    private List<Matching> femaleMatchings = new ArrayList<>();// 매칭된 여자 사용자 목록
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)

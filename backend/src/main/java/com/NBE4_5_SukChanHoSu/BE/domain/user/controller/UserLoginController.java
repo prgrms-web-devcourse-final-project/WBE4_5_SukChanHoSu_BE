@@ -10,22 +10,27 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserSuccessCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.util.CookieUtil;
+import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class UserLoginController {
+    private static final String GOOGLE_AUTHORIZATION_PATH = "/oauth2/authorization/google";
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
     private final UserService userService;
     private final CookieUtil cookieUtil;
+
+    @GetMapping("/google/url")
+    public String getGoogleLoginUrl(HttpServletRequest request) {
+        String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
+        return baseUrl + GOOGLE_AUTHORIZATION_PATH;
+    }
 
     @PostMapping("/join")
     public RsData<UserResponse> join(@RequestBody UserSignUpRequest requestDto) {
@@ -88,7 +93,8 @@ public class UserLoginController {
 
     @GetMapping("/me")
     public RsData<UserResponse> getProfile() {
-        UserResponse user = userService.getCurrentUser();
-        return new RsData<>("200-SUCCESS", "프로필 조회 성공", user);
+        User user = SecurityUtil.getCurrentUser();
+
+        return new RsData<>("200-SUCCESS", "프로필 조회 성공", new UserResponse(user));
     }
 }

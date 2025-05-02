@@ -23,8 +23,7 @@ public class UserProfileService {
 
     @Transactional
     public ProfileResponse createProfile(Long userId, ProfileRequest dto) {
-        UserProfile userProfile = userProfileRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         if (userProfile.getNickName() != null) {
             throw new IllegalStateException("이미 프로필이 등록된 사용자입니다.");
@@ -37,8 +36,7 @@ public class UserProfileService {
 
     @Transactional
     public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto) {
-        UserProfile userProfile = userProfileRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         updateEntityFromUpdateRequest(userProfile, dto);
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);
@@ -50,8 +48,7 @@ public class UserProfileService {
     }
 
     public ProfileResponse getMyProfile(Long userId) {
-        UserProfile userProfile = userProfileRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
         return new ProfileResponse(userProfile);
     }
 
@@ -63,40 +60,36 @@ public class UserProfileService {
         profile.setLongitude(dto.getLongitude());
         profile.setBirthdate(dto.getBirthdate());
         profile.setIntroduce(dto.getIntroduce());
-        if (dto.getDistance() != null) profile.setSearchRadius(dto.getDistance());
-        if (dto.getLifeMovie() != null) profile.setLifeMovie(dto.getLifeMovie());
-        if (dto.getFavoriteGenres() != null) profile.setFavoriteGenres(dto.getFavoriteGenres());
-        if (dto.getWatchedMovies() != null) profile.setWatchedMovies(dto.getWatchedMovies());
-        if (dto.getPreferredTheaters() != null) profile.setPreferredTheaters(dto.getPreferredTheaters());
+        profile.setSearchRadius(dto.getSearchRadius());
+        profile.setLifeMovie(dto.getLifeMovie());
+        profile.setFavoriteGenres(dto.getFavoriteGenres());
+        profile.setWatchedMovies(dto.getWatchedMovies());
+        profile.setPreferredTheaters(dto.getPreferredTheaters());
     }
 
     private void updateEntityFromUpdateRequest(UserProfile profile, ProfileUpdateRequest dto) {
-        if (dto.getNickname() != null) profile.setNickName(dto.getNickname());
-        if (dto.getGender() != null) profile.setGender(dto.getGender());
-        if (dto.getProfileImage() != null) profile.setProfileImage(dto.getProfileImage());
-        if (dto.getLatitude() != null) profile.setLatitude(dto.getLatitude());
-        if (dto.getLongitude() != null) profile.setLongitude(dto.getLongitude());
-        if (dto.getBirthdate() != null) profile.setBirthdate(dto.getBirthdate());
-        if (dto.getIntroduce() != null) profile.setIntroduce(dto.getIntroduce());
-
-        // 생략된 필드 동일하게 적용 (이 부분을 수정해야 합니다!)
-        if (dto.getDistance() != null) profile.setSearchRadius(dto.getDistance());
-        if (dto.getLifeMovie() != null) profile.setLifeMovie(dto.getLifeMovie());
-        if (dto.getFavoriteGenres() != null) profile.setFavoriteGenres(dto.getFavoriteGenres());
-        if (dto.getWatchedMovies() != null) profile.setWatchedMovies(dto.getWatchedMovies());
-        if (dto.getPreferredTheaters() != null) profile.setPreferredTheaters(dto.getPreferredTheaters());
+        profile.setNickName(dto.getNickname());
+        profile.setGender(dto.getGender());
+        profile.setProfileImage(dto.getProfileImage());
+        profile.setLatitude(dto.getLatitude());
+        profile.setLongitude(dto.getLongitude());
+        profile.setBirthdate(dto.getBirthdate());
+        profile.setIntroduce(dto.getIntroduce());
+        profile.setSearchRadius(dto.getSearchRadius());
+        profile.setLifeMovie(dto.getLifeMovie());
+        profile.setFavoriteGenres(dto.getFavoriteGenres());
+        profile.setWatchedMovies(dto.getWatchedMovies());
+        profile.setPreferredTheaters(dto.getPreferredTheaters());
     }
 
     public UserProfile findUser(Long userId) {
-        UserProfile userProfile =  userProfileRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
+        UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
         return userProfile;
     }
 
     // 이성만 조회
     public List<UserProfile> findProfileByGender(UserProfile userProfile) {
-        return userProfileRepository.findAll().stream()
-                .filter(profile -> !profile.getUserId().equals(userProfile.getUserId())) // 자신 제외
+        return userProfileRepository.findAll().stream().filter(profile -> !profile.getUserId().equals(userProfile.getUserId())) // 자신 제외
                 .filter(profile -> !profile.getGender().equals(userProfile.getGender())) // 성별이 다른 유저 필터링
                 .toList();
     }
@@ -117,6 +110,7 @@ public class UserProfileService {
     }
 
     static final double EARTH_RADIUS = 6371; // 지구의 반지름 (단위: km)
+
     // 거리 계산
     public int calDistance(UserProfile userProfile1, UserProfile userProfile2) {
         // 내 위/경도
@@ -131,9 +125,7 @@ public class UserProfileService {
         double dLon = Math.toRadians(lon2 - lon1);
 
         // 곡률 감안해서 어쩌구저쩌구해서 거리 계산
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         // 거리를 km로 계산
