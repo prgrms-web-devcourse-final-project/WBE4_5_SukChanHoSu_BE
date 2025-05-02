@@ -4,8 +4,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-
 @Repository
 public interface UserLikesRepository extends JpaRepository<UserLikes, Long> {
 

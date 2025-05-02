@@ -212,6 +212,7 @@ public class UserLikeControllerTest {
                 .andExpect(jsonPath("$.message",containsString("매칭 되었습니다.")))
                 .andExpect(jsonPath("$.data.matching").exists());
         //when
+        System.out.println("=================조회 시작================");
         ResultActions action2 = mvc.perform(get("/api/users/matching/1") // TempUser1의 매칭 데이터 가져오기
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
