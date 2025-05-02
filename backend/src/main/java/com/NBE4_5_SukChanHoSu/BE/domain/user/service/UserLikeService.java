@@ -6,6 +6,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
@@ -32,6 +33,7 @@ public class UserLikeService {
     private final EntityManager entityManager;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTTL ttl;
+    private UserProfileService userProfileService;
 
 
     @Transactional
@@ -93,8 +95,8 @@ public class UserLikeService {
     }
 
     // like 목록 조회
-    public List<UserProfile> getUserLikes(UserProfile user) {
-        List<UserProfile> likesUsers = new ArrayList<>();
+    public List<UserProfileResponse> getUserLikes(UserProfile user) {
+        List<UserProfileResponse> likesUsers = new ArrayList<>();
 
         String pattern = "likes:" + user.getUserId() + ":*"; // likes:fromId:toId
         Set<String> keys = redisTemplate.keys(pattern);
@@ -110,7 +112,8 @@ public class UserLikeService {
                     Map<String, Object> map = (Map<String, Object>) value;  // Map(키-값 쌍)으로 캐스팅
                     try{
                         UserLikes like = mapper.convertValue(map, UserLikes.class); // Map -> UserLikes 클래스로 변환
-                        likesUsers.add(like.getToUser());   // 메모리에 추가
+                        int radius = userProfileService.calDistance(like.getFromUser(), like.getToUser());  // 거리 계산
+                        likesUsers.add(new UserProfileResponse(like.getToUser(), radius));  // 메모리에 추가
                     }catch (IllegalArgumentException e){
                         System.err.println("JSON 역직렬화 실패: " + e.getMessage());
                         e.printStackTrace();    // todo 예외 처리
@@ -123,8 +126,8 @@ public class UserLikeService {
                 UserProfile likedUser = like.getToUser();   // 좋아요를 받은 사용자
                 if(likedUser != null) {
                     // 내가 좋아요 한 사용자 리스트에 추가
-                    likesUsers.add(likedUser);
-
+                    int radius = userProfileService.calDistance(like.getFromUser(), like.getToUser());  // 거리 계산
+                    likesUsers.add(new UserProfileResponse(likedUser, radius));  // 메모리에 추가
                     // 캐싱
                     String key = "likes:" + user.getUserId() + ":" + likedUser.getUserId();
                     redisTemplate.opsForValue().set(key, like,ttl.getLikes(), TimeUnit.SECONDS);
@@ -135,8 +138,8 @@ public class UserLikeService {
     }
 
     // user의 liked 목록 조회
-    public List<UserProfile> getUserLiked(UserProfile user) {
-        List<UserProfile> likedUsers = new ArrayList<>();
+    public List<UserProfileResponse> getUserLiked(UserProfile user) {
+        List<UserProfileResponse> likedUsers = new ArrayList<>();
 
         String pattern = "likes:*:" + user.getUserId(); // likes:fromId:toId
         Set<String> keys = redisTemplate.keys(pattern);
@@ -153,7 +156,8 @@ public class UserLikeService {
                     Map<String,Object> map = (Map<String, Object>) value;
                     try{
                         UserLikes like = mapper.convertValue(map, UserLikes.class);
-                        likedUsers.add(like.getFromUser());
+                        int distance = userProfileService.calDistance(like.getFromUser(), like.getToUser());    // 거리 계산
+                        likedUsers.add(new UserProfileResponse(like.getFromUser(), distance));
                     }catch (IllegalArgumentException e){
                         System.err.println("JSON 역직렬화 실패: " + e.getMessage());
                         e.printStackTrace();
@@ -166,7 +170,8 @@ public class UserLikeService {
                 UserProfile likesUser = like.getFromUser(); // 좋아요를 보낸 사용자
                 if(likesUser != null) {
                     // 나를 좋아요한 사용자 리스트에 추가
-                    likedUsers.add(likesUser);
+                    int distance = userProfileService.calDistance(user, likesUser);    // 거리 계산
+                    likedUsers.add(new UserProfileResponse(likesUser, distance));
 
                     // 캐싱
                     String key = "likes:" + likesUser.getUserId() + ":" + user.getUserId();

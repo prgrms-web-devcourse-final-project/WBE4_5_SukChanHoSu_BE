@@ -5,6 +5,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.LikeResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserLikeResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
@@ -66,9 +67,11 @@ public class UserLikeController {
     @Operation(summary = "like 테이블 조회", description = "사용자의 like 테이블 조회")
     public RsData<UserLikeResponse> getUserLikes(@PathVariable Long userId) {
         UserProfile user = userProfileService.findUser(userId);
-        UserLikeResponse response = new UserLikeResponse();
-        response.setUserLikes(userLikeService.getUserLikes(user));
-        response.setSize(response.getUserLikes().size());
+//        UserLikeResponse response = new UserLikeResponse();
+//        response.setUserLikes(userLikeService.getUserLikes(user));
+//        response.setSize(response.getUserLikes().size());
+        List<UserProfileResponse> userProfileResponses = userLikeService.getUserLikes(user);
+        UserLikeResponse response = new UserLikeResponse(userProfileResponses);
 
         if(response.getUserLikes().isEmpty()){
             return new RsData<>("404", "like 한 사용자가 없습니다.");
@@ -81,9 +84,11 @@ public class UserLikeController {
     @Operation(summary = "liked 테이블 조회", description = "사용자의 liked 테이블 조회")
     public RsData<UserLikeResponse> getUserLiked(@PathVariable Long userId) {
         UserProfile user = userProfileService.findUser(userId);
-        UserLikeResponse response = new UserLikeResponse();
-        response.setUserLikes(userLikeService.getUserLiked(user));
-        response.setSize(response.getUserLikes().size());
+        List<UserProfileResponse> userProfileResponses = userLikeService.getUserLiked(user);
+        UserLikeResponse response = new UserLikeResponse(userProfileResponses);
+//        UserLikeResponse response = new UserLikeResponse();
+//        response.setUserLikes(userLikeService.getUserLiked(user));
+//        response.setSize(response.getUserLikes().size());
 
         if(response.getUserLikes().isEmpty()){
             return new RsData<>("404", "나를 like 하는 사용자가 없습니다.");
