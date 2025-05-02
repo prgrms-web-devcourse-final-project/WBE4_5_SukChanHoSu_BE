@@ -12,7 +12,6 @@ import org.springframework.stereotype.Component;
 public class CookieUtil {
     private static final String ACCESS_TOKEN = "accessToken";
     private static final String REFRESH_TOKEN = "refreshToken";
-    private static final int COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7일
     @Value("${jwt.expiration.access-token}")
     private int accessTokenExpiration;
 
@@ -30,6 +29,7 @@ public class CookieUtil {
         cookie.setMaxAge(accessTokenExpiration);
         cookie.setPath(cookiePath);
         cookie.setDomain(cookieDomain);
+        cookie.setAttribute("SameSite", "None");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
@@ -40,6 +40,7 @@ public class CookieUtil {
         cookie.setMaxAge(refreshTokenExpiration);
         cookie.setPath(cookiePath);
         cookie.setDomain(cookieDomain);
+        cookie.setAttribute("SameSite", "None");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
@@ -74,6 +75,7 @@ public class CookieUtil {
         cookie.setMaxAge(0);
         cookie.setPath(cookiePath);
         cookie.setDomain(cookieDomain);
+        cookie.setAttribute("SameSite", "None");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
@@ -84,6 +86,7 @@ public class CookieUtil {
         cookie.setMaxAge(0);
         cookie.setPath(cookiePath);
         cookie.setDomain(cookieDomain);
+        cookie.setAttribute("SameSite", "None");
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
