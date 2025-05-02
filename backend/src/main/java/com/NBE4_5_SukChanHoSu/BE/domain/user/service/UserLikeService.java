@@ -205,7 +205,9 @@ public class UserLikeService {
                         try{
                             Matching matching = mapper.convertValue(map, Matching.class);
                             System.out.println("추출한 유저: " + matching.getFemaleUser());
-                            responses.add(new UserMatchingResponse(matching.getFemaleUser(),matching));
+                            int distance = userProfileService.calDistance(user, matching.getFemaleUser());
+                            responses.add(new UserMatchingResponse(matching.getFemaleUser(),matching,distance));
+
                         }catch (IllegalArgumentException e){
                             System.err.println("JSON 역직렬화 실패: " + e.getMessage());
                             e.printStackTrace();
@@ -218,7 +220,8 @@ public class UserLikeService {
                 List<Matching> matches = matchingRepository.findByMaleUser(user);
                 for(Matching matching: matches) {
                     // 매칭된 여자 유저 리스트에 등록
-                    responses.add(new UserMatchingResponse(matching.getFemaleUser(),matching));
+                    int distance = userProfileService.calDistance(user, matching.getFemaleUser());
+                    responses.add(new UserMatchingResponse(matching.getFemaleUser(),matching,distance));
 
                     // 캐싱
                     String key = "matching"+ user.getUserId() + ":" +matching.getFemaleUser().getUserId();
@@ -242,7 +245,8 @@ public class UserLikeService {
                         Map<String, Object> map = (Map<String, Object>) value;
                         try {
                             Matching matching = mapper.convertValue(map, Matching.class);
-                            responses.add(new UserMatchingResponse(matching.getMaleUser(),matching));
+                            int distance = userProfileService.calDistance(user, matching.getMaleUser());
+                            responses.add(new UserMatchingResponse(matching.getMaleUser(),matching,distance));
                             System.out.println("추출한 유저: " + matching.getMaleUser());
                         }catch (IllegalArgumentException e){
                             System.err.println("JSON 역직렬화 실패: " + e.getMessage());
@@ -256,7 +260,8 @@ public class UserLikeService {
                 List<Matching> matches = matchingRepository.findByFemaleUser(user);
                 for(Matching matching: matches) {
                     // 매칭된 남자 유저 리스트에 등록
-                    responses.add(new UserMatchingResponse(matching.getMaleUser(),matching));
+                    int distance = userProfileService.calDistance(user, matching.getMaleUser());
+                    responses.add(new UserMatchingResponse(matching.getMaleUser(),matching,distance));
 
                     // 캐싱
                     String redisKey = "matching:" + matching.getMaleUser().getUserId() + ":" + user.getUserId();
