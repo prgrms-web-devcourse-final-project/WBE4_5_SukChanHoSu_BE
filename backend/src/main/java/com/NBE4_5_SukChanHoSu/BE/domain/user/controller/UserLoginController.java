@@ -93,8 +93,6 @@ public class UserLoginController {
 
     @GetMapping("/me")
     public RsData<UserResponse> getProfile() {
-        Long id = SecurityUtil.getCurrentUserId();
-        String email = SecurityUtil.getCurrentUserEmail();
         User user = SecurityUtil.getCurrentUser();
 
         return new RsData<>("200-SUCCESS", "프로필 조회 성공", new UserResponse(user));
