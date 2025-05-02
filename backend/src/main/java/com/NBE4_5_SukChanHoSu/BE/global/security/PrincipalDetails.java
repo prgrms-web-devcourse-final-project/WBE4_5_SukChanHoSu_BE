@@ -33,10 +33,6 @@ public class PrincipalDetails implements UserDetails, OAuth2User {
         return attributes;
     }
 
-    public Long getId() {
-        return user.getId();
-    }
-
     @Override
     public String getName() {
         return user.getEmail();
