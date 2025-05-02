@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserLikeResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
@@ -48,7 +49,7 @@ public class UserLikeController {
         }
 
         // 좋아요
-        userLikeService.likeUser(fromUser,toUser);
+        UserLikes like = userLikeService.likeUser(fromUser,toUser);
 
         // 매칭 확인
         if(userLikeService.isAlreadyLiked(fromUser,toUser)){
@@ -56,9 +57,7 @@ public class UserLikeController {
             return new RsData<>("200", fromUser.getNickName()+"과(와)"+toUser.getNickName()+"이 매칭 되었습니다.", response);
         }
 
-        LikeResponse likeResponse = new LikeResponse();
-        likeResponse.setFromUser(fromUser);
-        likeResponse.setToUser(toUser);
+        LikeResponse likeResponse = new LikeResponse(like);
         return new RsData<>("200", fromUser.getNickName()+ " 가 "+toUser.getNickName()+ "님 에게 좋아요를 보냈습니다", likeResponse);
     }
 

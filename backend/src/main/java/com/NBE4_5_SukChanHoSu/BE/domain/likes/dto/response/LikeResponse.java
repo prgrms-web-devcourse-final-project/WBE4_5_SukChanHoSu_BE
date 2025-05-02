@@ -1,11 +1,14 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 
 @Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class LikeResponse {
-    private UserProfile fromUser;
-    private UserProfile toUser;
+    private UserLikes likes;
 }

@@ -39,7 +39,6 @@ public class UserProfile extends BaseTime {
 
     private LocalDate birthdate;
 
-    @Setter
     @ElementCollection(targetClass = Genre.class)
     @Enumerated(EnumType.STRING)
     private List<Genre> favoriteGenres;
@@ -61,22 +60,18 @@ public class UserProfile extends BaseTime {
 
     @OneToMany(mappedBy = "fromUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    @Setter
     private List<UserLikes> likes = new ArrayList<>(); // 사용자가 누른 좋아요 목록
 
     @OneToMany(mappedBy = "toUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    @Setter
     private List<UserLikes> likedBy = new ArrayList<>(); // 사용자를 좋아요한 목록
 
     @OneToMany(mappedBy = "maleUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    @Setter
     private List<Matching> maleMatchings = new ArrayList<>(); // 매칭된 남자 사용자 목록
 
     @OneToMany(mappedBy = "femaleUser", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonManagedReference
-    @Setter
     private List<Matching> femaleMatchings = new ArrayList<>(); // 매칭된 여자 사용자 목록
 
     @OneToOne
@@ -95,4 +90,5 @@ public class UserProfile extends BaseTime {
     public int hashCode() {
         return Objects.hash(userId); // 사용자 ID로 해시코드 생성
     }
+
 }

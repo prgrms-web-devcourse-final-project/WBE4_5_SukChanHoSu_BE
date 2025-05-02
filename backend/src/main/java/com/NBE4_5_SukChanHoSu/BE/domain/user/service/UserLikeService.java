@@ -9,7 +9,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
-import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
@@ -17,7 +16,6 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -36,7 +34,7 @@ public class UserLikeService {
 
 
     @Transactional
-    public void likeUser(UserProfile fromUser, UserProfile toUser) {
+    public UserLikes likeUser(UserProfile fromUser, UserProfile toUser) {
         // 좋아요 관계 생성
         UserLikes like = new UserLikes(fromUser, toUser);
         userLikesRepository.save(like);
@@ -44,6 +42,8 @@ public class UserLikeService {
         // Redis에 저장
         String key = "likes:" + fromUser.getUserId() + ":" + toUser.getUserId();
         redisTemplate.opsForValue().set(key, like,ttl.getLikes(), TimeUnit.SECONDS); // TTL 설정
+
+        return like;
     }
 
     // to -> from 관계도 존재하는지 확인
@@ -90,8 +90,6 @@ public class UserLikeService {
         // 응답 생성
         MatchingResponse matchingResponse = new MatchingResponse();
         matchingResponse.setMatching(matching);
-        matchingResponse.setMaleUser(matching.getMaleUser());
-        matchingResponse.setFemaleUser(matching.getFemaleUser());
         return matchingResponse;
     }
 
@@ -154,9 +152,9 @@ public class UserLikeService {
     // 매칭테이블에 이미 있는지 검증
     public boolean isAlreadyMatched(UserProfile fromUser, UserProfile toUser) {
         if(isMale(fromUser)){
-            return matchingRepository.existsByMaleUser(fromUser);
+            return matchingRepository.existsByMaleUserAndFemaleUser(fromUser,toUser);
         }else{
-            return matchingRepository.existsByFemaleUser(fromUser);
+            return matchingRepository.existsByMaleUserAndFemaleUser(toUser,fromUser);
         }
     }
 
