@@ -35,7 +35,7 @@ public class Matching {
     private UserProfile femaleUser; // 두 번째 사용자
 
     @Column(name = "matching_time", nullable = false)
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private Date matchingTime; // 매칭된 시간
 
     public Matching(UserProfile maleUser, UserProfile femaleUser) {

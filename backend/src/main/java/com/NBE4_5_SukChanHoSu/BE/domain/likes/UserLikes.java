@@ -34,7 +34,7 @@ public class UserLikes {
     private UserProfile toUser;  // 좋아요를 받은 사용자
 
     @Column(name = "like_time",nullable = false)
-    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
     private Date likeTime;
 
     public UserLikes(UserProfile fromUser, UserProfile toUser) {
