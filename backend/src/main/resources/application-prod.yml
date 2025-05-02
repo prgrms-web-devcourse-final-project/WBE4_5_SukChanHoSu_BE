@@ -48,3 +48,9 @@ spring:
       refresh-token: ${JWT.EXPIRATION.REFRESH_TOKEN}
     cookie-domain: ${JWT.COOKIE_DOMAIN} # 도메인
     cookie-path: ${JWT.COOKIE_PATH}
+
+  redis:
+    time_to_live:
+      likes: ${REDIS.TIME_TO_LIVE.likes}
+      liked: ${REDIS.TIME_TO_LIVE.liked}
+      matching: ${REDIS.TIME_TO_LIVE.matching}

@@ -7,13 +7,14 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserMatchingResponse {
     private Long matchingId;
-    private LocalDateTime matchingTime;
+    private Date matchingTime;
     private UserProfile user;
 
     public UserMatchingResponse(UserProfile user, Matching matching) {

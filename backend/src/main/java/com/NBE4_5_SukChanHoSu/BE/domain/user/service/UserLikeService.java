@@ -10,14 +10,17 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
+import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @AllArgsConstructor
@@ -28,21 +31,19 @@ public class UserLikeService {
     private final UserLikesRepository userLikesRepository;
     private final MatchingRepository matchingRepository;
     private final EntityManager entityManager;
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTTL ttl;
 
-    public UserProfile findUser(Long userId) {
-        UserProfile userProfile =  userProfileRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
-        return userProfile;
-    }
 
     @Transactional
     public void likeUser(UserProfile fromUser, UserProfile toUser) {
         // 좋아요 관계 생성
-        UserLikes like = new UserLikes();
-        like.setFromUser(fromUser);
-        like.setToUser(toUser);
-        like.setLikeTime(LocalDateTime.now());
+        UserLikes like = new UserLikes(fromUser, toUser);
         userLikesRepository.save(like);
+
+        // Redis에 저장
+        String key = "likes:" + fromUser.getUserId() + ":" + toUser.getUserId();
+        redisTemplate.opsForValue().set(key, like,ttl.getLikes(), TimeUnit.SECONDS); // TTL 설정
     }
 
     // to -> from 관계도 존재하는지 확인
@@ -55,24 +56,32 @@ public class UserLikeService {
         return userLikesRepository.existsByFromUserAndToUser(fromUser,toUser);
     }
 
+    // 매칭 키 생성 메서드
+    private String generateMatchingKey(Long userId1, Long userId2) {
+        Long smallerId = Math.min(userId1, userId2);
+        Long largerId = Math.max(userId1, userId2);
+        return "matching:" + smallerId + ":" + largerId;
+    }
+
     // like -> 매칭
     @Transactional
     public MatchingResponse matching(UserProfile fromUser, UserProfile toUser) {
-        Matching matching = new Matching();
+        Matching matching;
 
         // fromUser가 남자인 경우
         if(isMale(fromUser)){
-            matching.setMaleUser(fromUser);
-            matching.setFemaleUser(toUser);
+            matching = new Matching(fromUser, toUser);
         }
         // fromUser가 여자인 경우(toUser가 남자인 경우)
         else {
-            matching.setMaleUser(toUser);
-            matching.setFemaleUser(fromUser);
+            matching = new Matching(toUser, fromUser);
         }
 
-        matching.setMatchingTime(LocalDateTime.now());
         matchingRepository.save(matching);
+
+        // Redis에 저장
+        String key = generateMatchingKey(fromUser.getUserId(), toUser.getUserId()); // 정렬해서 키에 저장
+        redisTemplate.opsForValue().set(key, matching,ttl.getMatching(), TimeUnit.SECONDS); // TTL 설정
 
         // 좋아요 관계 삭제
         cancelLikes(fromUser, toUser);
@@ -161,6 +170,10 @@ public class UserLikeService {
          */
         entityManager.flush();
         entityManager.clear();
+
+        // Redis에서 삭제
+        String key = "likes:" + fromUser.getUserId() + ":" + toUser.getUserId();
+        redisTemplate.delete(key);
     }
 
     @Transactional
@@ -170,6 +183,10 @@ public class UserLikeService {
         }else{
             matchingRepository.deleteByMaleUserAndFemaleUser(toUser,fromUser);
         }
+
+        // Redis에서 삭제
+        String key = generateMatchingKey(fromUser.getUserId(), toUser.getUserId());
+        redisTemplate.delete(key);
     }
 
     public boolean isSameGender(UserProfile fromUser, UserProfile toUser) {
