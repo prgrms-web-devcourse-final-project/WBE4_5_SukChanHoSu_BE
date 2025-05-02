@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,7 +42,7 @@ public class ProfileUpdateRequest {
     @NotBlank
     private String lifeMovie;
 
-    private List<String> favoriteGenres;
+    private List<Genre> favoriteGenres;
 
     @Size(max = 4)
     private List<String> watchedMovies;

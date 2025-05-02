@@ -31,7 +31,8 @@ public class UserProfileService {
         }
 
         updateEntityFromRequest(userProfile, dto);
-        return toDto(userProfileRepository.save(userProfile));
+        UserProfile savedUserProfile = userProfileRepository.save(userProfile);
+        return new ProfileResponse(savedUserProfile); // toDto 대신 생성자 직접 호출
     }
 
     @Transactional
@@ -40,7 +41,8 @@ public class UserProfileService {
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         updateEntityFromUpdateRequest(userProfile, dto);
-        return toDto(userProfileRepository.save(userProfile));
+        UserProfile savedUserProfile = userProfileRepository.save(userProfile);
+        return new ProfileResponse(savedUserProfile);
     }
 
     public boolean isNicknameDuplicated(String nickname) {
@@ -50,7 +52,7 @@ public class UserProfileService {
     public ProfileResponse getMyProfile(Long userId) {
         UserProfile userProfile = userProfileRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-        return toDto(userProfile);
+        return new ProfileResponse(userProfile);
     }
 
     private void updateEntityFromRequest(UserProfile profile, ProfileRequest dto) {
@@ -61,7 +63,11 @@ public class UserProfileService {
         profile.setLongitude(dto.getLongitude());
         profile.setBirthdate(dto.getBirthdate());
         profile.setIntroduce(dto.getIntroduce());
-        // TODO: Favorite genres, lifeMovie, watchedMovies, preferredTheaters, distance 등 매핑 추가
+        if (dto.getDistance() != null) profile.setSearchRadius(dto.getDistance());
+        if (dto.getLifeMovie() != null) profile.setLifeMovie(dto.getLifeMovie());
+        if (dto.getFavoriteGenres() != null) profile.setFavoriteGenres(dto.getFavoriteGenres());
+        if (dto.getWatchedMovies() != null) profile.setWatchedMovies(dto.getWatchedMovies());
+        if (dto.getPreferredTheaters() != null) profile.setPreferredTheaters(dto.getPreferredTheaters());
     }
 
     private void updateEntityFromUpdateRequest(UserProfile profile, ProfileUpdateRequest dto) {
@@ -72,19 +78,13 @@ public class UserProfileService {
         if (dto.getLongitude() != null) profile.setLongitude(dto.getLongitude());
         if (dto.getBirthdate() != null) profile.setBirthdate(dto.getBirthdate());
         if (dto.getIntroduce() != null) profile.setIntroduce(dto.getIntroduce());
-        // TODO: 생략된 필드 동일하게 적용
-    }
 
-    private ProfileResponse toDto(UserProfile userProfile) {
-        return ProfileResponse.builder()
-                .nickname(userProfile.getNickName())
-                .gender(userProfile.getGender())
-                .profileImage(userProfile.getProfileImage())
-                .latitude(userProfile.getLatitude())
-                .longitude(userProfile.getLongitude())
-                .birthdate(userProfile.getBirthdate())
-                .introduce(userProfile.getIntroduce())
-                .build();
+        // 생략된 필드 동일하게 적용 (이 부분을 수정해야 합니다!)
+        if (dto.getDistance() != null) profile.setSearchRadius(dto.getDistance());
+        if (dto.getLifeMovie() != null) profile.setLifeMovie(dto.getLifeMovie());
+        if (dto.getFavoriteGenres() != null) profile.setFavoriteGenres(dto.getFavoriteGenres());
+        if (dto.getWatchedMovies() != null) profile.setWatchedMovies(dto.getWatchedMovies());
+        if (dto.getPreferredTheaters() != null) profile.setPreferredTheaters(dto.getPreferredTheaters());
     }
 
     public UserProfile findUser(Long userId) {

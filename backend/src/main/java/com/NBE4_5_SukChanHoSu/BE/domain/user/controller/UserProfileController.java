@@ -55,10 +55,8 @@ public class UserProfileController {
     public RsData<ProfileResponse> getMyProfile() {
         // 현재 인증된 사용자 정보 가져오기
         UserResponse userResponse = userService.getCurrentUser();
-
         // userId를 통해 프로필 정보 조회
         ProfileResponse response = userProfileService.getMyProfile(userResponse.getId());
-
         return new RsData<>("200", "프로필 조회 성공", response);
     }
 
