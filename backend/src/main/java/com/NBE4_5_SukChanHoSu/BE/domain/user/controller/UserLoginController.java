@@ -11,6 +11,8 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.util.CookieUtil;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,9 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
+@Tag(name = "인증 및 사용자 관리", description = "로그인, 회원가입, 로그아웃, 내 프로필 조회 등 API")
 public class UserLoginController {
+
     private static final String GOOGLE_AUTHORIZATION_PATH = "/oauth2/authorization/google";
     private static final String AUTHORIZATION_HEADER = "Authorization";
     private static final String BEARER_PREFIX = "Bearer ";
@@ -27,12 +31,14 @@ public class UserLoginController {
     private final CookieUtil cookieUtil;
 
     @GetMapping("/google/url")
+    @Operation(summary = "구글 로그인 URL 요청", description = "구글 OAuth2 로그인 페이지로 리다이렉트할 수 있는 URL 반환")
     public String getGoogleLoginUrl(HttpServletRequest request) {
         String baseUrl = request.getScheme() + "://" + request.getServerName() + ":" + request.getServerPort();
         return baseUrl + GOOGLE_AUTHORIZATION_PATH;
     }
 
     @PostMapping("/join")
+    @Operation(summary = "회원가입", description = "사용자 회원가입 요청")
     public RsData<UserResponse> join(@RequestBody UserSignUpRequest requestDto) {
         User user = userService.join(requestDto);
 
@@ -44,6 +50,7 @@ public class UserLoginController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "로그인", description = "사용자 로그인 후 AccessToken과 RefreshToken 발급")
     public RsData<LoginResponse> login(@RequestBody UserLoginRequest requestDto, HttpServletResponse response) {
         try {
             LoginResponse loginResponse = userService.login(requestDto);
@@ -62,6 +69,7 @@ public class UserLoginController {
     }
 
     @PostMapping("/logout")
+    @Operation(summary = "로그아웃", description = "AccessToken과 RefreshToken을 무효화하여 로그아웃 처리")
     public RsData<?> logout(HttpServletRequest request, HttpServletResponse response) {
         String authHeader = request.getHeader(AUTHORIZATION_HEADER);
         String accessToken = null;
@@ -88,10 +96,10 @@ public class UserLoginController {
         cookieUtil.deleteRefreshTokenFromCookie(response);
 
         return new RsData<>("200-SUCCESS", "로그아웃 성공");
-
     }
 
     @GetMapping("/me")
+    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
     public RsData<UserResponse> getProfile() {
         User user = SecurityUtil.getCurrentUser();
 
