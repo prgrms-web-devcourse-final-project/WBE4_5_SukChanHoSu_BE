@@ -140,4 +140,7 @@ public class UserProfileService {
         userProfile.setSearchRadius(radius);
     }
 
+    public boolean existsProfileByUserId(Long userId) {
+        return userProfileRepository.existsByUserId(userId);
+    }
 }

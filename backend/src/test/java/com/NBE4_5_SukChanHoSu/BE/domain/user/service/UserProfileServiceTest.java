@@ -154,12 +154,12 @@ class UserProfileServiceTest {
                     38.0,
                     128.0,
                     LocalDate.of(2000, 1, 1),
-                    50, // distance
-                    "인셉션", // lifeMovie (@NotBlank 이므로 널값 대신 채움)
+                    30, // searchRadius에 int 값 할당
+                    "인셉션", // lifeMovie
                     List.of(Genre.ACTION, Genre.COMEDY), // favoriteGenres
-                    List.of("어벤져스", "다크 나이트"), // watchedMovies (@Size(max = 4) 이므로 2개 채움)
+                    List.of("어벤져스", "다크 나이트"), // watchedMovies
                     List.of("CGV 강남", "롯데시네마 월드타워"), // preferredTheaters
-                    "새로운 소개입니다." // introduce (@NotBlank 이므로 널값 대신 채움)
+                    "새로운 소개입니다." // introduce
             );
 
             // mock 동작 정의
