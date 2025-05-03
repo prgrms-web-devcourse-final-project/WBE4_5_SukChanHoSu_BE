@@ -7,9 +7,11 @@ import lombok.Data;
 public class UserResponse {
     private String email;
     private String password;
+    private String role;
 
     public UserResponse(User user) {
         this.email = user.getEmail();
         this.password = user.getPassword();
+        this.role = user.getRole().name();
     }
 }

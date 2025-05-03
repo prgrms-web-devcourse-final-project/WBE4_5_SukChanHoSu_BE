@@ -1,6 +1,9 @@
 package com.NBE4_5_SukChanHoSu.BE.global.jwt.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
+import com.NBE4_5_SukChanHoSu.BE.global.security.PrincipalDetails;
 import com.NBE4_5_SukChanHoSu.BE.global.util.JwtUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
@@ -17,7 +20,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,7 @@ import java.util.stream.Collectors;
 public class TokenService {
     private final Key key;
     private final JwtUtil jwtUtil;
+    private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "Bearer";
@@ -47,8 +50,9 @@ public class TokenService {
     private int refreshTokenExpiration;
 
 
-    public TokenService(@Value("${jwt.secret}") String secretKey, JwtUtil jwtUtil, RedisTemplate<String, String> redisTemplate) {
+    public TokenService(@Value("${jwt.secret}") String secretKey, JwtUtil jwtUtil, UserRepository userRepository, RedisTemplate<String, String> redisTemplate) {
         this.jwtUtil = jwtUtil;
+        this.userRepository = userRepository;
         this.redisTemplate = redisTemplate;
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
@@ -80,7 +84,6 @@ public class TokenService {
                 .build();
     }
 
-    // Jwt 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메서드
     public Authentication getAuthentication(String accessToken) {
         Claims claims = parseClaims(accessToken);
 
@@ -93,7 +96,9 @@ public class TokenService {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        User user = userRepository.findByEmail(claims.getSubject());
+        UserDetails principal = new PrincipalDetails(user);
+
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 

@@ -11,11 +11,4 @@ public class SukChanHoSuApplication {
     public static void main(String[] args) {
         SpringApplication.run(SukChanHoSuApplication.class, args);
     }
-	@RestController
-	public class HelloController {
-		@GetMapping("/hello")
-		public String hello() {
-			return "hello";
-		}
-	}
 }
