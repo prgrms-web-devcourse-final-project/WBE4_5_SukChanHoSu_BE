@@ -15,7 +15,7 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
     // 여자 유저 매칭 정보 탐색
     List<Matching> findByFemaleUser(UserProfile femaleUser);
     // 매칭 정보 존재하는지 확인
-    boolean existsByMaleUserAndFemaleUser(UserProfile femaleUser, UserProfile maleUser);
+    boolean existsByMaleUserAndFemaleUser(UserProfile maleUser, UserProfile femaleUser);
 
     void deleteByMaleUserAndFemaleUser(UserProfile maleUser, UserProfile femaleUser);
 }
