@@ -23,13 +23,11 @@ public class UserLikes {
 
     @ManyToOne
     @JoinColumn(name = "liker_id", nullable = false)
-//    @JsonBackReference(value = "fromUser")
     @JsonIgnoreProperties({"likes", "likedBy", "maleMatchings", "femaleMatchings","user"})
     private UserProfile fromUser;  // 좋아요를 보낸 사용자
 
     @ManyToOne
     @JoinColumn(name = "liked_id", nullable = false)
-//    @JsonBackReference(value = "toUser")
     @JsonIgnoreProperties({"likes", "likedBy", "maleMatchings", "femaleMatchings","user"})
     private UserProfile toUser;  // 좋아요를 받은 사용자
 

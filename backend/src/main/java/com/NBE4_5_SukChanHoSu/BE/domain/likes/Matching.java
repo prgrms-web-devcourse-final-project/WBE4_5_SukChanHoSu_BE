@@ -24,13 +24,11 @@ public class Matching {
 
     @ManyToOne
     @JoinColumn(name = "male_user_id", nullable = false)
-//    @JsonBackReference(value = "maleUser")
     @JsonIgnoreProperties({"likes", "likedBy", "maleMatchings", "femaleMatchings","user"})
     private UserProfile maleUser; // 남자 유저
 
     @ManyToOne
     @JoinColumn(name = "female_user_id", nullable = false)
-//    @JsonBackReference(value = "femaleUser")
     @JsonIgnoreProperties({"likes", "likedBy", "maleMatchings", "femaleMatchings","user"})
     private UserProfile femaleUser; // 두 번째 사용자
 
