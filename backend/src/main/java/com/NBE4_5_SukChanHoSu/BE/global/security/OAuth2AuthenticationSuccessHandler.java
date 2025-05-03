@@ -20,10 +20,10 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
-        LoginResponse token = tokenService.generateToken(authentication);
+        LoginResponse loginResponse = tokenService.generateToken(authentication);
 
-        cookieUtil.addAccessCookie(token.getAccessToken(), response);
-        cookieUtil.addRefreshCookie(token.getRefreshToken(), response);
+        cookieUtil.addAccessCookie(loginResponse.getAccessToken(), response);
+        cookieUtil.addRefreshCookie(loginResponse.getRefreshToken(), response);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

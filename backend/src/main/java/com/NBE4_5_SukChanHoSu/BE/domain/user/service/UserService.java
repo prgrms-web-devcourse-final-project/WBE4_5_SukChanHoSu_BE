@@ -85,10 +85,7 @@ public class UserService {
             throw new RuntimeException("오류");
         }
 
-        String email = tokenService.getEmailFromToken(refreshToken);
-        tokenService.deleteRefreshToken(email);
-
-        long expirationTime = tokenService.getExpirationTimeFromToken(accessToken);
-        tokenService.addToBlacklist(accessToken, expirationTime);
+        long expirationTime = tokenService.getExpirationTimeFromToken(refreshToken);
+        tokenService.addToBlacklist(refreshToken, expirationTime);
     }
 }
