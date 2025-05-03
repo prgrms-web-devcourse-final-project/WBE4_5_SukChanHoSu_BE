@@ -2,35 +2,41 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>채팅 테스트</title>
+    <title>1:1 채팅 테스트</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>
     <script src="/webjars/stomp-websocket/2.3.4/stomp.min.js"></script>
-
-    <!--    <script src="/webjars/jquery/3.6.0/jquery.min.js"></script>-->
-<!--    <script src="/webjars/sockjs-client/1.5.1/sockjs.min.js"></script>-->
-<!--    <script src="/webjars/stomp-websocket/2.3.4/stomp.min.js"></script>-->
 </head>
 <body>
+<h2>1:1 채팅</h2>
+
 <div>
+    <input type="text" id="roomId" placeholder="채팅방 ID" />
     <input type="text" id="sender" placeholder="보내는 사람 이름" />
     <input type="text" id="message" placeholder="메시지 내용" />
     <button onclick="sendMessage()">보내기</button>
 </div>
+
+<hr>
 <div id="chat-box"></div>
 
 <script>
     let stompClient = null;
 
     function connect() {
-      //  const socket = new SockJS('/ws-stomp', null, {sessionId: () => new Date().getTime()});
-         const socket = new SockJS('/ws-stomp');  // WebSocket 연결
+        const roomId = $('#roomId').val();
+        if (!roomId) {
+            alert("채팅방 ID를 먼저 입력하세요.");
+            return;
+        }
+
+        const socket = new SockJS('/ws-stomp');
         stompClient = Stomp.over(socket);
 
         stompClient.connect({}, function (frame) {
             console.log('Connected: ' + frame);
 
-            stompClient.subscribe('/sub/chat/room', function (message) {
+            stompClient.subscribe('/sub/chat/room/' + roomId, function (message) {
                 showMessage(JSON.parse(message.body));
             });
         });
@@ -39,10 +45,18 @@
     function sendMessage() {
         const sender = $('#sender').val();
         const message = $('#message').val();
+        const roomId = $('#roomId').val();
+
+        if (!stompClient || !stompClient.connected) {
+            connect(); // 연결되지 않았다면 먼저 연결
+            setTimeout(() => sendMessage(), 500); // 연결 후 재시도
+            return;
+        }
 
         stompClient.send("/pub/chat/message", {}, JSON.stringify({
             sender: sender,
-            message: message
+            message: message,
+            roomId: roomId
         }));
     }
 
@@ -51,7 +65,7 @@
     }
 
     $(document).ready(function () {
-        connect();
+        $('#roomId').on('change', connect); // roomId 입력 변경 시 자동 연결
     });
 </script>
 </body>
