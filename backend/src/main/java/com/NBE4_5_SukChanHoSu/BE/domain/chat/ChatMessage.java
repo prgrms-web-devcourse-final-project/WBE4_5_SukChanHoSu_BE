@@ -8,7 +8,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class ChatMessage {
-    //private String roomId; //채팅방id
+    private String roomId; //채팅방id
     private String sender; //보낸 사람
     private String message;
 }
