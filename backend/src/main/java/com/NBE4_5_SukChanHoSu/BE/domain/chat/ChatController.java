@@ -15,7 +15,7 @@ public class ChatController {
 
     @MessageMapping("/chat/message")
     public void sendMessage(@Payload ChatMessage message) {
-        // roomId 기반으로 전송
+        // roomId 기반으로 전송.
         messagingTemplate.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
     }
 
