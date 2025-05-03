@@ -286,7 +286,7 @@ class UserProfileControllerTest {
                         .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
         // 응답 파싱
-        int status2 = action1.andReturn().getResponse().getStatus();
+        int status2 = action2.andReturn().getResponse().getStatus();
         String responseBody2 = action2.andReturn().getResponse().getContentAsString();
         JSONObject jsonResponse2 = new JSONObject(responseBody2);
 
@@ -299,8 +299,8 @@ class UserProfileControllerTest {
             assertEquals("추천할 사용자가 없습니다.", jsonResponse2.getString("message"));
         } else{
             // 둘다 200 OK를 반환한 경우 ->  응답이 달라야함
-            JSONArray user1 = jsonResponse1.getJSONArray("data");
-            JSONArray user2 = jsonResponse2.getJSONArray("data");
+            JSONObject user1 = jsonResponse1.getJSONObject("data");
+            JSONObject user2 = jsonResponse2.getJSONObject("data");
 
             assertNotEquals(user1.toString(), user2.toString());
         }
