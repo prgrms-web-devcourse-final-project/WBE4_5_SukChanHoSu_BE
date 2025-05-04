@@ -101,15 +101,20 @@ class UserProfileServiceTest {
                     37.5665,
                     126.9780,
                     LocalDate.of(2000, 1, 1),
-                    40, // search
-                    null, // lifeMovie
-                    null, // favoriteGenres
-                    null, // watchedMovies
-                    null, // preferredTheaters
-                    "소개" // introduce
+                    40,
+                    null,
+                    null,
+                    null,
+                    null,
+                    "소개"
             );
 
-            when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+            // User 존재 Mocking
+            User mockUser = User.builder().id(userId).build();
+            when(userRepository.findById(userId)).thenReturn(Optional.of(mockUser));
+
+            // 이미 프로필 존재 Mocking (findByUserId 사용)
+            when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(userProfile));
 
             // when & then
             assertThatThrownBy(() -> userProfileService.createProfile(userId, dto))
@@ -137,7 +142,7 @@ class UserProfileServiceTest {
 
             // Mock UserProfile 객체 생성 및 User 객체 설정
             UserProfile userProfile = new UserProfile();
-            userProfile.setUserId(userId); // ★ 꼭 필요!
+            userProfile.setUserId(userId);
             userProfile.setNickName("oldNickname");
             userProfile.setIntroduce("oldIntroduce");
             userProfile.setGender(Gender.Male);
@@ -145,7 +150,7 @@ class UserProfileServiceTest {
             userProfile.setLatitude(37.0);
             userProfile.setLongitude(127.0);
             userProfile.setBirthdate(LocalDate.of(1990, 1, 1));
-            userProfile.setUser(mockUser); // ★ Mock User 객체 설정
+            userProfile.setUser(mockUser);
 
             ProfileUpdateRequest dto = new ProfileUpdateRequest(
                     "newnickname",
@@ -154,16 +159,16 @@ class UserProfileServiceTest {
                     38.0,
                     128.0,
                     LocalDate.of(2000, 1, 1),
-                    30, // searchRadius에 int 값 할당
-                    "인셉션", // lifeMovie
-                    List.of(Genre.ACTION, Genre.COMEDY), // favoriteGenres
-                    List.of("어벤져스", "다크 나이트"), // watchedMovies
-                    List.of("CGV 강남", "롯데시네마 월드타워"), // preferredTheaters
-                    "새로운 소개입니다." // introduce
+                    30,
+                    "인셉션",
+                    List.of(Genre.ACTION, Genre.COMEDY),
+                    List.of("어벤져스", "다크 나이트"),
+                    List.of("CGV 강남", "롯데시네마 월드타워"),
+                    "새로운 소개입니다."
             );
 
-            // mock 동작 정의
-            when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+            // mock 동작 정의 (findByUserId로 수정)
+            when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(userProfile));
             when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
 
             // when
@@ -177,12 +182,11 @@ class UserProfileServiceTest {
             assertThat(responseDto.getLatitude()).isEqualTo(dto.getLatitude());
             assertThat(responseDto.getLongitude()).isEqualTo(dto.getLongitude());
             assertThat(responseDto.getBirthdate()).isEqualTo(dto.getBirthdate());
-            assertThat(responseDto.getEmail()).isEqualTo("test@example.com"); // 이메일 검증 추가
+            assertThat(responseDto.getEmail()).isEqualTo("test@example.com");
 
             verify(userProfileRepository, times(1)).save(userProfile);
         }
     }
-
 
     @Nested
     @DisplayName("isNicknameDuplicated 테스트")
