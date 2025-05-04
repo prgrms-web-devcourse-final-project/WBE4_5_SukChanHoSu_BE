@@ -3,7 +3,11 @@ package com.NBE4_5_SukChanHoSu.BE.global.jwt.service;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.security.BlacklistedTokenException;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.security.InvalidRefreshTokenException;
+import com.NBE4_5_SukChanHoSu.BE.global.jwt.dto.TokenResponse;
 import com.NBE4_5_SukChanHoSu.BE.global.security.PrincipalDetails;
 import com.NBE4_5_SukChanHoSu.BE.global.util.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -156,6 +160,28 @@ public class TokenService {
     public void addToBlacklist(String accessToken, long expirationTime) {
         String key = BLACKLIST_PREFIX + accessToken;
         redisTemplate.opsForValue().set(key, "blacklist", expirationTime, TimeUnit.MILLISECONDS);
+    }
+
+    public TokenResponse reissueAccessToken(String refreshToken) {
+        if (!validateToken(refreshToken)) {
+            throw new InvalidRefreshTokenException(
+                    UserErrorCode.INVALID_REFRESH_TOKEN.getCode(),
+                    UserErrorCode.INVALID_REFRESH_TOKEN.getMessage()
+            );
+        }
+
+        String email = getEmailFromToken(refreshToken);
+
+        String isBlacklisted = redisTemplate.opsForValue().get(refreshToken);
+        if (isBlacklisted != null) {
+            throw new BlacklistedTokenException(
+                    UserErrorCode.BLACKLISTED_REFRESH_TOKEN.getCode(),
+                    UserErrorCode.BLACKLISTED_REFRESH_TOKEN.getMessage());
+        }
+
+        String newAccessToken = createAccessToken(email);
+
+        return new TokenResponse(newAccessToken, refreshToken);
     }
 }
 
