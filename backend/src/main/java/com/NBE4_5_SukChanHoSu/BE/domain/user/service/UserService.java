@@ -76,7 +76,11 @@ public class UserService {
 
     public User getUserById(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
+                .orElseThrow(() -> new UserNotFoundException(
+                                UserErrorCode.USER_NOT_FOUND.getCode(),
+                                UserErrorCode.USER_NOT_FOUND.getMessage()
+                        )
+                );
     }
 
     public void logout(String refreshToken) {

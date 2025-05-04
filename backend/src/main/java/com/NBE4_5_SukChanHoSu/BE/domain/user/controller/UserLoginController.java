@@ -16,7 +16,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
@@ -97,6 +102,7 @@ public class UserLoginController {
         );
     }
 
+    // TODO 예시로 작성 추후 리펙토링
     @GetMapping("/me")
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
     public RsData<UserResponse> getProfile() {
@@ -107,11 +113,13 @@ public class UserLoginController {
 
     @DeleteMapping
     @Operation(summary = "회원탈퇴", description = "로그인한 사용자의 회원탈퇴")
-    public RsData<?> deleteUser(HttpServletRequest request, HttpServletResponse response) {
+    public RsData<?> deleteUser(HttpServletResponse response) {
         User user = SecurityUtil.getCurrentUser();
         userService.deleteUser(user);
+
         cookieUtil.deleteAccessTokenFromCookie(response);
         cookieUtil.deleteRefreshTokenFromCookie(response);
+
         return new RsData<>(
                 UserSuccessCode.WITHDREW_SUCCESS.getCode(),
                 UserSuccessCode.WITHDREW_SUCCESS.getMessage()
