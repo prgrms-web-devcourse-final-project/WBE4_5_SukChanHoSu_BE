@@ -6,6 +6,7 @@ import com.NBE4_5_SukChanHoSu.BE.global.jwt.dto.TokenResponse;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.service.TokenService;
 import com.NBE4_5_SukChanHoSu.BE.global.util.CookieUtil;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/token")
+@Tag(name = "Token", description = "AccessToken과 RefreshToken 관련 API")
 public class TokenController {
     private final CookieUtil cookieUtil;
     private final TokenService tokenService;
