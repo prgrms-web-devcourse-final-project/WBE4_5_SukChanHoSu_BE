@@ -52,20 +52,16 @@ public class UserLoginController {
     @PostMapping("/login")
     @Operation(summary = "로그인", description = "사용자 로그인 후 AccessToken과 RefreshToken 발급")
     public RsData<LoginResponse> login(@RequestBody UserLoginRequest requestDto, HttpServletResponse response) {
-        try {
-            LoginResponse loginResponse = userService.login(requestDto);
+        LoginResponse loginResponse = userService.login(requestDto);
 
-            cookieUtil.addAccessCookie(loginResponse.getAccessToken(), response);
-            cookieUtil.addRefreshCookie(loginResponse.getRefreshToken(), response);
+        cookieUtil.addAccessCookie(loginResponse.getAccessToken(), response);
+        cookieUtil.addRefreshCookie(loginResponse.getRefreshToken(), response);
 
-            return new RsData<>(
-                    UserSuccessCode.LOGIN_SUCCESS.getCode(),
-                    UserSuccessCode.LOGIN_SUCCESS.getMessage(),
-                    loginResponse
-            );
-        } catch (SecurityException e) {
-            return new RsData<>("401-UNAUTHORIZED", e.getMessage());
-        }
+        return new RsData<>(
+                UserSuccessCode.LOGIN_SUCCESS.getCode(),
+                UserSuccessCode.LOGIN_SUCCESS.getMessage(),
+                loginResponse
+        );
     }
 
     @PostMapping("/logout")
@@ -85,17 +81,20 @@ public class UserLoginController {
 
         if (accessToken == null || refreshToken == null) {
             return new RsData<>(
-                    UserErrorCode.LOGOUT_FALLED.getCode(),
-                    UserErrorCode.LOGOUT_FALLED.getMessage()
+                    UserErrorCode.LOGOUT_UNAUTHORIZED.getCode(),
+                    UserErrorCode.LOGOUT_UNAUTHORIZED.getMessage()
             );
         }
 
-        userService.logout(accessToken, refreshToken);
+        userService.logout(refreshToken);
 
         cookieUtil.deleteAccessTokenFromCookie(response);
         cookieUtil.deleteRefreshTokenFromCookie(response);
 
-        return new RsData<>("200-SUCCESS", "로그아웃 성공");
+        return new RsData<>(
+                UserSuccessCode.LOGOUT_SUCCESS.getCode(),
+                UserSuccessCode.LOGOUT_SUCCESS.getMessage()
+        );
     }
 
     @GetMapping("/me")
@@ -104,5 +103,18 @@ public class UserLoginController {
         User user = SecurityUtil.getCurrentUser();
 
         return new RsData<>("200-SUCCESS", "프로필 조회 성공", new UserResponse(user));
+    }
+
+    @DeleteMapping
+    @Operation(summary = "회원탈퇴", description = "로그인한 사용자의 회원탈퇴")
+    public RsData<?> deleteUser(HttpServletRequest request, HttpServletResponse response) {
+        User user = SecurityUtil.getCurrentUser();
+        userService.deleteUser(user);
+        cookieUtil.deleteAccessTokenFromCookie(response);
+        cookieUtil.deleteRefreshTokenFromCookie(response);
+        return new RsData<>(
+                UserSuccessCode.WITHDREW_SUCCESS.getCode(),
+                UserSuccessCode.WITHDREW_SUCCESS.getMessage()
+        );
     }
 }
