@@ -57,7 +57,8 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-
+    //actuator
+    implementation("org.springframework.boot:spring-boot-starter-actuator:3.4.5")
     tasks.named('test') {
         useJUnitPlatform()
     }
