@@ -4,8 +4,10 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -20,12 +23,28 @@ import java.util.List;
 public class UserProfileService {
 
     private final UserProfileRepository userProfileRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public ProfileResponse createProfile(Long userId, ProfileRequest dto) {
-        UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
 
-        if (userProfile.getNickName() != null) {
+        // 해당 userId를 가진 UserProfile이 이미 존재하는지 확인
+        Optional<UserProfile> existingProfile = userProfileRepository.findByUserId(userId);
+
+        UserProfile userProfile;
+
+        // 프로필이 없으면 새로 생성
+        if (!existingProfile.isPresent()) {
+            userProfile = new UserProfile();
+            userProfile.setUser(user);
+            // User 엔티티 연결 (가정: User 엔티티는 이미 존재한다고 가정)
+            // User user = userRepository.findById(userId)
+            //        .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
+            // userProfile.setUser(user);
+        } else {
+            // 프로필이 이미 존재하면 예외 발생 (또는 업데이트 로직 처리 - API 역할에 따라 다름)
             throw new IllegalStateException("이미 프로필이 등록된 사용자입니다.");
         }
 
@@ -36,7 +55,11 @@ public class UserProfileService {
 
     @Transactional
     public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto) {
-        UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        UserProfile userProfile = userProfileRepository.findByUserId(userId) // 수정: findById -> findByUserId
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        // User 엔티티 로딩 (선택 사항)
+        // ... (이전 답변에서 설명한 User 엔티티 로딩 로직)
 
         updateEntityFromUpdateRequest(userProfile, dto);
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);

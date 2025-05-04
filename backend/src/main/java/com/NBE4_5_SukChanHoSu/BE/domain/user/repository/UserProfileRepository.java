@@ -12,4 +12,5 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
     List<UserProfile> findByGender(Gender gender);
     boolean existsByNickName(String nickName);
     boolean existsByUserId(Long userId);
+    Optional<UserProfile> findByUserId(Long userId);
 }
