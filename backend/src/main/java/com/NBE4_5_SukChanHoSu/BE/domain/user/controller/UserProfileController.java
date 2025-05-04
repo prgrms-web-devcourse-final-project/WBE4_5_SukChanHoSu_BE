@@ -122,4 +122,24 @@ public class UserProfileController {
         UserProfile userProfile = userProfileService.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
+
+    @Operation(summary = "태그로 프로필 조회", description = "겹치는 태그가 있는 사람만 조회")
+    @GetMapping("/profile/tags")
+    public RsData<List<UserProfileResponse>> getProfileByTags(@RequestParam Long profileId) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+
+        List<UserProfileResponse> responses = userProfileService.findProfileByTags(userProfile);
+
+        return new RsData<>("200", "프로필 조회 성공", responses);
+    }
+
+    @Operation(summary = "추천", description = "유사도가 가장 높은 순서로 추천")
+    @GetMapping("/recommend")
+    public RsData<UserProfileResponse> getRecommend(@RequestParam Long profileId) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        UserProfileResponse response = userProfileService.recommend(userProfile);
+
+        return new RsData<>("200", "추천 사용자",response);
+    }
+
 }

@@ -5,17 +5,21 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.user.NoRecommendException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +28,9 @@ public class UserProfileService {
 
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
+    // 사용자별 추천 리스트 관리
+    private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
+
 
     @Transactional
     public ProfileResponse createProfile(Long userId, ProfileRequest dto) {
@@ -57,9 +64,6 @@ public class UserProfileService {
     public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto) {
         UserProfile userProfile = userProfileRepository.findByUserId(userId) // 수정: findById -> findByUserId
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        // User 엔티티 로딩 (선택 사항)
-        // ... (이전 답변에서 설명한 User 엔티티 로딩 로직)
 
         updateEntityFromUpdateRequest(userProfile, dto);
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);
@@ -133,7 +137,6 @@ public class UserProfileService {
     }
 
     static final double EARTH_RADIUS = 6371; // 지구의 반지름 (단위: km)
-
     // 거리 계산
     public int calDistance(UserProfile userProfile1, UserProfile userProfile2) {
         // 내 위/경도
@@ -148,7 +151,9 @@ public class UserProfileService {
         double dLon = Math.toRadians(lon2 - lon1);
 
         // 곡률 감안해서 어쩌구저쩌구해서 거리 계산
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
+                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
         double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
         // 거리를 km로 계산
@@ -165,5 +170,85 @@ public class UserProfileService {
 
     public boolean existsProfileByUserId(Long userId) {
         return userProfileRepository.existsByUserId(userId);
+    }
+    // 태그로 검색
+    public List<UserProfileResponse> findProfileByTags(UserProfile userProfile) {
+        // 범위 이내에 있는 사용자만 조회
+        int radius = userProfile.getSearchRadius();
+        List<UserProfileResponse> responses = findProfileWithinRadius(userProfile, radius);
+
+        List<Genre> tags = userProfile.getFavoriteGenres();
+
+        List<UserProfileResponse> filteredResponses = responses.stream()
+                .filter(response -> response.getFavoriteGenres().stream()
+                        .anyMatch(genre -> tags.stream().anyMatch(genre::equals)))
+                .toList();
+
+        return filteredResponses;
+    }
+
+
+    // 추천 알고리즘
+    public UserProfileResponse recommend(UserProfile userProfile) {
+        Long userId = userProfile.getUserId();
+        List<UserProfile> recommendedUsers = recommendedUsersMap.getOrDefault(userId, new ArrayList<>());
+        int radius = userProfile.getSearchRadius();
+        UserProfile recommendedUser = null;
+        int maxScore = 0;
+        int recommendDistance =0; // 추천 사용자의 거리 저장 필드
+
+        // 1차: 이성
+        List<UserProfile> profileByGender = findProfileByGender(userProfile);
+
+        // 거리 및 태그
+        for (UserProfile profile : profileByGender) {
+            // 이미 추천한 사용자는 패스
+            if (recommendedUsers.contains(profile)) {
+                continue;
+            }
+
+            int distance = calDistance(userProfile, profile); // 거리 계산
+            int distanceScore = 0;
+            int tagScore = 0;
+            int totalScore = -1;
+
+            // 2차: 거리
+            if (distance <= radius) { // 범위 내에 있는 경우만 추가
+                distanceScore = 100 - (distance * 3);   // 키로당 3점 감점
+
+                // 3차: 태그
+                for(Genre genre : profile.getFavoriteGenres()) {
+                    // 나와 태그가 겹친다면
+                    if(userProfile.getFavoriteGenres().contains(genre)) {
+                        tagScore+=10;   // 하나당 10점
+                    }
+                }
+            }
+            totalScore = distanceScore + tagScore; // 총점
+
+            // 최고 점수 사용자 업데이트(0점 이하는 등록x)
+            if (totalScore > maxScore) {
+                maxScore = totalScore;
+                recommendDistance = distance;
+                recommendedUser = profile;
+            }
+        }
+
+        // 추천할 사용자가 있는 경우
+        if(recommendedUser != null) {
+            recommendedUsers.add(recommendedUser);  // 리스트에 등록
+            recommendedUsersMap.put(userId, recommendedUsers); // 사용자별 리스트 업데이트
+            System.out.println("리스트관리: "+recommendedUsers);
+            return new UserProfileResponse(recommendedUser,recommendDistance);
+        }
+
+        // 리스트가 차있는데, 추천할 사용자가 없는 경우, 리스트 초기화
+        if (!recommendedUsers.isEmpty()) {
+            recommendedUsers.clear(); // 리스트 초기화
+            recommendedUsersMap.put(userId, recommendedUsers);  // 초기화 업데이트
+        }
+
+        throw new NoRecommendException("404","추천할 사용자가 없습니다.");
+
     }
 }
