@@ -30,8 +30,8 @@ public class MovieService {
     @Transactional
     public Movie update(Long id, UpdateMovieDto dto) {
         Movie movie = getById(id); // 영속 상태 객체
-        dto.applyTo(movie);        // 값만 덮어쓰기
-        return movie;              // save() 불필요 (dirty checking)
+        dto.applyTo(movie);
+        return movie;              // dirty checking
     }
 
     @Transactional
