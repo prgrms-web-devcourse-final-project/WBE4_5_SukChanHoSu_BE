@@ -54,3 +54,9 @@ spring:
       refresh-token: ${JWT.EXPIRATION.REFRESH_TOKEN}
     cookie-domain: ${JWT.COOKIE_DOMAIN} # 도메인
     cookie-path: ${JWT.COOKIE_PATH}
+
+  redis:
+    time_to_live:
+      likes: 86400 # 24h
+      liked: 86400 # 24h
+      matching: 3600 # 1h
