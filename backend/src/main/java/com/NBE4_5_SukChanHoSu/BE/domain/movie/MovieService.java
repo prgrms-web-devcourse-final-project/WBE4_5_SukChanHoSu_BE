@@ -28,17 +28,10 @@ public class MovieService {
     }
 
     @Transactional
-    public Movie update(Long id, Movie updatedMovie) {
-        Movie movie = getById(id); // 존재 확인
-        movie.setTitle(updatedMovie.getTitle());
-        movie.setReleaseYear(updatedMovie.getReleaseYear());
-        movie.setRating(updatedMovie.getRating());
-        movie.setTId(updatedMovie.getTId());
-        movie.setPosterImage(updatedMovie.getPosterImage());
-        movie.setDescription(updatedMovie.getDescription());
-        movie.setDirector(updatedMovie.getDirector());
-        movie.setGenres(updatedMovie.getGenres());
-        return movie;
+    public Movie update(Long id, UpdateMovieDto dto) {
+        Movie movie = getById(id); // 영속 상태 객체
+        dto.applyTo(movie);        // 값만 덮어쓰기
+        return movie;              // save() 불필요 (dirty checking)
     }
 
     @Transactional
