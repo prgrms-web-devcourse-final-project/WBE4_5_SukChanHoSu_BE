@@ -42,6 +42,11 @@ public class BaseInitData {
 	@Order(1)
 	public ApplicationRunner applicationRunner1() {
 		return args -> {
+			if (userRepository.count() > 0) {
+				System.out.println("👤 이미 유저 데이터가 존재합니다. 프로필 초기화를 생략합니다.");
+				return;
+			}
+
 			self.profileInit();
 		};
 	}
