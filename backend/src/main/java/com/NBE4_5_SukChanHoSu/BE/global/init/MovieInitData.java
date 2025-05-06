@@ -39,18 +39,6 @@ public class MovieInitData {
     @Autowired
     private final Map<Long, Long> MovieIdToTid;
 
-    @Bean
-    @Order(1)
-    public ApplicationRunner applicationRunner() {
-        return args -> {
-            if (movieRepository.count() > 0) {
-                System.out.println("🎬 이미 Movie 데이터가 존재하여 초기화를 건너뜁니다.");
-                return;
-            }
-            self.movieInit();
-        };
-    }
-
     @Transactional
     public void movieInit() throws IOException {
         File csv = new File("backend/src/main/resources/data/ml-latest-small/movies.csv");
