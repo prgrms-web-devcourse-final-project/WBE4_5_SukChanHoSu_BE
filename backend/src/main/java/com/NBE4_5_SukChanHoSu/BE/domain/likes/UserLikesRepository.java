@@ -2,8 +2,11 @@ package com.NBE4_5_SukChanHoSu.BE.domain.likes;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -13,4 +16,8 @@ public interface UserLikesRepository extends JpaRepository<UserLikes, Long> {
     boolean existsByFromUserAndToUser(UserProfile fromUser, UserProfile toUser);
 
     void deleteByFromUserAndToUser(UserProfile toUser, UserProfile fromUser);
+
+    // 특정 사용자가 마지막으로 좋아요를 보낸 시간 조회
+    @Query("SELECT MAX(ul.likeTime) FROM UserLikes ul WHERE ul.fromUser.userId = :userId")
+    LocalDateTime findLastLikeTimeByUserId(@Param("userId") Long userId);
 }

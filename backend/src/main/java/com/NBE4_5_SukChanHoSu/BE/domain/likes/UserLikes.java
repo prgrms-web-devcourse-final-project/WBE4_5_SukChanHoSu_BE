@@ -16,7 +16,10 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "user_likes")
+@Table( name = "user_likes",
+        indexes = {
+                @Index(name = "idx_like_time", columnList = "like_time")
+        })
 public class UserLikes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
