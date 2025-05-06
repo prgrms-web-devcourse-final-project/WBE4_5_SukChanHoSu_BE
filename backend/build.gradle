@@ -57,6 +57,9 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
+    implementation 'org.springframework.boot:spring-boot-starter-webflux' // WebClient 포함
+    implementation 'io.projectreactor:reactor-core' // Mono/Flux 등 비동기 지원
+
 
     tasks.named('test') {
         useJUnitPlatform()

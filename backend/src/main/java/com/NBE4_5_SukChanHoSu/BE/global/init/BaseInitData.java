@@ -46,7 +46,6 @@ public class BaseInitData {
 		};
 	}
 
-
 	@Transactional
 	public void profileInit() {
 		Random random = new Random();
