@@ -33,6 +33,7 @@ public class User {
     private String name;
     private String provider;
     private String providerId;
+    private boolean emailVerified = false;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonBackReference // 직렬화

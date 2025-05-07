@@ -19,7 +19,7 @@ public enum UserErrorCode {
     private final String message;
 
     UserErrorCode(String code, String message) {
-        this.code = code;
+        this.code = code.split("-")[0];
         this.message = message;
     }
 }
