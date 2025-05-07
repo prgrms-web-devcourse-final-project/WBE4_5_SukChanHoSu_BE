@@ -361,13 +361,12 @@ public class UserLikeControllerTest {
                 .andExpect(jsonPath("$.code").value("404"))
                 .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
 
-        login();
-        ResultActions getLikes = mvc.perform(get("/api/users/like") // TempUser1의 Likes 데이터 가져오기
+        ResultActions getLiked = mvc.perform(get("/api/users/liked") // TempUser2의 Likes 데이터 가져오기
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
 
-        getLikes
+        getLiked
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("404"))
                 .andExpect(jsonPath("$.message", containsString("사용자가 없습니다.")));
