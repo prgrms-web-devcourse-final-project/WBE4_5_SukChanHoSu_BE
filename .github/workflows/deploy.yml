@@ -182,13 +182,12 @@ jobs:
           working-directory: /
           comment: Deploy
           command: |
-            # -------------------------- 무중단 배포: 컨테이너 이름 결정 --------------------------
-            IMAGE="ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest"
+            IMAGE="ghcr.io/prgrms-web-devcourse-final-project/schs:latest"
             VOLUME="/gen:/gen"
             NETWORK="common"
             HEALTH_ENDPOINT="/actuator/health"
             TIMEOUT=60
-            
+
             if docker ps --format '{{.Names}}' | grep -q "app1_1"; then
               CURRENT="app1_1"
               NEXT="app1_2"
@@ -200,15 +199,14 @@ jobs:
               CURRENT_PORT=8081
               NEXT_PORT=8080
             fi
-            # -------------------------- 무중단 배포: 컨테이너 이름 결정 --------------------------
-            
+
             echo "Pulling new image..."
             docker pull "$IMAGE"
-            
+
             echo "Stopping previous $NEXT (if exists)"
             docker stop "$NEXT" 2>/dev/null || true
             docker rm "$NEXT" 2>/dev/null || true
-            
+
             echo "Starting new container: $NEXT"
             docker run -d \
               -v $VOLUME \
@@ -216,18 +214,17 @@ jobs:
               --name "$NEXT" \
               -p "$NEXT_PORT":8080 \
               "$IMAGE"
-            
-            # -------------------------- 무중단 배포: 헬스 체크 --------------------------
+
             echo "Waiting for health check..."
             START_TIME=$(date +%s)
             while true; do
               CONTENT=$(curl -s http://localhost:$NEXT_PORT$HEALTH_ENDPOINT)
-            
+
               if [[ "$CONTENT" == *'"status":"UP"'* ]]; then
                 echo "✅ $NEXT is UP!"
                 break
               fi
-            
+
               ELAPSED_TIME=$(( $(date +%s) - START_TIME ))
               if [[ $ELAPSED_TIME -ge $TIMEOUT ]]; then
                 echo "❌ Timeout: $NEXT did not start in $TIMEOUT seconds."
@@ -235,17 +232,16 @@ jobs:
                 docker rm "$NEXT"
                 exit 1
               fi
-            
+
               echo "⏳ Waiting for $NEXT to be UP..."
               sleep 5
             done
-            # -------------------------- 무중단 배포: 헬스 체크 --------------------------
-            
+
             echo "Stopping old container: $CURRENT"
             docker stop "$CURRENT" 2>/dev/null || true
             docker rm "$CURRENT" 2>/dev/null || true
-            
+
             echo "Cleaning up unused images..."
             docker rmi $(docker images -f "dangling=true" -q) 2>/dev/null || true
-            
+
             echo "✅ Deployment complete. Running: $NEXT"
