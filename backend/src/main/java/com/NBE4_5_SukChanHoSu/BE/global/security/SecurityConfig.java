@@ -35,6 +35,7 @@ public class SecurityConfig {
                                 .requestMatchers("/oauth2/**", "/api/auth/**").permitAll()
                                 // Swagger
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                .requestMatchers("/.well-known/**").permitAll()
 
                                 // Public endpoints
                                 .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
