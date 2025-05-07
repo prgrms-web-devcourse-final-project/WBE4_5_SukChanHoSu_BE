@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.User.controller;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
@@ -11,8 +11,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -26,12 +29,18 @@ public class UserLoginControllerTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+
     @Test
     @DisplayName("회원가입 성공")
     void joinSuccess() {
         // given
+        String email = "joinTest@example.com";
+        redisTemplate.opsForValue().set("emailVerify:" + email, "true", 30, TimeUnit.SECONDS);
+
         UserSignUpRequest requestDto = new UserSignUpRequest();
-        requestDto.setEmail("testuser@example.com");
+        requestDto.setEmail(email);
         requestDto.setPassword("testPassword123!");
         requestDto.setPasswordConfirm("testPassword123!");
 
@@ -54,7 +63,8 @@ public class UserLoginControllerTest {
         String email = "loginuser@example.com";
         String rawPassword = "testPassword123!";
 
-        // 회원가입 먼저
+        redisTemplate.opsForValue().set("emailVerify:" + email, "true", 30, TimeUnit.SECONDS);
+
         UserSignUpRequest signUpDto = new UserSignUpRequest();
         signUpDto.setEmail(email);
         signUpDto.setPassword(rawPassword);
@@ -98,14 +108,15 @@ public class UserLoginControllerTest {
         String correctPassword = "correctPassword123!";
         String wrongPassword = "wrongPassword";
 
-        // 회원가입 먼저
+        redisTemplate.opsForValue().set("emailVerify:" + email, "true", 30, TimeUnit.SECONDS);
+
         UserSignUpRequest signUpDto = new UserSignUpRequest();
         signUpDto.setEmail(email);
         signUpDto.setPassword(correctPassword);
         signUpDto.setPasswordConfirm(correctPassword);
+
         userService.join(signUpDto);
 
-        // 잘못된 비밀번호로 로그인 시도
         UserLoginRequest loginDto = new UserLoginRequest();
         loginDto.setEmail(email);
         loginDto.setPassword(wrongPassword);
