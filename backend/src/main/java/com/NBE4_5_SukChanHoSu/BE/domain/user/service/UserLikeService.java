@@ -101,8 +101,7 @@ public class UserLikeService {
         Set<String> keys = redisTemplate.keys(pattern);
 
         // 레디스에 값이 있는 경우
-        if(keys != null && !keys.isEmpty()){
-            System.out.println("=====레디스 확인======");
+        if(!keys.isEmpty()){
             ObjectMapper mapper = new ObjectMapper();
             for(String key : keys){
                 System.out.println("###key: " + key);
@@ -120,7 +119,6 @@ public class UserLikeService {
                 }
             }
         }else{
-            System.out.println("=====레디스에 없음=====");
             for(UserLikes like: user.getLikes()) {  // 내가 좋아요한 사용자 목록
                 UserProfile likedUser = like.getToUser();   // 좋아요를 받은 사용자
                 if(likedUser != null) {
@@ -144,14 +142,12 @@ public class UserLikeService {
         Set<String> keys = redisTemplate.keys(pattern);
 
         // 레디스에 값이 있는 경우
-        if(keys != null && !keys.isEmpty()){
-            System.out.println("=====레디스 확인======");
+        if(!keys.isEmpty()){
             ObjectMapper mapper = new ObjectMapper();
             for(String key : keys){
                 System.out.println("###key: " + key);
                 Object value = redisTemplate.opsForValue().get(key);
                 if (value instanceof Map) {
-                    System.out.println("===== 인스턴스 찾음 ======");
                     Map<String,Object> map = (Map<String, Object>) value;
                     try{
                         UserLikes like = mapper.convertValue(map, UserLikes.class);
@@ -164,7 +160,6 @@ public class UserLikeService {
                 }
             }
         }else{
-            System.out.println("=====레디스에 없음=====");
             for(UserLikes like: user.getLikedBy()) {    // 나를 좋아요한 사용자 목록
                 UserProfile likesUser = like.getFromUser(); // 좋아요를 보낸 사용자
                 if(likesUser != null) {
@@ -193,13 +188,11 @@ public class UserLikeService {
             keys = redisTemplate.keys(pattern);
 
             // redis 검색
-            if(keys != null && !keys.isEmpty()){
-                System.out.println("=====레디스 확인======");
+            if(!keys.isEmpty()){
                 ObjectMapper mapper = new ObjectMapper();
                 for(String key : keys){
                     Object value = redisTemplate.opsForValue().get(key);
                     if(value instanceof Map){
-                        System.out.println("===== 인스턴스 찾음 ======");
                         Map<String,Object> map = (Map<String, Object>) value;
                         try{
                             Matching matching = mapper.convertValue(map, Matching.class);
@@ -215,7 +208,6 @@ public class UserLikeService {
                 }
             }else{
                 // DB 조회
-                System.out.println("=====레디스에 없음=====");
                 List<Matching> matches = matchingRepository.findByMaleUser(user);
                 for(Matching matching: matches) {
                     // 매칭된 여자 유저 리스트에 등록
@@ -234,13 +226,11 @@ public class UserLikeService {
             pattern = "matching:*:" + user.getUserId();     // matching:maleId:femaleId
             keys = redisTemplate.keys(pattern);
 
-            if(keys != null && !keys.isEmpty()){
-                System.out.println("=====레디스 확인======");
+            if(!keys.isEmpty()){
                 ObjectMapper mapper = new ObjectMapper();
                 for(String key : keys){
                     Object value = redisTemplate.opsForValue().get(key);
                     if (value instanceof Map) {
-                        System.out.println("===== 인스턴스 찾음 ======");
                         Map<String, Object> map = (Map<String, Object>) value;
                         try {
                             Matching matching = mapper.convertValue(map, Matching.class);
@@ -255,7 +245,6 @@ public class UserLikeService {
                 }
             }else{
                 // DB 조회
-                System.out.println("=====레디스에 없음=====");
                 List<Matching> matches = matchingRepository.findByFemaleUser(user);
                 for(Matching matching: matches) {
                     // 매칭된 남자 유저 리스트에 등록

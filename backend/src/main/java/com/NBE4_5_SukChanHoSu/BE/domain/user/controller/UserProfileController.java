@@ -63,7 +63,6 @@ public class UserProfileController {
 
     @Operation(summary = "프로필로 유저 객체 조회", description = "프로필 엔티티를 이용하여 유저 정보 가져오는지 확인")
     @GetMapping("/user")
-    // todo: 프로바이더 제공되면 파라미터에서 헤더로 변경
     public RsData<User> getUser() {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
@@ -114,17 +113,6 @@ public class UserProfileController {
 
         List<UserProfileResponse> responses  = userProfileService.findProfileWithinRadius(userProfile,radius);
         return new RsData<>("200", "거리 조회 성공", responses);
-    }
-
-    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
-    @GetMapping("/profile/me")
-    //todo 임시, 이후 삭제
-    public RsData<UserProfile> getMyProfile() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
-
-        UserProfile userProfile = userProfileService.findUser(profileId);
-        return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
 
     @Operation(summary = "태그로 프로필 조회", description = "겹치는 태그가 있는 사람만 조회")
