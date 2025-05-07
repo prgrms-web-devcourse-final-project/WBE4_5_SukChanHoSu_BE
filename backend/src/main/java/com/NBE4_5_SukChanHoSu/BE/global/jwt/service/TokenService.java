@@ -44,7 +44,6 @@ public class TokenService {
     private final RedisTemplate<String, String> redisTemplate;
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "Bearer";
-    private static final String EMAIL_PREFIX = "email:";
     private static final String BLACKLIST_PREFIX = "blacklist:";
 
 
@@ -152,14 +151,9 @@ public class TokenService {
         return jwtUtil.getRemainingTime(token);
     }
 
-    public void deleteRefreshToken(String email) {
-        String key = EMAIL_PREFIX + email;
-        redisTemplate.delete(key);
-    }
-
     public void addToBlacklist(String accessToken, long expirationTime) {
         String key = BLACKLIST_PREFIX + accessToken;
-        redisTemplate.opsForValue().set(key, "blacklist", expirationTime, TimeUnit.MILLISECONDS);
+        redisTemplate.opsForValue().set(key, BLACKLIST_PREFIX, expirationTime, TimeUnit.MILLISECONDS);
     }
 
     public TokenResponse reissueAccessToken(String refreshToken) {

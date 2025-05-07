@@ -19,6 +19,8 @@ public class EmailService {
     private final JavaMailSender javaMailSender;
     private final RedisTemplate<String, String> redisTemplate;
     private static final String EMAIL_AUTH = "emailAuth:";
+    private static final String EMAIL_VERIFY = "emailVerify:";
+    private static final String TRUE = "true";
 
     @Value("${spring.mail.username}")
     private String senderEmail;
@@ -56,7 +58,7 @@ public class EmailService {
         return message;
     }
 
-    public void sendSimpleMessage(String sendEmail) throws MessagingException {
+    public String sendSimpleMessage(String sendEmail) throws MessagingException {
         String authCode = createCode();
         String key = EMAIL_AUTH + sendEmail;
         redisTemplate.opsForValue().set(key, authCode, authCodeExpirationMillis, TimeUnit.MILLISECONDS);
@@ -64,11 +66,17 @@ public class EmailService {
         MimeMessage message = createMail(sendEmail, authCode);
         javaMailSender.send(message);
 
+        return authCode;
     }
 
     public boolean verifyEmailCode(String email, String verifyCode) {
         String key = EMAIL_AUTH + email;
         String authCode = redisTemplate.opsForValue().get(key);
-        return authCode != null && authCode.equals(verifyCode);
+        if (authCode != null && authCode.equals(verifyCode)) {
+            redisTemplate.opsForValue().set(EMAIL_VERIFY + email, TRUE, 5, TimeUnit.MINUTES);
+            redisTemplate.delete(key);
+            return true;
+        }
+        return false;
     }
 }

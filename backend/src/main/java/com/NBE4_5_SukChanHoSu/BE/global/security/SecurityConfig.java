@@ -32,7 +32,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
-                                .requestMatchers("/oauth2/**", "/api/auth/login", "/api/auth/join", "/api/auth/google/", "/api/email/**").permitAll()
+                                .requestMatchers("/oauth2/**", "/api/auth/login", "/api/auth/join", "/api/auth/google/url", "/api/email/**").permitAll()
                                 // Swagger
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 // Actuator
