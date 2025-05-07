@@ -15,7 +15,7 @@ public enum UserSuccessCode {
     private final String message;
 
     UserSuccessCode(String code, String message) {
-        this.code = code;
+        this.code = code.split("-")[0];
         this.message = message;
     }
 }

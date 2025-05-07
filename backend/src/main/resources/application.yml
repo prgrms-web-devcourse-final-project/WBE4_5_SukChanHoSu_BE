@@ -1,4 +1,5 @@
 server:
+  forward-headers-strategy: native
   port: 8080  # ✅ 서버 포트 조정 가능 (예: 8080 → 8081)
   shutdown: graceful
   tomcat:
