@@ -1,25 +1,28 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.dto;
 
-import lombok.Getter;
-import lombok.Setter;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.MovieGenre;
+import lombok.Data;
 
-@Getter
-@Setter
+import java.util.List;
+
+@Data
 public class MovieResponse {
-    private String rank; // 순위
     private String movieNm; // 영화명
     private String openDt; // 개봉일
-    private String audiCnt; // 관객수
-    private String genres; // 장르
+    private String showTm;  // 상영 시간
+    private String director;
+//    private Long audiAcc; // 관객수
     private String actors; // 배우
+    private List<MovieGenre> genres; // 장르
     private String watchGradeNm; // 연령제한
     private String posterUrl; // 포스터 URL
 
-    public MovieResponse(String rank, String movieNm, String openDt, String audiCnt, String genres, String actors, String watchGradeNm, String posterUrl) {
-        this.rank = rank;
+    public MovieResponse(String movieNm, String openDt,String showTm, String director, List<MovieGenre> genres, String actors, String watchGradeNm, String posterUrl) {
         this.movieNm = movieNm;
         this.openDt = openDt;
-        this.audiCnt = audiCnt;
+        this.showTm = showTm;
+        this.director = director;
+//        this.audiAcc = audiAcc;
         this.genres = genres;
         this.actors = actors;
         this.watchGradeNm = watchGradeNm;

@@ -1,7 +1,9 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.service;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieRankingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.WeeklyBoxOfficeResult;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.MovieGenre;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +39,8 @@ public class MovieService {
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
 
-    public List<MovieResponse> searchWeeklyBoxOffice(String targetDt, String weekGb, String itemPerPage) {
+    // 주간 박스오피스
+    public List<MovieRankingResponse> searchWeeklyBoxOffice(String targetDt, String weekGb, String itemPerPage) {
         // KOBIS 주간 박스오피스 조회 API 요청 URL 생성
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(rankUrl)
                 .queryParam("key", kobisApiKey)
@@ -47,6 +50,7 @@ public class MovieService {
 
         String requestUrl = builder.toUriString();
 
+        // 응답 JSON으로 받아오기
         String jsonResponse;
         try {
             jsonResponse = restTemplate.getForObject(requestUrl, String.class);
@@ -59,7 +63,7 @@ public class MovieService {
             return Collections.emptyList(); // 빈 리스트 반환
         }
 
-        // JSON 파싱 및 데이터 처리
+        // JSON 파싱/데이터 처리
         try {
             WeeklyBoxOfficeResult result = objectMapper.readValue(jsonResponse, WeeklyBoxOfficeResult.class);
             if (result == null) {
@@ -74,17 +78,13 @@ public class MovieService {
             // 영화 상세 정보 조회
             return boxOfficeList.stream()
                     .map(movie -> {
-                        Map<String, Object> detail = getMovieDetail(movie.getMovieCd()); // KOBIS 상세 정보 조회
                         String posterUrl = getMoviePoster(movie.getMovieNm()); // TMDB에서 포스터 URL 조회
-                        return new MovieResponse(
+                        return new MovieRankingResponse(
                                 movie.getRank(), // 순위
                                 movie.getMovieNm(), // 영화명
-                                movie.getOpenDt(), // 개봉일
-                                movie.getAudiCnt(), // 관객수
-                                (String) detail.get("genres"), // 장르
-                                (String) detail.get("actors"), // 배우
-                                (String) detail.get("watchGradeNm"), // 연령제한
-                                posterUrl // 포스터 URL
+                                posterUrl, // 포스터 URL
+                                movie.getAudiAcc(),
+                                movie.getMovieCd()
                         );
                     })
                     .collect(Collectors.toList());
@@ -94,14 +94,13 @@ public class MovieService {
         }
     }
 
-    private Map<String, Object> getMovieDetail(String movieCd) {
+    public MovieResponse getMovieDetail(String movieCd) {
         // KOBIS 영화 상세 정보 조회 API 요청 URL 생성
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(detailUrl)
                 .queryParam("key", kobisApiKey)
                 .queryParam("movieCd", movieCd);
 
         String requestUrl = builder.toUriString();
-        System.out.println("KOBIS Movie Info API Request URL: " + requestUrl);
 
         // API 요청 및 응답 받기
         String jsonResponse;
@@ -110,13 +109,18 @@ public class MovieService {
             if (jsonResponse == null || jsonResponse.isEmpty()) {
                 throw new RuntimeException("KOBIS Movie Info API returned empty response");
             }
-            System.out.println("KOBIS Movie Info API Response: " + jsonResponse);
         } catch (Exception e) {
             System.err.println("Error during KOBIS Movie Info API request: " + e.getMessage());
-            return Map.of(
-                    "genres", "장르 정보 없음",
-                    "actors", "배우 정보 없음",
-                    "watchGradeNm", "연령제한 정보 없음"
+            return new MovieResponse(
+                    "영화명 정보 없음",
+                    "개봉일 정보 없음",
+                    "상영 시간 정보 없음",
+                    "감독 정보 없음", // 단일 String으로 처리
+                    List.of(new MovieGenre("장르 정보 없음")),
+//                    List.of("배우 정보 없음"),
+                    "배우 정보 없음",
+                    "연령제한 정보 없음",
+                    "포스터 정보 없음"
             );
         }
 
@@ -133,21 +137,43 @@ public class MovieService {
                 throw new RuntimeException("movieInfo is null");
             }
 
-            // 장르 정보 추출
-            List<Map<String, String>> genres = (List<Map<String, String>>) movieInfo.get("genres");
-            String genreString = genres == null || genres.isEmpty()
-                    ? "장르 정보 없음"
-                    : genres.stream()
-                    .map(genre -> genre.get("genreNm"))
-                    .collect(Collectors.joining(", "));
+            // 추가 필드 확인
+            System.out.println("directors: " + movieInfo.get("directors"));
 
-            // 배우 정보 추출
+            // 영화명 추출 (널 체크 및 기본값 설정)
+            String movieNm = movieInfo.get("movieNm") != null ? movieInfo.get("movieNm").toString() : "영화명 정보 없음";
+
+            // 개봉일 추출 (널 체크 및 기본값 설정)
+            String openDt = movieInfo.get("openDt") != null ? movieInfo.get("openDt").toString() : "개봉일 정보 없음";
+
+            // 상영 시간 추출 (널 체크 및 기본값 설정)
+            String showTm = movieInfo.get("showTm") != null ? movieInfo.get("showTm").toString() : "상영 시간 정보 없음";
+
+            // 감독 정보 추출 (단일 String으로 처리)
+            List<Map<String, String>> directors = (List<Map<String, String>>) movieInfo.get("directors");
+            String director = "감독 정보 없음"; // 기본값
+            if (directors != null && !directors.isEmpty()) {
+                Map<String, String> firstDirector = directors.get(0);
+                if (firstDirector != null && firstDirector.get("peopleNm") != null) {
+                    director = firstDirector.get("peopleNm"); // 첫 번째 감독의 이름 추출
+                }
+            }
+
+            // 장르 정보 추출 (List<MovieGenre>으로 변환)
+            List<Map<String, String>> genres = (List<Map<String, String>>) movieInfo.get("genres");
+            List<MovieGenre> genreList = genres == null || genres.isEmpty()
+                    ? List.of(new MovieGenre("장르 정보 없음"))
+                    : genres.stream()
+                    .map(genre -> new MovieGenre(genre.get("genreNm")))
+                    .collect(Collectors.toList());
+
+            // 배우 정보 추출 (List<String>으로 변환)
             List<Map<String, String>> actors = (List<Map<String, String>>) movieInfo.get("actors");
-            String actorString = actors == null || actors.isEmpty()
+            String actorList = actors == null || actors.isEmpty()
                     ? "배우 정보 없음"
                     : actors.stream()
                     .map(actor -> actor.get("peopleNm"))
-                    .collect(Collectors.joining(", "));
+                    .collect(Collectors.joining(", ")); // 쉼표로 연결
 
             // 연령제한 정보 추출
             List<Map<String, String>> audits = (List<Map<String, String>>) movieInfo.get("audits");
@@ -155,21 +181,38 @@ public class MovieService {
                     ? "연령제한 정보 없음"
                     : audits.get(0).get("watchGradeNm");
 
-            // 결과 Map 반환
-            return Map.of(
-                    "genres", genreString,
-                    "actors", actorString,
-                    "watchGradeNm", watchGradeNm
+            // 포스터 URL 조회
+            String posterUrl = getMoviePoster(movieNm);
+
+            // MovieResponse 객체 생성 및 반환
+            return new MovieResponse(
+                    movieNm, // 영화명
+                    openDt, // 개봉일
+                    showTm, // 상영 시간
+                    director, // 감독 (단일 String)
+                    genreList, // 장르
+                    actorList, // 배우
+                    watchGradeNm, // 연령제한
+                    posterUrl // 포스터 URL
             );
         } catch (Exception e) {
-            return Map.of(
-                    "genres", "장르 정보 없음",
-                    "actors", "배우 정보 없음",
-                    "watchGradeNm", "연령제한 정보 없음"
+            System.err.println("Error parsing KOBIS Movie Info JSON response: " + e.getMessage());
+            return new MovieResponse(
+                    "영화명 정보 없음",
+                    "개봉일 정보 없음",
+                    "상영 시간 정보 없음",
+                    "감독 정보 없음", // 단일 String으로 처리
+                    List.of(new MovieGenre("장르 정보 없음")),
+//                    List.of("배우 정보 없음"),
+                    "배우 정보 없음",
+                    "연령제한 정보 없음",
+                    "포스터 정보 없음"
             );
         }
     }
 
+
+    // 포스터 가져오기
     private String getMoviePoster(String movieNm) {
         // TMDB 영화 검색 API 요청 URL 생성
         UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(tmdbSearchUrl)

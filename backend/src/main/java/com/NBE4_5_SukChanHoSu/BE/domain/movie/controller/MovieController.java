@@ -1,14 +1,14 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieRankingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
+@RequestMapping("/api/movie")
 public class MovieController {
 
     private final MovieService movieService;
@@ -17,11 +17,17 @@ public class MovieController {
         this.movieService = movieApiService;
     }
 
-    @GetMapping("/movies")
-    public List<MovieResponse> searchMovies(
+    @GetMapping("/weekly")
+    public List<MovieRankingResponse> searchWeeklyBoxOffice(
             @RequestParam String targetDt,
             @RequestParam(defaultValue = "0") String weekGb,
             @RequestParam(defaultValue = "10") String itemPerPage) {
         return movieService.searchWeeklyBoxOffice(targetDt, weekGb, itemPerPage);
+    }
+
+    // 영화 상세 정보 조회
+    @GetMapping("/detail/{movieCd}")
+    public MovieResponse getMovieDetail(@PathVariable String movieCd) {
+        return movieService.getMovieDetail(movieCd);
     }
 }
