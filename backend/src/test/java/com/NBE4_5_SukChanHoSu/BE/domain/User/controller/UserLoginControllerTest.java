@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.MemberTest;
+package com.NBE4_5_SukChanHoSu.BE.domain.User.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-public class UserServiceTest {
+public class UserLoginControllerTest {
 
     @Autowired
     private UserService userService;
