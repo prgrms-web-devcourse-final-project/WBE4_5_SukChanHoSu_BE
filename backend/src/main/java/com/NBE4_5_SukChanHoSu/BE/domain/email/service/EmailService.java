@@ -5,19 +5,26 @@ import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class EmailService {
     private final JavaMailSender javaMailSender;
+    private final RedisTemplate<String, String> redisTemplate;
+    private static final String EMAIL_AUTH = "emailAuth:";
 
     @Value("${spring.mail.username}")
     private String senderEmail;
+
+    @Value("${spring.mail.properties.auth-code-expiration-millis}")
+    private Long authCodeExpirationMillis;
 
     public String createCode() {
         Random random = new Random();
@@ -51,9 +58,17 @@ public class EmailService {
 
     public void sendSimpleMessage(String sendEmail) throws MessagingException {
         String authCode = createCode();
+        String key = EMAIL_AUTH + sendEmail;
+        redisTemplate.opsForValue().set(key, authCode, authCodeExpirationMillis, TimeUnit.MILLISECONDS);
 
         MimeMessage message = createMail(sendEmail, authCode);
         javaMailSender.send(message);
 
+    }
+
+    public boolean verifyEmailCode(String email, String verifyCode) {
+        String key = EMAIL_AUTH + email;
+        String authCode = redisTemplate.opsForValue().get(key);
+        return authCode != null && authCode.equals(verifyCode);
     }
 }
