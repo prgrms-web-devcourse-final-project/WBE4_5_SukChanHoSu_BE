@@ -55,3 +55,14 @@ jwt:
     refresh-token: ${JWT.EXPIRATION.REFRESH_TOKEN}
   cookie-domain: ${JWT.COOKIE_DOMAIN} # 도메인
   cookie-path: ${JWT.COOKIE_PATH}
+
+aws:
+  s3:
+    bucket: profile-image    # S3 버킷 이름
+  credentials:
+    access-key: ${AWS.ACCESS_KEY}   # 환경변수로 AWS 접근 키 설정
+    secret-key: ${AWS.SECRET_KEY}   # 환경변수로 AWS 비밀 키 설정
+  region:
+    static: ap-northeast-2         # AWS 리전 설정 (서울 리전)
+  stack:
+    auto: false                    # 자동 스택 생성 여부 설정

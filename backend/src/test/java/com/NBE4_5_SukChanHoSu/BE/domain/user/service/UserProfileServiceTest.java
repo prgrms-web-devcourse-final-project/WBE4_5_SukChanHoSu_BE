@@ -8,6 +8,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
+import com.NBE4_5_SukChanHoSu.BE.global.util.S3Util;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,7 +16,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -30,6 +34,9 @@ class UserProfileServiceTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private S3Util s3Util;
+
     @InjectMocks
     private UserProfileService userProfileService;
 
@@ -41,7 +48,7 @@ class UserProfileServiceTest {
     @Nested
     @DisplayName("createProfile 테스트")
     class CreateProfileTest {
-        void createProfile_success() {
+        void createProfile_success() throws IOException {
             Long userId = 1L;
 
             User user = User.builder()
@@ -69,7 +76,7 @@ class UserProfileServiceTest {
             when(userRepository.findById(userId)).thenReturn(Optional.of(user));
             when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
             when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
-
+            when(s3Util.uploadFile(any(MultipartFile.class))).thenReturn("profile.jpg"); // S3Util 관련 mock 추가
             ProfileRequest dto = ProfileRequest.builder()
                     .nickname("testuser")
                     .gender(Gender.Male)
@@ -79,15 +86,40 @@ class UserProfileServiceTest {
                     .profileImage("profile.jpg")
                     .build();
 
-            userProfileService.createProfile(userId, dto);
+            userProfileService.createProfile(userId, dto,null);
 
             assertThat(userProfile.getNickName()).isEqualTo(dto.getNickname());
             verify(userProfileRepository, times(1)).save(any(UserProfile.class));
+            verify(userRepository, times(1)).findById(userId);
+            verify(userProfileRepository, times(1)).findByUserId(userId);
         }
+
+        @Test // 이미지 업로드 테스트 추가
+        void createProfile_withImage_success() throws IOException {
+            Long userId = 1L;
+            User user = User.builder().id(userId).email("test@example.com").build();
+            UserProfile savedUserProfile = UserProfile.builder().userId(userId).nickName("testuser").gender(Gender.Male).profileImage("s3-profile.jpg").latitude(37.5665).longitude(126.9780).birthdate(LocalDate.of(2000, 1, 1)).user(user).build(); // 처음부터 S3 URL로 설정
+            MockMultipartFile imageFile = new MockMultipartFile("profileImage", "image.jpg", "image/jpeg", "some image".getBytes());
+            ProfileRequest dto = ProfileRequest.builder().nickname("testuser").gender(Gender.Male).latitude(37.5665).longitude(126.9780).birthdate(LocalDate.of(2000, 1, 1)).profileImage("profile.jpg").build();
+
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+            when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.empty());
+            when(userProfileRepository.save(any(UserProfile.class))).thenReturn(savedUserProfile); // 저장 시 S3 URL을 가진 객체 반환
+            when(s3Util.uploadFile(any(MultipartFile.class))).thenReturn("s3-profile.jpg"); // S3 URL 반환 가정
+
+            ProfileResponse response = userProfileService.createProfile(userId, dto, imageFile); // 반환되는 ProfileResponse 캡처
+
+            assertThat(response.getProfileImage()).isEqualTo("s3-profile.jpg"); // ProfileResponse의 이미지 URL 검증
+            verify(userProfileRepository, times(1)).save(any(UserProfile.class));
+            verify(userRepository, times(1)).findById(userId);
+            verify(userProfileRepository, times(1)).findByUserId(userId);
+            verify(s3Util, times(1)).uploadFile(any(MultipartFile.class));
+        }
+
 
         @Test
         @DisplayName("이미 프로필이 등록된 경우 예외를 던진다.")
-        void createProfile_alreadyExists() {
+        void createProfile_alreadyExists() throws IOException {
             // given
             Long userId = 1L;
             UserProfile existingUserProfile = new UserProfile();
@@ -107,12 +139,15 @@ class UserProfileServiceTest {
             when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(existingUserProfile)); // 이미 존재하는 프로필 반환
 
             // when & then
-            assertThatThrownBy(() -> userProfileService.createProfile(userId, dto))
+            assertThatThrownBy(() -> userProfileService.createProfile(userId, dto,null))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("이미 프로필이 등록된 사용자입니다.");
 
             // save 메서드가 호출되지 않았는지 확인 (테스트의 의도에 따라 추가)
             verify(userProfileRepository, never()).save(any(UserProfile.class));
+            verify(userRepository, times(1)).findById(userId);
+            verify(userProfileRepository, times(1)).findByUserId(userId);
+            verify(s3Util, never()).uploadFile(any(MultipartFile.class)); // 이미지 업로드 안했으므로 호출 안됨
         }
 
         @Nested
@@ -121,7 +156,7 @@ class UserProfileServiceTest {
 
             @Test
             @DisplayName("정상적으로 프로필을 수정한다.")
-            void updateProfile_success() {
+            void updateProfile_success() throws IOException {
                 // given
                 Long userId = 1L;
 
@@ -160,9 +195,10 @@ class UserProfileServiceTest {
                 // mock 동작 정의
                 when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(existingUserProfile));
                 when(userProfileRepository.save(any(UserProfile.class))).thenReturn(updatedUserProfile); // 업데이트된 객체 반환
-
+                doNothing().when(s3Util).deleteFile(anyString());// S3Util 관련 mock 추가 (삭제될 수 있음)
+                when(s3Util.uploadFile(any(MultipartFile.class))).thenReturn("new.jpg"); // S3Util 관련 mock 추가
                 // when
-                ProfileResponse responseDto = userProfileService.updateProfile(userId, dto);
+                ProfileResponse responseDto = userProfileService.updateProfile(userId, dto,null);
 
                 // then
                 assertThat(responseDto.getNickname()).isEqualTo(dto.getNickname());
