@@ -71,9 +71,3 @@ dependencies {
 test {
     useJUnitPlatform() // JUnit5로 테스트 실행
 }
-
-processResources {
-    from('src/main/resources') {
-        include 'application-secret.yml'
-    }
-}
