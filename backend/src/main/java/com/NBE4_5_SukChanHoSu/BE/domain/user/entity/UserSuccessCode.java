@@ -6,7 +6,10 @@ import lombok.Getter;
 public enum UserSuccessCode {
     JOIN_SUCCESS("200-1", "회원가입이 완료되었습니다."),
     LOGIN_SUCCESS("200-2", "로그인이 완료되었습니다."),
-    LOGOUT_SUCCESS("200-3", "로그아웃이 완료되었습니다.");
+    LOGOUT_SUCCESS("200-3", "로그아웃이 완료되었습니다."),
+    WITHDREW_SUCCESS("200-4", "회원탈퇴가 완료되었습니다."),
+    PROFILE_FETCH_SUCCESS("200-5", "프로필 조회 성공"),
+    REISSUE_SUCCESS("200-6", "accessToken 재발급 성공");
 
     private final String code;
     private final String message;
