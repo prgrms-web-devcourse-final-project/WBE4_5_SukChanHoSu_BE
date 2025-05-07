@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.email.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.email.dto.request.EmailDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.email.service.EmailService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import jakarta.mail.MessagingException;
@@ -34,11 +35,20 @@ public class EmailController {
         }
     }
 
-//    // 인증코드 인증
-//    @PostMapping("/verify")
-//    public String verify(EmailDto emailDto) {
-//        log.info("EmailController.verify()");
-//        boolean isVerify = emailService.verifyEmailCode(emailDto.getMail(), emailDto.getVerifyCode());
-//        return isVerify ? "인증이 완료되었습니다." : "인증 실패하셨습니다.";
-//    }
+    // 인증코드 인증
+    @PostMapping("/verify")
+    public RsData<?> verify(EmailDto emailDto) {
+        log.info("EmailController.verify()");
+        boolean isVerify = emailService.verifyEmailCode(emailDto.getMail(), emailDto.getVerifyCode());
+        if (isVerify) {
+            return new RsData<>(
+                    "200",
+                    "인증이 완료되었습니다."
+            );
+        }
+        return new RsData<>(
+                "400",
+                "인증이 실패했습니다."
+        );
+    }
 }
