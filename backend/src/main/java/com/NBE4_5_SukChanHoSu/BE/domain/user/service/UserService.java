@@ -12,11 +12,14 @@ import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.concurrent.TimeUnit;
 
 @Slf4j
 @Service
@@ -25,9 +28,21 @@ public class UserService {
     private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
+    private final RedisTemplate<String, String> redisTemplate;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private static final String EMAIL_VERIFY = "emailVerify:";
+    private static final String TRUE = "true";
+
 
     public User join(UserSignUpRequest requestDto) {
+        String verified = redisTemplate.opsForValue().get(EMAIL_VERIFY + requestDto.getEmail());
+        if (!TRUE.equals(verified)) {
+            throw new ServiceException(
+                    UserErrorCode.EMAIL_NOT_VERIFY.getCode(),
+                    UserErrorCode.EMAIL_NOT_VERIFY.getMessage()
+            );
+        }
+
         if (!requestDto.getPassword().equals(requestDto.getPasswordConfirm())) {
             throw new ServiceException(
                     UserErrorCode.PASSWORDS_NOT_MATCH.getCode(),
@@ -47,6 +62,7 @@ public class UserService {
                 .email(requestDto.getEmail())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
                 .role(Role.USER)
+                .emailVerified(true)
                 .build();
 
         return userRepository.save(user);
