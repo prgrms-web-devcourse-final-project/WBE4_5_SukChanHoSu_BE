@@ -42,6 +42,7 @@ spring:
             scope:
               - profile
               - email
+            redirect-uri: https://api.app.mm.ts0608.life/login/oauth2/code/google
   data:
     redis:
       host: ${REDIS.HOST}
