@@ -3,6 +3,10 @@ spring:
     redis:
       host: ${REDIS.HOST}
       port: ${REDIS.PORT}
+      time_to_live:
+        likes: 86400 # 24h
+        liked: 86400 # 24h
+        matching: 3600 # 1h
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DATABASE.URL}

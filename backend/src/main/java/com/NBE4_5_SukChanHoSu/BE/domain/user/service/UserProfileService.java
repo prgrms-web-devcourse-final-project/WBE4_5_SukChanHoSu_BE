@@ -37,7 +37,7 @@ public class UserProfileService {
 
     @Transactional
     public ProfileResponse createProfile(Long userId, ProfileRequest dto) {
-        User user = userRepository.findById(userId)
+        User    user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
 
         // 해당 userId를 가진 UserProfile이 이미 존재하는지 확인
@@ -48,7 +48,21 @@ public class UserProfileService {
         // 프로필이 없으면 새로 생성
         if (!existingProfile.isPresent()) {
             userProfile = new UserProfile();
-            userProfile.setUser(user);
+            userProfile = UserProfile.builder()
+                    .user(user)
+                    .nickName(dto.getNickname())
+                    .gender(dto.getGender())
+                    .profileImage(dto.getProfileImage())
+                    .latitude(dto.getLatitude())
+                    .longitude(dto.getLongitude())
+                    .birthdate(dto.getBirthdate())
+                    .introduce(dto.getIntroduce())
+                    .searchRadius(dto.getSearchRadius())
+                    .lifeMovie(dto.getLifeMovie())
+                    .favoriteGenres(dto.getFavoriteGenres())
+                    .watchedMovies(dto.getWatchedMovies())
+                    .preferredTheaters(dto.getPreferredTheaters())
+                    .build();
             // User 엔티티 연결 (가정: User 엔티티는 이미 존재한다고 가정)
             // User user = userRepository.findById(userId)
             //        .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
@@ -58,7 +72,7 @@ public class UserProfileService {
             throw new IllegalStateException("이미 프로필이 등록된 사용자입니다.");
         }
 
-        updateEntityFromRequest(userProfile, dto);
+//        updateEntityFromRequest(userProfile, dto);
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);
         return new ProfileResponse(savedUserProfile); // toDto 대신 생성자 직접 호출
     }
@@ -68,7 +82,22 @@ public class UserProfileService {
         UserProfile userProfile = userProfileRepository.findByUserId(userId) // 수정: findById -> findByUserId
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        updateEntityFromUpdateRequest(userProfile, dto);
+        userProfile = UserProfile.builder()
+                .user(userProfile.getUser()) // 기존 User 연결 유지
+                .userId(userProfile.getUserId()) // 기존 ID 유지
+                .nickName(dto.getNickname())
+                .gender(dto.getGender())
+                .profileImage(dto.getProfileImage())
+                .latitude(dto.getLatitude())
+                .longitude(dto.getLongitude())
+                .birthdate(dto.getBirthdate())
+                .introduce(dto.getIntroduce())
+                .searchRadius(dto.getSearchRadius())
+                .lifeMovie(dto.getLifeMovie())
+                .favoriteGenres(dto.getFavoriteGenres())
+                .watchedMovies(dto.getWatchedMovies())
+                .preferredTheaters(dto.getPreferredTheaters())
+                .build();
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);
         return new ProfileResponse(savedUserProfile);
     }
@@ -82,35 +111,35 @@ public class UserProfileService {
         return new ProfileResponse(userProfile);
     }
 
-    private void updateEntityFromRequest(UserProfile profile, ProfileRequest dto) {
-        profile.setNickName(dto.getNickname());
-        profile.setGender(dto.getGender());
-        profile.setProfileImage(dto.getProfileImage());
-        profile.setLatitude(dto.getLatitude());
-        profile.setLongitude(dto.getLongitude());
-        profile.setBirthdate(dto.getBirthdate());
-        profile.setIntroduce(dto.getIntroduce());
-        profile.setSearchRadius(dto.getSearchRadius());
-        profile.setLifeMovie(dto.getLifeMovie());
-        profile.setFavoriteGenres(dto.getFavoriteGenres());
-        profile.setWatchedMovies(dto.getWatchedMovies());
-        profile.setPreferredTheaters(dto.getPreferredTheaters());
-    }
-
-    private void updateEntityFromUpdateRequest(UserProfile profile, ProfileUpdateRequest dto) {
-        profile.setNickName(dto.getNickname());
-        profile.setGender(dto.getGender());
-        profile.setProfileImage(dto.getProfileImage());
-        profile.setLatitude(dto.getLatitude());
-        profile.setLongitude(dto.getLongitude());
-        profile.setBirthdate(dto.getBirthdate());
-        profile.setIntroduce(dto.getIntroduce());
-        profile.setSearchRadius(dto.getSearchRadius());
-        profile.setLifeMovie(dto.getLifeMovie());
-        profile.setFavoriteGenres(dto.getFavoriteGenres());
-        profile.setWatchedMovies(dto.getWatchedMovies());
-        profile.setPreferredTheaters(dto.getPreferredTheaters());
-    }
+//    private void updateEntityFromRequest(UserProfile profile, ProfileRequest dto) {
+//        profile.setNickName(dto.getNickname());
+//        profile.setGender(dto.getGender());
+//        profile.setProfileImage(dto.getProfileImage());
+//        profile.setLatitude(dto.getLatitude());
+//        profile.setLongitude(dto.getLongitude());
+//        profile.setBirthdate(dto.getBirthdate());
+//        profile.setIntroduce(dto.getIntroduce());
+//        profile.setSearchRadius(dto.getSearchRadius());
+//        profile.setLifeMovie(dto.getLifeMovie());
+//        profile.setFavoriteGenres(dto.getFavoriteGenres());
+//        profile.setWatchedMovies(dto.getWatchedMovies());
+//        profile.setPreferredTheaters(dto.getPreferredTheaters());
+//    }
+//
+//    private void updateEntityFromUpdateRequest(UserProfile profile, ProfileUpdateRequest dto) {
+//        profile.setNickName(dto.getNickname());
+//        profile.setGender(dto.getGender());
+//        profile.setProfileImage(dto.getProfileImage());
+//        profile.setLatitude(dto.getLatitude());
+//        profile.setLongitude(dto.getLongitude());
+//        profile.setBirthdate(dto.getBirthdate());
+//        profile.setIntroduce(dto.getIntroduce());
+//        profile.setSearchRadius(dto.getSearchRadius());
+//        profile.setLifeMovie(dto.getLifeMovie());
+//        profile.setFavoriteGenres(dto.getFavoriteGenres());
+//        profile.setWatchedMovies(dto.getWatchedMovies());
+//        profile.setPreferredTheaters(dto.getPreferredTheaters());
+//    }
 
     public UserProfile findUser(Long userId) {
         UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
@@ -192,6 +221,66 @@ public class UserProfileService {
 
 
     // 추천 알고리즘
+//    public UserProfileResponse recommend(UserProfile userProfile) {
+//        Long userId = userProfile.getUserId();
+//        List<UserProfile> alreadyRecommended = recommendedUsersMap.computeIfAbsent(userId, k -> new ArrayList<>());
+//        int radius = userProfile.getSearchRadius();
+//        UserProfile nextRecommendation = null;
+//        int nextMaxScore = -1;
+//        int nextRecommendDistance = -1;
+//
+//        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+//        List<UserProfile> profileByGender = findProfileByGender(userProfile);
+//
+//        // 거리 및 태그
+//        for (UserProfile profile : profileByGender) {
+//            if (alreadyRecommended.contains(profile)) {
+//                continue;
+//            }
+//
+//            LocalDateTime lastLikeTime = userLikesRepository.findLastLikeTimeByUserId(profile.getUserId());
+//            if (lastLikeTime == null || lastLikeTime.isBefore(oneMonthAgo)) {
+//                continue;
+//            }
+//
+//            int distance = calDistance(userProfile, profile);
+//            int distanceScore = 0;
+//            int tagScore = 0;
+//            int totalScore = -1;
+//
+//            if (distance <= radius) {
+//                distanceScore = 100 - (distance * 3);
+//                for (Genre genre : profile.getFavoriteGenres()) {
+//                    if (userProfile.getFavoriteGenres().contains(genre)) {
+//                        tagScore += 10;
+//                    }
+//                }
+//            }
+//            totalScore = distanceScore + tagScore;
+//
+//            if (totalScore > nextMaxScore) {
+//                nextMaxScore = totalScore;
+//                nextRecommendDistance = distance;
+//                nextRecommendation = profile;
+//            }
+//        }
+//
+//        // 추천할 사용자가 있는 경우
+//        if(recommendedUser != null) {
+//            recommendedUsers.add(recommendedUser);  // 리스트에 등록
+//            recommendedUsersMap.put(userId, recommendedUsers); // 사용자별 리스트 업데이트
+//            System.out.println("리스트관리: "+recommendedUsers);
+//            return new UserProfileResponse(recommendedUser,recommendDistance);
+//        }
+//
+//        if (nextRecommendation != null) {
+//            alreadyRecommended.add(nextRecommendation);
+//            recommendedUsersMap.put(userId, alreadyRecommended);
+//            return new UserProfileResponse(nextRecommendation, nextRecommendDistance);
+//        }
+//
+//        throw new NoRecommendException("404", "추천할 사용자가 없습니다.");
+//    }
     public UserProfileResponse recommend(UserProfile userProfile) {
         Long userId = userProfile.getUserId();
         List<UserProfile> alreadyRecommended = recommendedUsersMap.computeIfAbsent(userId, k -> new ArrayList<>());
@@ -203,6 +292,7 @@ public class UserProfileService {
         LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
         List<UserProfile> profileByGender = findProfileByGender(userProfile);
 
+        // 거리 및 태그
         for (UserProfile profile : profileByGender) {
             if (alreadyRecommended.contains(profile)) {
                 continue;

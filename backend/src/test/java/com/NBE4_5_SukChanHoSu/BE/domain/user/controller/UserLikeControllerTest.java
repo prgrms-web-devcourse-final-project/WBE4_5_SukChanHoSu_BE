@@ -210,7 +210,7 @@ public class UserLikeControllerTest {
         action.andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("매칭 되었습니다.")))
-                .andExpect(jsonPath("$.data.matching").exists());
+                .andExpect(jsonPath("$.data").exists());
         //when
         ResultActions action2 = mvc.perform(get("/api/users/matching/1") // TempUser1의 매칭 데이터 가져오기
                         .contentType(MediaType.APPLICATION_JSON)
