@@ -109,7 +109,7 @@ public class UserLikeControllerTest {
     @DisplayName("사용자의 like 목록 가져오기")
     void getUserLikes() throws Exception {
         //given
-        setUpLike(2L);
+        setUpLike(12L);
 
         //when
         ResultActions action = mvc.perform(get("/api/users/like") // TempUser1의 like 데이터 가져오기
@@ -297,11 +297,11 @@ public class UserLikeControllerTest {
     @DisplayName("like 취소 - like 상태")
     void cancelLikeUser() throws Exception {
         // given
-        setUpLike(2L);
+        setUpLike(12L);
 
         // when
         ResultActions action = mvc.perform(delete("/api/users/like")
-                        .param("toUserId","2")
+                        .param("toUserId","12")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
