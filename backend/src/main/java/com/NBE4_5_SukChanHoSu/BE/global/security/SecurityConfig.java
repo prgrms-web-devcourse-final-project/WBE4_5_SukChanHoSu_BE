@@ -35,6 +35,8 @@ public class SecurityConfig {
                                 .requestMatchers("/oauth2/**", "/api/auth/**").permitAll()
                                 // Swagger
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                // Actuator
+                                .requestMatchers("/actuator/**").permitAll()
                                 .requestMatchers("/.well-known/**").permitAll()
 
                                 // Public endpoints
