@@ -70,6 +70,16 @@ public class UserProfileController {
         return new RsData<>("200", "프로필 조회 성공", profile.getUser());
     }
 
+    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
+    @GetMapping("/profile/me")
+    //todo 임시, 이후 삭제
+    public RsData<UserProfile> getMyProfile() {
+        User user = SecurityUtil.getCurrentUser();
+        Long profileId = user.getUserProfile().getUserId();
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
+    }
+
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
     @PutMapping("/radius")
     public RsData<?> setRadius(@RequestParam Integer radius) {

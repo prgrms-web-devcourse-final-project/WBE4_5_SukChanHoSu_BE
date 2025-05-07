@@ -182,7 +182,7 @@ class UserProfileControllerTest {
                 .andExpect(jsonPath("$.message",containsString("성공")))
                 .andExpect(jsonPath("$.data.searchRadius").value(radius));
 
-        mvc.perform(get("/api/profile/profile/me")
+        mvc.perform(get("/api/profile/user")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
                         .andExpect(jsonPath("$.code").value("200"))

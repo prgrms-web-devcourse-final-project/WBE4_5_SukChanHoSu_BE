@@ -9,6 +9,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.redis.RedisSerializationException;
 import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
@@ -104,7 +105,6 @@ public class UserLikeService {
         if(!keys.isEmpty()){
             ObjectMapper mapper = new ObjectMapper();
             for(String key : keys){
-                System.out.println("###key: " + key);
                 Object value = redisTemplate.opsForValue().get(key);
                 if (value instanceof Map) {
                     Map<String, Object> map = (Map<String, Object>) value;  // Map(키-값 쌍)으로 캐스팅
@@ -113,8 +113,7 @@ public class UserLikeService {
                         int radius = userProfileService.calDistance(like.getFromUser(), like.getToUser());  // 거리 계산
                         likesUsers.add(new UserProfileResponse(like.getToUser(), radius));  // 메모리에 추가
                     }catch (IllegalArgumentException e){
-                        System.err.println("JSON 역직렬화 실패: " + e.getMessage());
-                        e.printStackTrace();    // todo 예외 처리
+                        throw new RedisSerializationException("500","JSON 역직렬화 실패");
                     }
                 }
             }
@@ -154,8 +153,7 @@ public class UserLikeService {
                         int distance = userProfileService.calDistance(like.getFromUser(), like.getToUser());    // 거리 계산
                         likedUsers.add(new UserProfileResponse(like.getFromUser(), distance));
                     }catch (IllegalArgumentException e){
-                        System.err.println("JSON 역직렬화 실패: " + e.getMessage());
-                        e.printStackTrace();
+                        throw new RedisSerializationException("500","JSON 역직렬화 실패");
                     }
                 }
             }
@@ -201,8 +199,7 @@ public class UserLikeService {
                             responses.add(new UserMatchingResponse(matching.getFemaleUser(),matching,distance));
 
                         }catch (IllegalArgumentException e){
-                            System.err.println("JSON 역직렬화 실패: " + e.getMessage());
-                            e.printStackTrace();
+                            throw new RedisSerializationException("500","JSON 역직렬화 실패");
                         }
                     }
                 }
@@ -238,8 +235,7 @@ public class UserLikeService {
                             responses.add(new UserMatchingResponse(matching.getMaleUser(),matching,distance));
                             System.out.println("추출한 유저: " + matching.getMaleUser());
                         }catch (IllegalArgumentException e){
-                            System.err.println("JSON 역직렬화 실패: " + e.getMessage());
-                            e.printStackTrace();
+                            throw new RedisSerializationException("500","JSON 역직렬화 실패");
                         }
                     }
                 }
