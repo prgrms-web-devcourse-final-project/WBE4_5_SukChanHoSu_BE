@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -35,6 +36,6 @@ public class User {
     private String providerId;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonBackReference // 직렬화
+    @JsonIgnoreProperties({"likes", "likedBy", "maleMatchings", "femaleMatchings","user"})
     private UserProfile userProfile;
 }
