@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.chat;
+package com.NBE4_5_SukChanHoSu.BE.domain.chat.dto;
 
 import lombok.Getter;
 import lombok.NoArgsConstructor;
