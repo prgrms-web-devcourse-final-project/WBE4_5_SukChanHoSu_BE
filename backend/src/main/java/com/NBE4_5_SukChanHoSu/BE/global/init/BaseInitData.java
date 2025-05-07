@@ -49,6 +49,11 @@ public class BaseInitData {
 
 	@Transactional
 	public void profileInit() {
+		if (userRepository.count() > 0) {
+			System.out.println("⚠️ 유저가 이미 존재하여 profileInit() 스킵됨.");
+			return;
+		}
+
 		Random random = new Random();
 
 		for (int i = 1; i <= 10; i++) {
