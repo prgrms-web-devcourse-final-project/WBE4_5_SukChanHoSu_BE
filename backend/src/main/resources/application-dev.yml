@@ -47,3 +47,11 @@ logging:
     org.hibernate.orm.jdbc.bind: trace
     orh.hibernate.orm.jdbc.extract: trace
     org.springframework.transaction.interceptor: trace
+
+movie:
+  api:
+    key: ${MOVIE.API.KEY}
+    key2: ${MOVIE.API.KEY2}
+    rank-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchWeeklyBoxOfficeList.json"
+    detail-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json"
+    tmdb-search-url: "https://api.themoviedb.org/3/search/movie"
