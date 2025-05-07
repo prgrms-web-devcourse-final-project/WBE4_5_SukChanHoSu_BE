@@ -64,8 +64,8 @@ public class UserService {
 
         if (!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
             throw new ServiceException(
-                    UserErrorCode.PASSWORD_INVALID.getCode(),
-                    UserErrorCode.PASSWORD_INVALID.getMessage()
+                    UserErrorCode.PASSWORDS_NOT_MATCH.getCode(),
+                    UserErrorCode.PASSWORDS_NOT_MATCH.getMessage()
             );
         }
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(requestDto.getEmail(), requestDto.getPassword());
@@ -75,20 +75,20 @@ public class UserService {
     }
 
     public User getUserById(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
-        return user;
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException(
+                                UserErrorCode.USER_NOT_FOUND.getCode(),
+                                UserErrorCode.USER_NOT_FOUND.getMessage()
+                        )
+                );
     }
 
-    public void logout(String accessToken, String refreshToken) {
-        if (accessToken == null || refreshToken == null) {
-            throw new RuntimeException("오류");
-        }
+    public void logout(String refreshToken) {
+        long expirationTime = tokenService.getExpirationTimeFromToken(refreshToken);
+        tokenService.addToBlacklist(refreshToken, expirationTime);
+    }
 
-        String email = tokenService.getEmailFromToken(refreshToken);
-        tokenService.deleteRefreshToken(email);
-
-        long expirationTime = tokenService.getExpirationTimeFromToken(accessToken);
-        tokenService.addToBlacklist(accessToken, expirationTime);
+    public void deleteUser(User user) {
+        userRepository.delete(user);
     }
 }

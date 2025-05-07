@@ -4,12 +4,14 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Getter
 @AllArgsConstructor
+@SuperBuilder
 public class ProfileRequest {
 
     private String nickname;

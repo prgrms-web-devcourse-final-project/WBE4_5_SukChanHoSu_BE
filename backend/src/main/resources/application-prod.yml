@@ -31,6 +31,10 @@ spring:
       host: ${REDIS.HOST}
       port: ${REDIS.PORT}
       password: ${REDIS.PASSWORD}
+      time_to_live:
+        likes: 86400 # 24h
+        liked: 86400 # 24h
+        matching: 3600 # 1h
   logging:
     level:
       com.example: INFO

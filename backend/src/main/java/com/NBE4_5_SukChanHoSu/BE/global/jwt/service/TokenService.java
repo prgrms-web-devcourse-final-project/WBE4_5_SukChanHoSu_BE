@@ -1,8 +1,13 @@
 package com.NBE4_5_SukChanHoSu.BE.global.jwt.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.security.BlacklistedTokenException;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.security.InvalidRefreshTokenException;
+import com.NBE4_5_SukChanHoSu.BE.global.jwt.dto.TokenResponse;
 import com.NBE4_5_SukChanHoSu.BE.global.security.PrincipalDetails;
 import com.NBE4_5_SukChanHoSu.BE.global.util.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -59,29 +64,34 @@ public class TokenService {
     }
 
     public LoginResponse generateToken(Authentication authentication) {
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        long now = (new Date()).getTime();
-
-        Date accessTokenExpiresIn = new Date(now + accessTokenExpiration);
-        String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
-                .claim(AUTHORITIES_KEY, authorities)
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-        String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + refreshTokenExpiration))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+        String accessToken = createAccessToken(authentication.getName());
+        String refreshToken = createRefreshToken(authentication.getName());
 
         return LoginResponse.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public String createAccessToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .claim(AUTHORITIES_KEY, Role.USER)
+                .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+    public String createRefreshToken(String email) {
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .claim(AUTHORITIES_KEY, Role.USER)
+                .setExpiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public Authentication getAuthentication(String accessToken) {
@@ -103,12 +113,12 @@ public class TokenService {
     }
 
     // 토큰 정보를 검증하는 메서드
-    public boolean validateToken(String token) {
+    public boolean validateToken(String accessToken) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(token);
+                    .parseClaimsJws(accessToken);
             return true;
         } catch (SecurityException | MalformedJwtException e) {
             log.info("Invalid JWT Token", e);
@@ -150,6 +160,28 @@ public class TokenService {
     public void addToBlacklist(String accessToken, long expirationTime) {
         String key = BLACKLIST_PREFIX + accessToken;
         redisTemplate.opsForValue().set(key, "blacklist", expirationTime, TimeUnit.MILLISECONDS);
+    }
+
+    public TokenResponse reissueAccessToken(String refreshToken) {
+        if (!validateToken(refreshToken)) {
+            throw new InvalidRefreshTokenException(
+                    UserErrorCode.INVALID_REFRESH_TOKEN.getCode(),
+                    UserErrorCode.INVALID_REFRESH_TOKEN.getMessage()
+            );
+        }
+
+        String email = getEmailFromToken(refreshToken);
+
+        String isBlacklisted = redisTemplate.opsForValue().get(refreshToken);
+        if (isBlacklisted != null) {
+            throw new BlacklistedTokenException(
+                    UserErrorCode.BLACKLISTED_REFRESH_TOKEN.getCode(),
+                    UserErrorCode.BLACKLISTED_REFRESH_TOKEN.getMessage());
+        }
+
+        String newAccessToken = createAccessToken(email);
+
+        return new TokenResponse(newAccessToken, refreshToken);
     }
 }
 
