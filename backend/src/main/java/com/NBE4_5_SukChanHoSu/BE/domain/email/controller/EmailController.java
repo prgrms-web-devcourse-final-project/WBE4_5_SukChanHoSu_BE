@@ -20,12 +20,13 @@ public class EmailController {
     private final EmailService emailService;
 
     @PostMapping("/send")
-    public RsData<?> mailSend(@RequestParam String email) throws MessagingException {
+    public RsData<String> mailSend(@RequestParam String email) throws MessagingException {
         try {
-            emailService.sendSimpleMessage(email);
+            String authCode = emailService.sendSimpleMessage(email);
             return new RsData<>(
                     "200",
-                    "메일 전송 성공"
+                    "메일 전송 성공",
+                    authCode
             );
         } catch (MailException e) {
             return new RsData<>(
@@ -35,10 +36,8 @@ public class EmailController {
         }
     }
 
-    // 인증코드 인증
     @PostMapping("/verify")
     public RsData<?> verify(EmailDto emailDto) {
-        log.info("EmailController.verify()");
         boolean isVerify = emailService.verifyEmailCode(emailDto.getMail(), emailDto.getVerifyCode());
         if (isVerify) {
             return new RsData<>(
