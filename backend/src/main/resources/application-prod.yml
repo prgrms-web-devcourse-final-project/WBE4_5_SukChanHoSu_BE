@@ -45,7 +45,7 @@ spring:
             redirect-uri: https://api.app.mm.ts0608.life/login/oauth2/code/google
   data:
     redis:
-      host: redis_1
+      host: 172.18.0.2
       port: 6379
       password: 0914
       time_to_live:
