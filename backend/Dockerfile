@@ -12,6 +12,8 @@ RUN ./gradlew dependencies --no-daemon
 
 COPY src src
 
+COPY src/main/resources/application-secret.yml src/main/resources/
+
 RUN ./gradlew build -x test --no-daemon
 
 RUN rm -rf /app/build/libs/*-plain.jar
