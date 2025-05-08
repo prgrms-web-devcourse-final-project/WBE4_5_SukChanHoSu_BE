@@ -53,7 +53,7 @@ public class UserLikeControllerTest {
     @DisplayName("로그인")
     void login() {
         // given
-        String email = "testUser1@example.com";
+        String email = "initUser1@example.com";
         String rawPassword = "testPassword123!";
 
         // 로그인
