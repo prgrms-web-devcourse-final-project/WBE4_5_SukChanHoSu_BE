@@ -1,0 +1,66 @@
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: howns10221@gmail.com
+    password: rola qhya inua ujrp
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+      auth-code-expiration-millis: 300000  # 5 * 60 * 1000(밀리초) == 5분
+  data:
+    redis:
+      host: ${REDIS.HOST}
+      port: ${REDIS.PORT}
+      time_to_live:
+        likes: 86400 # 24h
+        liked: 86400 # 24h
+        matching: 3600 # 1h
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DATABASE.URL}
+    username: ${DATABASE.USERNAME}
+    password: ${DATABASE.PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE.CLIENT_ID}
+            client-secret: ${GOOGLE.SECURITY_PASSWORD}
+            scope:
+              - profile
+              - email
+            redirect-uri: https://api.app.mm.ts0608.life/login/oauth2/code/google
+
+jwt:
+  secret: ${JWT.SECRET}
+  expiration:
+    access-token: ${JWT.EXPIRATION.ACCESS_TOKEN}
+    refresh-token: ${JWT.EXPIRATION.REFRESH_TOKEN}
+  cookie-domain: ${JWT.COOKIE_DOMAIN}
+  cookie-path: ${JWT.COOKIE_PATH}
+
+
+logging:
+  level:
+    org.hibernate.sql: debug
+    org.hibernate.orm.jdbc.bind: trace
+    orh.hibernate.orm.jdbc.extract: trace
+    org.springframework.transaction.interceptor: trace
