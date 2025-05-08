@@ -8,13 +8,19 @@ public class MovieRankingResponse {
     private String movieNm; // 영화명
     private String posterUrl; // 포스터 URL
     private String movieCd;
-    private long audiAcc;
+    private String audiAcc;
 
     public MovieRankingResponse(int rank, String movieNm, String posterUrl, long audiAcc, String movieCd) {
         this.rank = rank;
         this.movieNm = movieNm;
         this.posterUrl = posterUrl;
         this.movieCd = movieCd;
-        this.audiAcc = audiAcc;
+        this.audiAcc = formatAudiAcc(audiAcc);
+    }
+
+    // 관객수를 만 단위로 변환 (천 단위는 버림)
+    private String formatAudiAcc(long audiAcc) {
+        long audiAccInTenThousand = audiAcc / 10000; // 만 단위로 변환
+        return audiAccInTenThousand + "만";
     }
 }
