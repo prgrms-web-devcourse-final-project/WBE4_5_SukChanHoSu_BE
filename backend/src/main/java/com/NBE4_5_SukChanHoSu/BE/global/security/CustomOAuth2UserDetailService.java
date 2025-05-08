@@ -11,18 +11,21 @@ import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
+    private static final String GOOGLE_PREFIX  = "google";
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
         OAuth2User oAuth2User = super.loadUser(oAuth2UserRequest);
 
         OAuth2UserInfo oAuth2UserInfo = null;
-        if (oAuth2UserRequest.getClientRegistration().getRegistrationId().equals("google")) {
+        if (oAuth2UserRequest.getClientRegistration().getRegistrationId().equals(GOOGLE_PREFIX)) {
             oAuth2UserInfo = new GoogleUserInfo(oAuth2User.getAttributes());
         }
 
@@ -35,12 +38,13 @@ public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
 
         if (user == null) {
             user = User.builder()
-                    .password(provider)
+                    .password(UUID.randomUUID().toString())
                     .email(email)
                     .role(Role.USER)
                     .name(name)
                     .provider(provider)
                     .providerId(providerId)
+                    .emailVerified(true)
                     .build();
             userRepository.save(user);
         }

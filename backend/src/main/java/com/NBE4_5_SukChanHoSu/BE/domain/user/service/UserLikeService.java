@@ -9,6 +9,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.redis.RedisSerializationException;
 import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
@@ -101,11 +102,9 @@ public class UserLikeService {
         Set<String> keys = redisTemplate.keys(pattern);
 
         // 레디스에 값이 있는 경우
-        if(keys != null && !keys.isEmpty()){
-            System.out.println("=====레디스 확인======");
+        if(!keys.isEmpty()){
             ObjectMapper mapper = new ObjectMapper();
             for(String key : keys){
-                System.out.println("###key: " + key);
                 Object value = redisTemplate.opsForValue().get(key);
                 if (value instanceof Map) {
                     Map<String, Object> map = (Map<String, Object>) value;  // Map(키-값 쌍)으로 캐스팅
@@ -114,13 +113,11 @@ public class UserLikeService {
                         int radius = userProfileService.calDistance(like.getFromUser(), like.getToUser());  // 거리 계산
                         likesUsers.add(new UserProfileResponse(like.getToUser(), radius));  // 메모리에 추가
                     }catch (IllegalArgumentException e){
-                        System.err.println("JSON 역직렬화 실패: " + e.getMessage());
-                        e.printStackTrace();    // todo 예외 처리
+                        throw new RedisSerializationException("500","JSON 역직렬화 실패");
                     }
                 }
             }
         }else{
-            System.out.println("=====레디스에 없음=====");
             for(UserLikes like: user.getLikes()) {  // 내가 좋아요한 사용자 목록
                 UserProfile likedUser = like.getToUser();   // 좋아요를 받은 사용자
                 if(likedUser != null) {
@@ -144,27 +141,23 @@ public class UserLikeService {
         Set<String> keys = redisTemplate.keys(pattern);
 
         // 레디스에 값이 있는 경우
-        if(keys != null && !keys.isEmpty()){
-            System.out.println("=====레디스 확인======");
+        if(!keys.isEmpty()){
             ObjectMapper mapper = new ObjectMapper();
             for(String key : keys){
                 System.out.println("###key: " + key);
                 Object value = redisTemplate.opsForValue().get(key);
                 if (value instanceof Map) {
-                    System.out.println("===== 인스턴스 찾음 ======");
                     Map<String,Object> map = (Map<String, Object>) value;
                     try{
                         UserLikes like = mapper.convertValue(map, UserLikes.class);
                         int distance = userProfileService.calDistance(like.getFromUser(), like.getToUser());    // 거리 계산
                         likedUsers.add(new UserProfileResponse(like.getFromUser(), distance));
                     }catch (IllegalArgumentException e){
-                        System.err.println("JSON 역직렬화 실패: " + e.getMessage());
-                        e.printStackTrace();
+                        throw new RedisSerializationException("500","JSON 역직렬화 실패");
                     }
                 }
             }
         }else{
-            System.out.println("=====레디스에 없음=====");
             for(UserLikes like: user.getLikedBy()) {    // 나를 좋아요한 사용자 목록
                 UserProfile likesUser = like.getFromUser(); // 좋아요를 보낸 사용자
                 if(likesUser != null) {
@@ -193,13 +186,11 @@ public class UserLikeService {
             keys = redisTemplate.keys(pattern);
 
             // redis 검색
-            if(keys != null && !keys.isEmpty()){
-                System.out.println("=====레디스 확인======");
+            if(!keys.isEmpty()){
                 ObjectMapper mapper = new ObjectMapper();
                 for(String key : keys){
                     Object value = redisTemplate.opsForValue().get(key);
                     if(value instanceof Map){
-                        System.out.println("===== 인스턴스 찾음 ======");
                         Map<String,Object> map = (Map<String, Object>) value;
                         try{
                             Matching matching = mapper.convertValue(map, Matching.class);
@@ -208,14 +199,12 @@ public class UserLikeService {
                             responses.add(new UserMatchingResponse(matching.getFemaleUser(),matching,distance));
 
                         }catch (IllegalArgumentException e){
-                            System.err.println("JSON 역직렬화 실패: " + e.getMessage());
-                            e.printStackTrace();
+                            throw new RedisSerializationException("500","JSON 역직렬화 실패");
                         }
                     }
                 }
             }else{
                 // DB 조회
-                System.out.println("=====레디스에 없음=====");
                 List<Matching> matches = matchingRepository.findByMaleUser(user);
                 for(Matching matching: matches) {
                     // 매칭된 여자 유저 리스트에 등록
@@ -234,13 +223,11 @@ public class UserLikeService {
             pattern = "matching:*:" + user.getUserId();     // matching:maleId:femaleId
             keys = redisTemplate.keys(pattern);
 
-            if(keys != null && !keys.isEmpty()){
-                System.out.println("=====레디스 확인======");
+            if(!keys.isEmpty()){
                 ObjectMapper mapper = new ObjectMapper();
                 for(String key : keys){
                     Object value = redisTemplate.opsForValue().get(key);
                     if (value instanceof Map) {
-                        System.out.println("===== 인스턴스 찾음 ======");
                         Map<String, Object> map = (Map<String, Object>) value;
                         try {
                             Matching matching = mapper.convertValue(map, Matching.class);
@@ -248,14 +235,12 @@ public class UserLikeService {
                             responses.add(new UserMatchingResponse(matching.getMaleUser(),matching,distance));
                             System.out.println("추출한 유저: " + matching.getMaleUser());
                         }catch (IllegalArgumentException e){
-                            System.err.println("JSON 역직렬화 실패: " + e.getMessage());
-                            e.printStackTrace();
+                            throw new RedisSerializationException("500","JSON 역직렬화 실패");
                         }
                     }
                 }
             }else{
                 // DB 조회
-                System.out.println("=====레디스에 없음=====");
                 List<Matching> matches = matchingRepository.findByFemaleUser(user);
                 for(Matching matching: matches) {
                     // 매칭된 남자 유저 리스트에 등록
