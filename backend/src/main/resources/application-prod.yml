@@ -61,8 +61,8 @@ spring:
 
 movie:
   api:
-    key: ${MOVIE.API.KEY}
-    key2: ${MOVIE.API.KEY2}
+    kofic_key: ${MOVIE.API.KEY}
+    tmdb_key: ${MOVIE.API.KEY2}
     rank-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchWeeklyBoxOfficeList.json"
     detail-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json"
     tmdb-search-url: "https://api.themoviedb.org/3/search/movie"
