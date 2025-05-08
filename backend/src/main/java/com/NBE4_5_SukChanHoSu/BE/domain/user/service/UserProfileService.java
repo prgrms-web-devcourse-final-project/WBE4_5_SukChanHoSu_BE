@@ -111,36 +111,6 @@ public class UserProfileService {
         return new ProfileResponse(userProfile);
     }
 
-//    private void updateEntityFromRequest(UserProfile profile, ProfileRequest dto) {
-//        profile.setNickName(dto.getNickname());
-//        profile.setGender(dto.getGender());
-//        profile.setProfileImage(dto.getProfileImage());
-//        profile.setLatitude(dto.getLatitude());
-//        profile.setLongitude(dto.getLongitude());
-//        profile.setBirthdate(dto.getBirthdate());
-//        profile.setIntroduce(dto.getIntroduce());
-//        profile.setSearchRadius(dto.getSearchRadius());
-//        profile.setLifeMovie(dto.getLifeMovie());
-//        profile.setFavoriteGenres(dto.getFavoriteGenres());
-//        profile.setWatchedMovies(dto.getWatchedMovies());
-//        profile.setPreferredTheaters(dto.getPreferredTheaters());
-//    }
-//
-//    private void updateEntityFromUpdateRequest(UserProfile profile, ProfileUpdateRequest dto) {
-//        profile.setNickName(dto.getNickname());
-//        profile.setGender(dto.getGender());
-//        profile.setProfileImage(dto.getProfileImage());
-//        profile.setLatitude(dto.getLatitude());
-//        profile.setLongitude(dto.getLongitude());
-//        profile.setBirthdate(dto.getBirthdate());
-//        profile.setIntroduce(dto.getIntroduce());
-//        profile.setSearchRadius(dto.getSearchRadius());
-//        profile.setLifeMovie(dto.getLifeMovie());
-//        profile.setFavoriteGenres(dto.getFavoriteGenres());
-//        profile.setWatchedMovies(dto.getWatchedMovies());
-//        profile.setPreferredTheaters(dto.getPreferredTheaters());
-//    }
-
     public UserProfile findUser(Long userId) {
         UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
         return userProfile;
@@ -221,80 +191,22 @@ public class UserProfileService {
 
 
     // 추천 알고리즘
-//    public UserProfileResponse recommend(UserProfile userProfile) {
-//        Long userId = userProfile.getUserId();
-//        List<UserProfile> alreadyRecommended = recommendedUsersMap.computeIfAbsent(userId, k -> new ArrayList<>());
-//        int radius = userProfile.getSearchRadius();
-//        UserProfile nextRecommendation = null;
-//        int nextMaxScore = -1;
-//        int nextRecommendDistance = -1;
-//
-//        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
-//        List<UserProfile> profileByGender = findProfileByGender(userProfile);
-//
-//        // 거리 및 태그
-//        for (UserProfile profile : profileByGender) {
-//            if (alreadyRecommended.contains(profile)) {
-//                continue;
-//            }
-//
-//            LocalDateTime lastLikeTime = userLikesRepository.findLastLikeTimeByUserId(profile.getUserId());
-//            if (lastLikeTime == null || lastLikeTime.isBefore(oneMonthAgo)) {
-//                continue;
-//            }
-//
-//            int distance = calDistance(userProfile, profile);
-//            int distanceScore = 0;
-//            int tagScore = 0;
-//            int totalScore = -1;
-//
-//            if (distance <= radius) {
-//                distanceScore = 100 - (distance * 3);
-//                for (Genre genre : profile.getFavoriteGenres()) {
-//                    if (userProfile.getFavoriteGenres().contains(genre)) {
-//                        tagScore += 10;
-//                    }
-//                }
-//            }
-//            totalScore = distanceScore + tagScore;
-//
-//            if (totalScore > nextMaxScore) {
-//                nextMaxScore = totalScore;
-//                nextRecommendDistance = distance;
-//                nextRecommendation = profile;
-//            }
-//        }
-//
-//        // 추천할 사용자가 있는 경우
-//        if(recommendedUser != null) {
-//            recommendedUsers.add(recommendedUser);  // 리스트에 등록
-//            recommendedUsersMap.put(userId, recommendedUsers); // 사용자별 리스트 업데이트
-//            System.out.println("리스트관리: "+recommendedUsers);
-//            return new UserProfileResponse(recommendedUser,recommendDistance);
-//        }
-//
-//        if (nextRecommendation != null) {
-//            alreadyRecommended.add(nextRecommendation);
-//            recommendedUsersMap.put(userId, alreadyRecommended);
-//            return new UserProfileResponse(nextRecommendation, nextRecommendDistance);
-//        }
-//
-//        throw new NoRecommendException("404", "추천할 사용자가 없습니다.");
-//    }
     public UserProfileResponse recommend(UserProfile userProfile) {
         Long userId = userProfile.getUserId();
-        List<UserProfile> alreadyRecommended = recommendedUsersMap.computeIfAbsent(userId, k -> new ArrayList<>());
+        List<UserProfile> recommendedUsers = recommendedUsersMap.getOrDefault(userId, new ArrayList<>());
         int radius = userProfile.getSearchRadius();
-        UserProfile nextRecommendation = null;
-        int nextMaxScore = -1;
-        int nextRecommendDistance = -1;
-
+        UserProfile recommendedUser = null;
+        int maxScore = 0;
+        int recommendDistance =0; // 추천 사용자의 거리 저장 필드
         LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+
+        // 1차: 이성
         List<UserProfile> profileByGender = findProfileByGender(userProfile);
 
         // 거리 및 태그
         for (UserProfile profile : profileByGender) {
-            if (alreadyRecommended.contains(profile)) {
+            // 이미 추천한 사용자는 패스
+            if (recommendedUsers.contains(profile)) {
                 continue;
             }
 
@@ -303,34 +215,49 @@ public class UserProfileService {
                 continue;
             }
 
-            int distance = calDistance(userProfile, profile);
+            int distance = calDistance(userProfile, profile); // 거리 계산
             int distanceScore = 0;
             int tagScore = 0;
             int totalScore = -1;
 
-            if (distance <= radius) {
-                distanceScore = 100 - (distance * 3);
-                for (Genre genre : profile.getFavoriteGenres()) {
-                    if (userProfile.getFavoriteGenres().contains(genre)) {
-                        tagScore += 10;
+            // 2차: 거리
+            if (distance <= radius) { // 범위 내에 있는 경우만 추가
+                distanceScore = 100 - (distance * 3);   // 키로당 3점 감점
+
+                // 3차: 태그
+                for(Genre genre : profile.getFavoriteGenres()) {
+                    // 나와 태그가 겹친다면
+                    if(userProfile.getFavoriteGenres().contains(genre)) {
+                        tagScore+=10;   // 하나당 10점
                     }
                 }
             }
-            totalScore = distanceScore + tagScore;
+            totalScore = distanceScore + tagScore; // 총점
+            System.out.println("User ID: " + profile.getUserId() + ", Distance: " + distance + ", Distance Score: " + distanceScore + ", Tag Score: " + tagScore + ", Total Score: " + totalScore); // 로깅 추가
 
-            if (totalScore > nextMaxScore) {
-                nextMaxScore = totalScore;
-                nextRecommendDistance = distance;
-                nextRecommendation = profile;
+            // 최고 점수 사용자 업데이트(0점 이하는 등록x)
+            if (totalScore > maxScore) {
+                maxScore = totalScore;
+                recommendDistance = distance;
+                recommendedUser = profile;
             }
         }
 
-        if (nextRecommendation != null) {
-            alreadyRecommended.add(nextRecommendation);
-            recommendedUsersMap.put(userId, alreadyRecommended);
-            return new UserProfileResponse(nextRecommendation, nextRecommendDistance);
+        // 추천할 사용자가 있는 경우
+        if(recommendedUser != null) {
+            recommendedUsers.add(recommendedUser);  // 리스트에 등록
+            recommendedUsersMap.put(userId, recommendedUsers); // 사용자별 리스트 업데이트
+            System.out.println("리스트관리: "+recommendedUsers);
+            return new UserProfileResponse(recommendedUser,recommendDistance);
         }
 
-        throw new NoRecommendException("404", "추천할 사용자가 없습니다.");
+        // 리스트가 차있는데, 추천할 사용자가 없는 경우, 리스트 초기화
+        if (!recommendedUsers.isEmpty()) {
+            recommendedUsers.clear(); // 리스트 초기화
+            recommendedUsersMap.put(userId, recommendedUsers);  // 초기화 업데이트
+        }
+
+        throw new NoRecommendException("404","추천할 사용자가 없습니다.");
+
     }
 }
