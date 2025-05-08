@@ -22,7 +22,7 @@ public class EmailController {
     @PostMapping("/send")
     @Operation(
             summary = "인증 메일 전송",
-            description = "입력한 이메일 주소로 인증 코드를 포함한 메일을 전송합니다."
+            description = "입력한 이메일 주소로 인증 코드를 포함한 메일을 전송합니다"
     )
     public RsData<String> mailSend(@RequestParam String email) throws MessagingException {
         try {
