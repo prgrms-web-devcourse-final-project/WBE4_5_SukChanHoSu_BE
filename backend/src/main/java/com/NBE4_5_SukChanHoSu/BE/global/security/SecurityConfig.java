@@ -32,10 +32,15 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
-                                .requestMatchers("/oauth2/**", "/api/auth/**").permitAll()
+                                .requestMatchers("/oauth2/**", "/api/auth/login", "/api/auth/join", "/api/auth/google/", "/api/email/**").permitAll()
                                 // Swagger
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                                // Actuator
+                                .requestMatchers("/actuator/**").permitAll()
                                 .requestMatchers("/.well-known/**").permitAll()
+
+                                // 채팅 정적 리소스 허용
+                                .requestMatchers("/chat.html", "/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws-stomp/**", "/ws-stomp").permitAll()
 
                                 // Public endpoints
                                 .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
@@ -67,7 +72,8 @@ public class SecurityConfig {
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(List.of(
                 "https://www.app4.qwas.shop",
-                "https://login.aleph.kr"
+                "https://login.aleph.kr",
+                "https://api.app.mm.ts0608.life"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));

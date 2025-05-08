@@ -88,6 +88,7 @@ public class UserProfile extends BaseTime {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JsonIgnoreProperties({"userProfile"})
     private User user;
 
     @Override

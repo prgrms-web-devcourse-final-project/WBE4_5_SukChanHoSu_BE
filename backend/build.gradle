@@ -29,7 +29,13 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+    implementation 'org.webjars:sockjs-client:1.5.1'
+    implementation 'org.webjars:stomp-websocket:2.3.4'
+    implementation 'org.webjars:jquery:3.3.1'
+    implementation 'org.webjars:bootstrap:4.3.1'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    implementation 'org.springframework.boot:spring-boot-starter-mail'
 
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
@@ -60,7 +66,8 @@ dependencies {
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-
+    //actuator
+    implementation("org.springframework.boot:spring-boot-starter-actuator:3.4.5")
     tasks.named('test') {
         useJUnitPlatform()
     }
