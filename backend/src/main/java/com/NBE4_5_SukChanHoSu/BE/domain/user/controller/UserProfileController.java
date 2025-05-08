@@ -6,7 +6,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
-import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -63,29 +62,26 @@ public class UserProfileController {
 
     @Operation(summary = "프로필로 유저 객체 조회", description = "프로필 엔티티를 이용하여 유저 정보 가져오는지 확인")
     @GetMapping("/user")
-    public RsData<User> getUser() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+    // todo: 프로바이더 제공되면 파라미터에서 헤더로 변경
+    public RsData<User> getUser(@RequestParam Long profileId) {
         UserProfile profile = userProfileService.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", profile.getUser());
     }
 
-    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
-    @GetMapping("/profile/me")
-    //todo 임시, 이후 삭제
-    public RsData<UserProfile> getMyProfile() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
-        UserProfile userProfile = userProfileService.findUser(profileId);
-        return new RsData<>("200", "프로필 조회 성공", userProfile);
+    @Operation(summary = "유저로 프로필 객체 조회", description = "유저 엔티티를 이용하여 프로필 정보 가져오는지 확인")
+    @GetMapping("/userProfile")
+    // todo: 프로바이더 제공되면 파라미터에서 헤더로 변경
+    public RsData<UserProfile> getProfile(@RequestParam Long userId) {
+        User user = userService.getUserById(userId);
+        return new RsData<>("200", "프로필 조회 성공", user.getUserProfile());
     }
 
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
     @PutMapping("/radius")
-    public RsData<?> setRadius(@RequestParam Integer radius) {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
-
+    public RsData<?> setRadius(
+            @RequestParam("profileId") Long profileId,
+            @RequestParam("radius") Integer radius
+    ) {
         UserProfile userProfile = userProfileService.findUser(profileId);
         userProfileService.setRadius(userProfile,radius);
 
@@ -94,10 +90,7 @@ public class UserProfileController {
 
     @Operation(summary = "이성 조회(거리포함)", description = "거리를 포함한 이성 친구만 조회")
     @GetMapping("/profiles/gender")
-    public RsData<List<UserProfileResponse>> getProfileByGenderWithDistance() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
-
+    public RsData<List<UserProfileResponse>> getProfileByGenderWithDistance(@RequestParam Long profileId) {
         UserProfile userProfile = userProfileService.findUser(profileId);
         List<UserProfile> profileByGender = userProfileService.findProfileByGender(userProfile);
 
@@ -114,10 +107,7 @@ public class UserProfileController {
 
     @Operation(summary = "범위 이내 사용자 조회", description = "범위 내에 있는 사용자만 조회")
     @GetMapping("/withinRadius")
-    public RsData<List<UserProfileResponse>> getProfileWithinRadius() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
-
+    public RsData<List<UserProfileResponse>> getProfileWithinRadius(@RequestParam Long profileId) {
         UserProfile userProfile = userProfileService.findUser(profileId);
         int radius = userProfile.getSearchRadius();
 
@@ -125,12 +115,17 @@ public class UserProfileController {
         return new RsData<>("200", "거리 조회 성공", responses);
     }
 
+    @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
+    @GetMapping("/profile/me")
+    //todo 임시, 이후 삭제
+    public RsData<UserProfile> getMyProfile(@RequestParam Long profileId) {
+        UserProfile userProfile = userProfileService.findUser(profileId);
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
+    }
+
     @Operation(summary = "태그로 프로필 조회", description = "겹치는 태그가 있는 사람만 조회")
     @GetMapping("/profile/tags")
-    public RsData<List<UserProfileResponse>> getProfileByTags() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
-
+    public RsData<List<UserProfileResponse>> getProfileByTags(@RequestParam Long profileId) {
         UserProfile userProfile = userProfileService.findUser(profileId);
 
         List<UserProfileResponse> responses = userProfileService.findProfileByTags(userProfile);
@@ -140,10 +135,7 @@ public class UserProfileController {
 
     @Operation(summary = "추천", description = "유사도가 가장 높은 순서로 추천")
     @GetMapping("/recommend")
-    public RsData<UserProfileResponse> getRecommend() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
-
+    public RsData<UserProfileResponse> getRecommend(@RequestParam Long profileId) {
         UserProfile userProfile = userProfileService.findUser(profileId);
         UserProfileResponse response = userProfileService.recommend(userProfile);
 
