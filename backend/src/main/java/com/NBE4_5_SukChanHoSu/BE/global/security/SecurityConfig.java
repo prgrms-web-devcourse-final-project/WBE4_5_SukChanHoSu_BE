@@ -70,7 +70,9 @@ public class SecurityConfig {
         configuration.setAllowedOrigins(List.of(
                 "https://www.app4.qwas.shop",
                 "https://login.aleph.kr",
-                "https://api.app.mm.ts0608.life"
+                "https://api.app.mm.ts0608.life",
+                "http://localhost:5173",
+                "https://moive-match-rox9.vercel.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
