@@ -275,24 +275,21 @@ public class MovieService {
 
     // 포스터 가져오기
     private String getMoviePoster(String movieNm) {
-        // TMDB 영화 검색 API 요청 URL 생성
+        // 요청 URL 생성
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(tmdbSearchUrl)
                 .queryParam("api_key", tmdbApiKey)
                 .queryParam("query", movieNm);
 
         String requestUrl = builder.toUriString();
-        System.out.println("TMDB API Request URL: " + requestUrl);
 
-        // API 요청 및 응답 받기
+        // API 요청 및 응답
         String jsonResponse;
         try {
             jsonResponse = restTemplate.getForObject(requestUrl, String.class);
             if (jsonResponse == null || jsonResponse.isEmpty()) {
-                throw new RuntimeException("TMDB API returned empty response");
+                throw new ResponseNotFound("404","TMDB 응답 요청이 비어있습니다.");
             }
-            System.out.println("TMDB API Response: " + jsonResponse);
         } catch (Exception e) {
-            System.err.println("Error during TMDB API request: " + e.getMessage());
             return "포스터 정보 없음";
         }
 
@@ -304,16 +301,13 @@ public class MovieService {
                 return "포스터 정보 없음";
             }
 
-            // 첫 번째 결과에서 포스터 URL 추출
-            String posterPath = (String) results.get(0).get("poster_path");
-            if (posterPath == null || posterPath.isEmpty()) {
-                return "포스터 정보 없음";
-            }
+            Map<String, Object> first = results.getFirst();
 
+            // 포스터 URL 추출
+            String posterPath = (String) first.get("poster_path");
             // 포스터 URL 생성
             return "https://image.tmdb.org/t/p/w500" + posterPath;
         } catch (Exception e) {
-            System.err.println("Error parsing TMDB JSON response: " + e.getMessage());
             return "포스터 정보 없음";
         }
     }
