@@ -53,7 +53,7 @@ public class UserLikeControllerTest {
     @DisplayName("로그인")
     void login() {
         // given
-        String email = "testUser1@example.com";
+        String email = "initUser1@example.com";
         String rawPassword = "testPassword123!";
 
         // 로그인
@@ -70,7 +70,7 @@ public class UserLikeControllerTest {
     @DisplayName("로그인2")
     void login2() {
         // given
-        String email = "testUser2@example.com";
+        String email = "initUser2@example.com";
         String rawPassword = "testPassword123!";
 
         // 로그인
@@ -81,6 +81,7 @@ public class UserLikeControllerTest {
         // when
         LoginResponse tokenDto = userService.login(loginDto);
         this.accessToken = tokenDto.getAccessToken();
+        this.refreshToken = tokenDto.getRefreshToken();
     }
 
 
@@ -97,7 +98,7 @@ public class UserLikeControllerTest {
     @DisplayName("다른 사용자에게 like 요청")
     void likeUser() throws Exception {
         mvc.perform(post("/api/users/like")
-                        .param("toUserId","12")
+                        .param("toUserId","2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
@@ -109,7 +110,7 @@ public class UserLikeControllerTest {
     @DisplayName("사용자의 like 목록 가져오기")
     void getUserLikes() throws Exception {
         //given
-        setUpLike(12L);
+        setUpLike(2L);
 
         //when
         ResultActions action = mvc.perform(get("/api/users/like") // TempUser1의 like 데이터 가져오기
@@ -120,14 +121,14 @@ public class UserLikeControllerTest {
         action.andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("좋아요한 유저 목록 반환")))
-                .andExpect(jsonPath("$.data.userLikes[0].userId").value(12));// user2이 목록에 존재
+                .andExpect(jsonPath("$.data.userLikes[0].userId").value(2));// user2이 목록에 존재
     }
 
     @Test
     @DisplayName("사용자의 liked 목록 가져오기")
     void getUserLiked() throws Exception {
         //given
-        setUpLike(12L);
+        setUpLike(2L);
         System.out.println("accessToken = " + accessToken);
 
         login2();
@@ -143,17 +144,17 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("TempUser2를 좋아요한 유저 목록 반환")))
-                .andExpect(jsonPath("$.data.userLikes[0].userId").value(11));// user1이 목록에 존재
+                .andExpect(jsonPath("$.data.userLikes[0].userId").value(1));// user1이 목록에 존재
     }
 
     @Test
     @DisplayName("매칭된 상태에서는 사용자의 liked 목록에 안나오는걸 확인")
     void getUserLikedMatchingStatus() throws Exception {
         //given
-        setUpLike(12L);
+        setUpLike(2L);
 
         login2();
-        setUpLike(11L);
+        setUpLike(1L);
 
         // when
         ResultActions getMatching = mvc.perform(get("/api/users/matching") // 매칭 목록 가져오기
@@ -172,7 +173,7 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
-                .andExpect(jsonPath("$.data[*].user.userId").value(11));
+                .andExpect(jsonPath("$.data[*].user.userId").value(1));
         // liked 목록에서는 조회 불가능
         getLiked
                 .andExpect(status().isOk())
@@ -184,10 +185,10 @@ public class UserLikeControllerTest {
     @DisplayName("매칭된 상태에서는 사용자의 likes 목록에 안나오는걸 확인")
     void getUserLikesMatchingStatus() throws Exception {
         //given
-        setUpLike(12L);
+        setUpLike(2L);
 
         login2();
-        setUpLike(11L);
+        setUpLike(1L);
 
         // when
         ResultActions getMatching = mvc.perform(get("/api/users/matching") // 매칭 목록 가져오기
@@ -206,7 +207,7 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
-                .andExpect(jsonPath("$.data[*].user.userId").value(11));
+                .andExpect(jsonPath("$.data[*].user.userId").value(1));
 
         // likes 목록에서는 조회 불가능
         getLikes
@@ -220,12 +221,12 @@ public class UserLikeControllerTest {
     @DisplayName("사용자의 matching 목록 가져오기")
     void getUserMatch() throws Exception {
         //given
-        setUpLike(12L);
+        setUpLike(2L);
 
         login2();
         // user2 -> user1 맞팔해서 매칭
         ResultActions action = mvc.perform(post("/api/users/like")
-                        .param("toUserId","11")
+                        .param("toUserId","1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
@@ -245,18 +246,18 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
-                .andExpect(jsonPath("$.data[*].user.userId").value(11));
+                .andExpect(jsonPath("$.data[*].user.userId").value(1));
     }
 
     @Test
     @DisplayName("중복 like 방지")
     void aVoidDuplicationLike() throws Exception {
         // given
-        setUpLike(12L);
+        setUpLike(2L);
 
         // when
         ResultActions action = mvc.perform(post("/api/users/like")
-                        .param("toUserId","12")
+                        .param("toUserId","2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
@@ -272,16 +273,16 @@ public class UserLikeControllerTest {
     @DisplayName("매칭된 상태에서 like 방지")
     void aVoidDuplicationLike2() throws Exception {
         // given
-        setUpLike(12L);
+        setUpLike(2L);
 
         login2();
-        setUpLike(11L);
+        setUpLike(1L);
 
 
 
         // when
         ResultActions action = mvc.perform(post("/api/users/like")
-                        .param("toUserId","11")
+                        .param("toUserId","1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
@@ -297,11 +298,11 @@ public class UserLikeControllerTest {
     @DisplayName("like 취소 - like 상태")
     void cancelLikeUser() throws Exception {
         // given
-        setUpLike(12L);
+        setUpLike(2L);
 
         // when
         ResultActions action = mvc.perform(delete("/api/users/like")
-                        .param("toUserId","12")
+                        .param("toUserId","2")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
@@ -317,13 +318,13 @@ public class UserLikeControllerTest {
     @DisplayName("like 취소 - matching 상태")
     void cancelMatchUser() throws Exception {
         // given
-        setUpLike(12L); // 11 -> 12
+        setUpLike(2L); // 11 -> 12
         login2();   // 12 로그인
-        setUpLike(11L); // 12 -> 11
+        setUpLike(1L); // 12 -> 11
 
         // when
         ResultActions action = mvc.perform(delete("/api/users/like")
-                        .param("toUserId","11")
+                        .param("toUserId","1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
@@ -339,13 +340,13 @@ public class UserLikeControllerTest {
     @DisplayName("like 취소 후, 데이터 조회x")
     void cancelMatchGetLikes() throws Exception {
         // given
-        setUpLike(12L);
+        setUpLike(2L);
 
         login2();
-        setUpLike(11L);
+        setUpLike(1L);
 
         mvc.perform(delete("/api/users/like")
-                        .param("toUserId", "11")
+                        .param("toUserId", "1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
