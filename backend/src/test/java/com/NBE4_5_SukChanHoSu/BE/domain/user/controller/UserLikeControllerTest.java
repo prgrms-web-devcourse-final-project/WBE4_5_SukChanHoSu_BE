@@ -53,7 +53,7 @@ public class UserLikeControllerTest {
     @DisplayName("로그인")
     void login() {
         // given
-        String email = "initUser1@example.com";
+        String email = "testUser1@example.com";
         String rawPassword = "testPassword123!";
 
         // 로그인
@@ -97,9 +97,9 @@ public class UserLikeControllerTest {
     @DisplayName("다른 사용자에게 like 요청")
     void likeUser() throws Exception {
         mvc.perform(post("/api/users/like")
-                .param("toUserId","12")
-                .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + accessToken))
+                        .param("toUserId","12")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("에게 좋아요를 보냈습니다")));
@@ -163,7 +163,7 @@ public class UserLikeControllerTest {
 
         ResultActions getLiked = mvc.perform(get("/api/users/liked") // TempUser2를 좋아요한 유저 데이터 가져오기
                         .contentType(MediaType.APPLICATION_JSON)
-                .header("Authorization", "Bearer " + accessToken))
+                        .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
 
         // then
@@ -381,9 +381,9 @@ public class UserLikeControllerTest {
 
         // when
         ResultActions maleAction =mvc.perform(post("/api/users/like")
-                        .param("toUserId",String.valueOf(male2))
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + accessToken));
+                .param("toUserId",String.valueOf(male2))
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + accessToken));
 
         login2();
         ResultActions femaleAction =mvc.perform(post("/api/users/like")

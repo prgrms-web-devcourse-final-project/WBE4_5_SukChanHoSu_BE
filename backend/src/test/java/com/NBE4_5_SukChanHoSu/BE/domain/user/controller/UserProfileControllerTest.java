@@ -107,7 +107,7 @@ class UserProfileControllerTest {
     @DisplayName("로그인")
     void login() {
         // given
-        String email = "initUser1@example.com";
+        String email = "testUser1@example.com";
         String rawPassword = "testPassword123!";
 
         // 로그인
@@ -185,9 +185,9 @@ class UserProfileControllerTest {
         mvc.perform(get("/api/profile/profile/me")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
-                        .andExpect(jsonPath("$.code").value("200"))
-                        .andExpect(jsonPath("$.message",containsString("성공")))
-                        .andExpect(jsonPath("$.data.searchRadius").value(radius));
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("성공")))
+                .andExpect(jsonPath("$.data.searchRadius").value(radius));
     }
 
     @Test
@@ -298,4 +298,3 @@ class UserProfileControllerTest {
     }
 
 }
-
