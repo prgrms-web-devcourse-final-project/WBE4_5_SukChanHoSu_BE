@@ -33,11 +33,6 @@ public class AppConfig {
     }
 
     @Bean
-    public RestTemplate restTemplate() {
-        return new RestTemplate();
-    }
-
-    @Bean
     public RestClient restClient() {
         return RestClient.create();
     }
