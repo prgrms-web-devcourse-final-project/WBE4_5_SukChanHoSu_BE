@@ -171,6 +171,7 @@ class UserProfileServiceTest {
                 assertThat(responseDto.getProfileImage()).isEqualTo(dto.getProfileImage());
                 assertThat(responseDto.getLatitude()).isEqualTo(dto.getLatitude());
                 assertThat(responseDto.getLongitude()).isEqualTo(dto.getLongitude());
+                assertThat(responseDto.getEmail()).isEqualTo("test@example.com");
 
                 verify(userProfileRepository, times(1)).findByUserId(userId);
                 verify(userProfileRepository, times(1)).save(any(UserProfile.class));
