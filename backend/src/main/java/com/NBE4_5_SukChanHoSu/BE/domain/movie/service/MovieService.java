@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -41,7 +42,8 @@ public class MovieService {
     private String tmdbSearchUrl; // TMDB 영화 검색 API URL
 
 //    private final RestTemplate restTemplate;
-    private final WebClient webClient;  // redisTemplate -> webClient로 외부 수집 프로토콜 변경
+//    private final WebClient webClient;  // redisTemplate -> webClient로 외부 수집 프로토콜 변경
+    private final RestClient restClient;  // // redisTemplate -> webClient -> RestClient 로 외부 수집 프로토콜 변경
     private final ObjectMapper objectMapper;
 
     // 주간 박스오피스
@@ -60,11 +62,18 @@ public class MovieService {
         String jsonResponse;
         try {
 //            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-            jsonResponse = webClient.get() // get 요청 생성
+
+//            jsonResponse = webClient.get() // get 요청 생성
+//                    .uri(requestUrl)    // URL 설정
+//                    .retrieve() // 응답
+//                    .bodyToMono(String.class)   // String 변환
+//                    .block();   // 비동기 작업 -> 동기적 처리
+
+            jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
-                    .retrieve() // 응답
-                    .bodyToMono(String.class)   // String 변환
-                    .block();   // 비동기 작업 -> 동기적 처리
+                    .retrieve()     // 응답
+                    .body(String.class);    // String 변환
+
             // 응답이 비어있는 경우
             if (jsonResponse == null || jsonResponse.isEmpty()) {
                 throw new ResponseNotFound("404","KOBIS 응답 요청이 비어있습니다.");
@@ -119,11 +128,17 @@ public class MovieService {
         String jsonResponse;
         try {
 //            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-            jsonResponse = webClient.get() // get 요청 생성
+//            jsonResponse = webClient.get() // get 요청 생성
+//                    .uri(requestUrl)    // URL 설정
+//                    .retrieve() // 응답
+//                    .bodyToMono(String.class)   // String 변환
+//                    .block();   // 비동기 작업 -> 동기적 처리
+
+            jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
-                    .retrieve() // 응답
-                    .bodyToMono(String.class)   // String 변환
-                    .block();   // 비동기 작업 -> 동기적 처리
+                    .retrieve()     // 응답
+                    .body(String.class);    // String 변환
+
             if (jsonResponse == null || jsonResponse.isEmpty()) {
                 throw new ResponseNotFound("404","KOBIS 응답 요청이 비어있습니다.");
             }
@@ -234,11 +249,17 @@ public class MovieService {
         String jsonResponse;
         try {
 //            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-            jsonResponse = webClient.get() // get 요청 생성
+//            jsonResponse = webClient.get() // get 요청 생성
+//                    .uri(requestUrl)    // URL 설정
+//                    .retrieve() // 응답
+//                    .bodyToMono(String.class)   // String 변환
+//                    .block();   // 비동기 작업 -> 동기적 처리
+
+            jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
-                    .retrieve() // 응답
-                    .bodyToMono(String.class)   // String 변환
-                    .block();   // 비동기 작업 -> 동기적 처리
+                    .retrieve()     // 응답
+                    .body(String.class);    // String 변환
+
             if (jsonResponse == null || jsonResponse.isEmpty()) {
                 throw new ResponseNotFound("404","TMDB 응답 요청이 비어있습니다.");
             }
@@ -262,11 +283,16 @@ public class MovieService {
             String detailUrl = "https://api.themoviedb.org/3/movie/" + movieId + "?api_key=" + tmdbApiKey;
             // 응답 생성
 //            String detailResponse = restTemplate.getForObject(detailUrl, String.class);
-            String detailResponse = webClient.get() // get 요청 생성
+//            String detailResponse = webClient.get() // get 요청 생성
+//                    .uri(detailUrl)    // URL 설정
+//                    .retrieve() // 응답
+//                    .bodyToMono(String.class)   // String 변환
+//                    .block();   // 비동기 작업 -> 동기적 처리
+
+            String detailResponse = restClient.get() // get 요청
                     .uri(detailUrl)    // URL 설정
-                    .retrieve() // 응답
-                    .bodyToMono(String.class)   // String 변환
-                    .block();   // 비동기 작업 -> 동기적 처리
+                    .retrieve()     // 응답
+                    .body(String.class);    // String 변환
 
             // 상세 정보 반환
             return objectMapper.readValue(detailResponse, new TypeReference<Map<String, Object>>() {});
@@ -288,11 +314,16 @@ public class MovieService {
         String jsonResponse;
         try {
 //            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-            jsonResponse = webClient.get() // get 요청 생성
+//            jsonResponse = webClient.get() // get 요청 생성
+//                    .uri(requestUrl)    // URL 설정
+//                    .retrieve() // 응답
+//                    .bodyToMono(String.class)   // String 변환
+//                    .block();   // 비동기 작업 -> 동기적 처리
+            jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
-                    .retrieve() // 응답
-                    .bodyToMono(String.class)   // String 변환
-                    .block();   // 비동기 작업 -> 동기적 처리
+                    .retrieve()     // 응답
+                    .body(String.class);    // String 변환
+
             if (jsonResponse == null || jsonResponse.isEmpty()) {
                 throw new ResponseNotFound("404","TMDB 응답 요청이 비어있습니다.");
             }
