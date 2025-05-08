@@ -16,8 +16,9 @@ public class MovieResponse {
     private List<MovieGenre> genres; // 장르
     private String watchGradeNm; // 연령제한
     private String posterUrl; // 포스터 URL
+    private String overview;    // 줄거리
 
-    public MovieResponse(String movieNm, String openDt,String showTm, String director, List<MovieGenre> genres, String actors, String watchGradeNm, String posterUrl) {
+    public MovieResponse(String movieNm, String openDt,String showTm, String director, List<MovieGenre> genres, String actors, String watchGradeNm, String posterUrl, String overview) {
         this.movieNm = movieNm;
         this.openDt = openDt;
         this.showTm = showTm;
@@ -27,5 +28,6 @@ public class MovieResponse {
         this.actors = actors;
         this.watchGradeNm = watchGradeNm;
         this.posterUrl = posterUrl;
+        this.overview = overview;
     }
 }
