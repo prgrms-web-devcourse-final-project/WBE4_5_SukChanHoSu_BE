@@ -182,8 +182,7 @@ jobs:
           working-directory: /
           comment: Deploy
           command: |
-            echo "${{ secrets.ENV_FILE }}" > .env
-            IMAGE="ghcr.io/${{ needs.buildImageAndPush.outputs.owner_lc }}/${{ needs.buildImageAndPush.outputs.image_name }}:latest"
+            IMAGE="ghcr.io/prgrms-web-devcourse-final-project/schs:latest"
             VOLUME="/gen:/gen"
             NETWORK="common"
             HEALTH_ENDPOINT="/actuator/health"
