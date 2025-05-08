@@ -13,9 +13,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -40,7 +40,8 @@ public class MovieService {
     @Value("${movie.api.tmdb-search-url}")
     private String tmdbSearchUrl; // TMDB 영화 검색 API URL
 
-    private final RestTemplate restTemplate;
+//    private final RestTemplate restTemplate;
+    private final WebClient webClient;  // redisTemplate -> webClient로 외부 수집 프로토콜 변경
     private final ObjectMapper objectMapper;
 
     // 주간 박스오피스
@@ -58,7 +59,12 @@ public class MovieService {
         // 응답 JSON으로 받아오기
         String jsonResponse;
         try {
-            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
+//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
+            jsonResponse = webClient.get() // get 요청 생성
+                    .uri(requestUrl)    // URL 설정
+                    .retrieve() // 응답
+                    .bodyToMono(String.class)   // String 변환
+                    .block();   // 비동기 작업 -> 동기적 처리
             // 응답이 비어있는 경우
             if (jsonResponse == null || jsonResponse.isEmpty()) {
                 throw new ResponseNotFound("404","KOBIS 응답 요청이 비어있습니다.");
@@ -112,7 +118,12 @@ public class MovieService {
         // API 요청 및 응답 받기
         String jsonResponse;
         try {
-            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
+//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
+            jsonResponse = webClient.get() // get 요청 생성
+                    .uri(requestUrl)    // URL 설정
+                    .retrieve() // 응답
+                    .bodyToMono(String.class)   // String 변환
+                    .block();   // 비동기 작업 -> 동기적 처리
             if (jsonResponse == null || jsonResponse.isEmpty()) {
                 throw new ResponseNotFound("404","KOBIS 응답 요청이 비어있습니다.");
             }
@@ -222,7 +233,12 @@ public class MovieService {
         // API 요청 및 응답 받기
         String jsonResponse;
         try {
-            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
+//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
+            jsonResponse = webClient.get() // get 요청 생성
+                    .uri(requestUrl)    // URL 설정
+                    .retrieve() // 응답
+                    .bodyToMono(String.class)   // String 변환
+                    .block();   // 비동기 작업 -> 동기적 처리
             if (jsonResponse == null || jsonResponse.isEmpty()) {
                 throw new ResponseNotFound("404","TMDB 응답 요청이 비어있습니다.");
             }
@@ -245,7 +261,12 @@ public class MovieService {
             // 디테일 URL 생성
             String detailUrl = "https://api.themoviedb.org/3/movie/" + movieId + "?api_key=" + tmdbApiKey;
             // 응답 생성
-            String detailResponse = restTemplate.getForObject(detailUrl, String.class);
+//            String detailResponse = restTemplate.getForObject(detailUrl, String.class);
+            String detailResponse = webClient.get() // get 요청 생성
+                    .uri(detailUrl)    // URL 설정
+                    .retrieve() // 응답
+                    .bodyToMono(String.class)   // String 변환
+                    .block();   // 비동기 작업 -> 동기적 처리
 
             // 상세 정보 반환
             return objectMapper.readValue(detailResponse, new TypeReference<Map<String, Object>>() {});
@@ -266,7 +287,12 @@ public class MovieService {
         // API 요청 및 응답
         String jsonResponse;
         try {
-            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
+//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
+            jsonResponse = webClient.get() // get 요청 생성
+                    .uri(requestUrl)    // URL 설정
+                    .retrieve() // 응답
+                    .bodyToMono(String.class)   // String 변환
+                    .block();   // 비동기 작업 -> 동기적 처리
             if (jsonResponse == null || jsonResponse.isEmpty()) {
                 throw new ResponseNotFound("404","TMDB 응답 요청이 비어있습니다.");
             }
