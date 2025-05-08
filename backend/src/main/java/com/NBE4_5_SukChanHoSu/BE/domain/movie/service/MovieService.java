@@ -4,6 +4,9 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieRankingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.WeeklyBoxOfficeResult;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.MovieGenre;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.NullResponseException;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ParsingException;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ResponseNotFound;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -41,36 +44,41 @@ public class MovieService {
 
     // 주간 박스오피스
     public List<MovieRankingResponse> searchWeeklyBoxOffice(String targetDt, String weekGb, String itemPerPage) {
-        // KOBIS 주간 박스오피스 조회 API 요청 URL 생성
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(rankUrl)
+        // 요청 URL 생성
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(rankUrl)
                 .queryParam("key", kobisApiKey)
                 .queryParam("targetDt", targetDt)
                 .queryParam("weekGb", weekGb)
                 .queryParam("itemPerPage", itemPerPage);
 
+        // 요청 URL
         String requestUrl = builder.toUriString();
 
         // 응답 JSON으로 받아오기
         String jsonResponse;
         try {
             jsonResponse = restTemplate.getForObject(requestUrl, String.class);
+            // 응답이 비어있는 경우
             if (jsonResponse == null || jsonResponse.isEmpty()) {
-                throw new RuntimeException("KOBIS API returned empty response");
+                throw new ResponseNotFound("404","KMDB 응답 요청이 비어있습니다.");
             }
         } catch (Exception e) {
-            return Collections.emptyList(); // 빈 리스트 반환
+            throw new NullResponseException("404","응답이 비어있습니다.");
         }
 
         // JSON 파싱/데이터 처리
         try {
+            // Json -> WeeklyBoxOfficeResult 로 파싱
             WeeklyBoxOfficeResult result = objectMapper.readValue(jsonResponse, WeeklyBoxOfficeResult.class);
             if (result == null) {
-                throw new RuntimeException("KOBIS API response parsing failed: result is null");
+                throw new ParsingException("400","API 응답 파싱 실패");
             }
 
+            // 박스오피스 리스트
             List<WeeklyBoxOfficeResult.WeeklyBoxOffice> boxOfficeList = result.getBoxOfficeResult().getWeeklyBoxOfficeList();
+            // 처리 데이터가 널
             if (boxOfficeList == null || boxOfficeList.isEmpty()) {
-                return Collections.emptyList(); // 빈 리스트 반환
+                throw new NullResponseException("404","응답이 비어있습니다.");
             }
 
             // 영화 상세 정보 조회
@@ -87,14 +95,13 @@ public class MovieService {
                     })
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            System.err.println("Error parsing KOBIS JSON response: " + e.getMessage());
-            return Collections.emptyList(); // 빈 리스트 반환
+            throw new ParsingException("400","API 응답 파싱 실패");
         }
     }
 
     public MovieResponse getMovieDetail(String movieCd) {
         // KOBIS 영화 상세 정보 조회 API 요청 URL 생성
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(detailUrl)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(detailUrl)
                 .queryParam("key", kobisApiKey)
                 .queryParam("movieCd", movieCd);
 
@@ -221,7 +228,7 @@ public class MovieService {
     // TMDB에서 영화 상세 정보 가져오기
     private Map<String, Object> getTmdbMovieInfo(String movieNm) {
         // TMDB 영화 검색 API 요청 URL 생성
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(tmdbSearchUrl)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(tmdbSearchUrl)
                 .queryParam("api_key", tmdbApiKey)
                 .queryParam("query", movieNm);
 
@@ -269,7 +276,7 @@ public class MovieService {
     // 포스터 가져오기
     private String getMoviePoster(String movieNm) {
         // TMDB 영화 검색 API 요청 URL 생성
-        UriComponentsBuilder builder = UriComponentsBuilder.fromHttpUrl(tmdbSearchUrl)
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(tmdbSearchUrl)
                 .queryParam("api_key", tmdbApiKey)
                 .queryParam("query", movieNm);
 
