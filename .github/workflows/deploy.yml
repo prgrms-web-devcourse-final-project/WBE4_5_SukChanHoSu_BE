@@ -123,14 +123,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
-      - name: Grant execute permission for gradlew
-        run: chmod +x ./gradlew
-        working-directory: ./backend/
-
       - name: Generate application-secret.yml
         env:
           APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET_YML }}
         run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application-secret.yml
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+        working-directory: ./backend/
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
