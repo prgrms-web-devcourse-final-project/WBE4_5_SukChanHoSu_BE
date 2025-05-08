@@ -26,8 +26,8 @@ public class MovieController {
     }
 
     // 영화 상세 정보 조회
-    @GetMapping("/detail/{movieCd}")
-    public MovieResponse getMovieDetail(@PathVariable String movieCd) {
+    @GetMapping("/detail")
+    public MovieResponse getMovieDetail(@RequestParam String movieCd) {
         return movieService.getMovieDetail(movieCd);
     }
 }
