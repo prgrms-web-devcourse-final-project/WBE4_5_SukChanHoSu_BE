@@ -2,10 +2,10 @@ name: Backend CI & Deploy
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main, develop, cd ]
     types: [ opened, closed, synchronize ]
   push:
-    branches: [ main, develop ]
+    branches: [ main, develop, cd ]
   workflow_dispatch:
 
 env:
