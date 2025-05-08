@@ -1,6 +1,8 @@
 package com.NBE4_5_SukChanHoSu.BE.global.util;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserErrorCode;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.security.BadCredentialsException;
 import com.NBE4_5_SukChanHoSu.BE.global.security.PrincipalDetails;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
@@ -18,7 +20,10 @@ public class SecurityUtil {
 
         if (authentication == null || !authentication.isAuthenticated() ||
                 !(authentication.getPrincipal() instanceof PrincipalDetails)) {
-            throw new RuntimeException("인증된 사용자를 찾을 수 없습니다.");
+            throw new BadCredentialsException(
+                    UserErrorCode.USER_UNAUTHORIZED.getCode(),
+                    UserErrorCode.USER_UNAUTHORIZED.getMessage()
+            );
         }
 
         return ((PrincipalDetails) authentication.getPrincipal()).getUser().getId();
@@ -30,7 +35,10 @@ public class SecurityUtil {
 
         if (authentication == null || !authentication.isAuthenticated() ||
                 !(authentication.getPrincipal() instanceof PrincipalDetails)) {
-            throw new RuntimeException("인증된 사용자를 찾을 수 없습니다.");
+            throw new BadCredentialsException(
+                    UserErrorCode.USER_UNAUTHORIZED.getCode(),
+                    UserErrorCode.USER_UNAUTHORIZED.getMessage()
+            );
         }
 
         return ((PrincipalDetails) authentication.getPrincipal()).getUsername();
@@ -42,7 +50,10 @@ public class SecurityUtil {
 
         if (authentication == null || !authentication.isAuthenticated() ||
                 !(authentication.getPrincipal() instanceof PrincipalDetails)) {
-            throw new RuntimeException("인증된 사용자를 찾을 수 없습니다.");
+            throw new BadCredentialsException(
+                    UserErrorCode.USER_UNAUTHORIZED.getCode(),
+                    UserErrorCode.USER_UNAUTHORIZED.getMessage()
+            );
         }
 
         return ((PrincipalDetails) authentication.getPrincipal()).getUser();

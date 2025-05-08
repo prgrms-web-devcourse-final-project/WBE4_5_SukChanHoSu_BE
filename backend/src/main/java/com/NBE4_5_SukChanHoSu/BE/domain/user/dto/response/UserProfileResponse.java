@@ -17,6 +17,8 @@ public class UserProfileResponse {
     private LocalDate birthdate;
     private List<Genre> favoriteGenres;
     private String introduce;
+    private double latitude;
+    private double longitude;
     private String distance;
 
     public UserProfileResponse (UserProfile userProfile, int distance) {
@@ -27,6 +29,8 @@ public class UserProfileResponse {
         this.birthdate = userProfile.getBirthdate();
         this.favoriteGenres = userProfile.getFavoriteGenres();
         this.introduce = userProfile.getIntroduce();
+        this.latitude = userProfile.getLatitude();
+        this.longitude = userProfile.getLongitude();
         this.distance = "약 "+distance+"km";
     }
 

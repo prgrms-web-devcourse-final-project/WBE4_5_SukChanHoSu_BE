@@ -1,10 +1,8 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
@@ -26,7 +24,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;

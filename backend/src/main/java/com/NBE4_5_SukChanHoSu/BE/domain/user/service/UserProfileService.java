@@ -62,22 +62,22 @@ public class UserProfileService {
 
     private void updateEntityFromRequest(UserProfile profile, ProfileRequest dto) {
         profile.setNickName(dto.getNickname());
-        profile.setGender(dto.getGender());
+//        profile.setGender(dto.getGender());
         profile.setProfileImage(dto.getProfileImage());
         profile.setLatitude(dto.getLatitude());
         profile.setLongitude(dto.getLongitude());
-        profile.setBirthdate(dto.getBirthdate());
+//        profile.setBirthdate(dto.getBirthdate());
         profile.setIntroduce(dto.getIntroduce());
         // TODO: Favorite genres, lifeMovie, watchedMovies, preferredTheaters, distance 등 매핑 추가
     }
 
     private void updateEntityFromUpdateRequest(UserProfile profile, ProfileUpdateRequest dto) {
         if (dto.getNickname() != null) profile.setNickName(dto.getNickname());
-        if (dto.getGender() != null) profile.setGender(dto.getGender());
+//        if (dto.getGender() != null) profile.setGender(dto.getGender());
         if (dto.getProfileImage() != null) profile.setProfileImage(dto.getProfileImage());
         if (dto.getLatitude() != null) profile.setLatitude(dto.getLatitude());
         if (dto.getLongitude() != null) profile.setLongitude(dto.getLongitude());
-        if (dto.getBirthdate() != null) profile.setBirthdate(dto.getBirthdate());
+//        if (dto.getBirthdate() != null) profile.setBirthdate(dto.getBirthdate());
         if (dto.getIntroduce() != null) profile.setIntroduce(dto.getIntroduce());
         // TODO: 생략된 필드 동일하게 적용
     }
@@ -170,7 +170,6 @@ public class UserProfileService {
 
         return filteredResponses;
     }
-
 
     // 추천 알고리즘
     public UserProfileResponse recommend(UserProfile userProfile) {
