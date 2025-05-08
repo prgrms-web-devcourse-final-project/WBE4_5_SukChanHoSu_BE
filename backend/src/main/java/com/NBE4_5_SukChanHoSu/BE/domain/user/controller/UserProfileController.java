@@ -78,7 +78,10 @@ public class UserProfileController {
 
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
     @PutMapping("/radius")
-    public RsData<?> setRadius(@RequestParam Long profileId, @RequestParam Integer radius) {
+    public RsData<?> setRadius(
+            @RequestParam("profileId") Long profileId,
+            @RequestParam("radius") Integer radius
+    ) {
         UserProfile userProfile = userProfileService.findUser(profileId);
         userProfileService.setRadius(userProfile,radius);
 

@@ -31,7 +31,10 @@ public class UserLikeController {
     @PostMapping("/like")
     @Operation(summary = "like 전송", description = "toUser에게 like 전송")
     // todo: 인증 구현시 파라미터에서 인증정보로 변경
-    public RsData<?> likeUser(@RequestParam Long fromUserId,@RequestParam Long toUserId) {
+    public RsData<?> likeUser(
+            @RequestParam("fromUserId") Long fromUserId,
+            @RequestParam("toUserId") Long toUserId
+    ) {
         // 유저 탐색
         UserProfile fromUser = userProfileService.findUser(fromUserId);
         UserProfile toUser = userProfileService.findUser(toUserId);
