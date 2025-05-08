@@ -3,8 +3,11 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieRankingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieService;
+import com.NBE4_5_SukChanHoSu.BE.global.util.DateUtils;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -19,9 +22,14 @@ public class MovieController {
 
     @GetMapping("/weekly")
     public List<MovieRankingResponse> searchWeeklyBoxOffice(
-            @RequestParam String targetDt,
+            @RequestParam(required = false) String targetDt,    // 필수 파라미터 x
             @RequestParam(defaultValue = "0") String weekGb,
             @RequestParam(defaultValue = "10") String itemPerPage) {
+
+        if(targetDt == null || targetDt.isEmpty()) {
+            targetDt = DateUtils.getOneWeekAgoDate();   // 1주일전
+        }
+
         return movieService.searchWeeklyBoxOffice(targetDt, weekGb, itemPerPage);
     }
 

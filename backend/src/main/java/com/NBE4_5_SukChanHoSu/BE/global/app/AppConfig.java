@@ -31,9 +31,4 @@ public class AppConfig {
         registrationBean.setOrder(Integer.MIN_VALUE);
         return registrationBean;
     }
-
-    @Bean
-    public RestClient restClient() {
-        return RestClient.create();
-    }
 }
