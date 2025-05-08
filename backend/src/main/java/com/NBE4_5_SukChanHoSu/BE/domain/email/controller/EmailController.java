@@ -9,10 +9,7 @@ import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.mail.MailException;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @Slf4j
 @RestController
@@ -48,7 +45,7 @@ public class EmailController {
             summary = "이메일 인증 코드 검증",
             description = "입력한 이메일과 인증 코드를 검증하여 인증 여부를 반환합니다."
     )
-    public RsData<?> verify(EmailDto emailDto) {
+    public RsData<?> verify(@RequestBody EmailDto emailDto) {
         boolean isVerify = emailService.verifyEmailCode(emailDto.getMail(), emailDto.getVerifyCode());
         if (isVerify) {
             return new RsData<>(
