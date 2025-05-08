@@ -86,7 +86,7 @@ public class UserProfile extends BaseTime {
     @JsonIgnoreProperties({"maleUser", "femaleUser"})
     private List<Matching> femaleMatchings = new ArrayList<>(); // 매칭된 여자 사용자 목록
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
     private User user;
 
