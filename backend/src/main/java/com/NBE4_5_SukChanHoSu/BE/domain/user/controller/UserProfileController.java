@@ -72,7 +72,7 @@ public class UserProfileController {
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
     @GetMapping("/profile/me")
     //todo 임시, 이후 삭제
-    public RsData<UserProfile> getMyProfile() {
+    public RsData<UserProfile> getMyProfile1() {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
         UserProfile userProfile = userProfileService.findUser(profileId);
