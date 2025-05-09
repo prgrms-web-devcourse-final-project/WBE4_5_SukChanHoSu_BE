@@ -30,6 +30,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -48,7 +49,6 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/h2-console/**").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .headers(headers -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 )
