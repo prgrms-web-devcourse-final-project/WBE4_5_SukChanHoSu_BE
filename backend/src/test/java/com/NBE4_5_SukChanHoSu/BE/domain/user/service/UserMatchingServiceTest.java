@@ -141,6 +141,4 @@ class UserMatchingServiceTest {
         // Then
         assertFalse(recommendUserRepository.existsById(oldRecommendation.getId()));
     }
-
-
 }

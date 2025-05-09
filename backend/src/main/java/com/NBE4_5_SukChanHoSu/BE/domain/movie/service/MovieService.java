@@ -7,17 +7,22 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.MovieGenre;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.NullResponseException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ParsingException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ResponseNotFound;
+import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,13 +44,22 @@ public class MovieService {
     @Value("${movie.api.tmdb-search-url}")
     private String tmdbSearchUrl; // TMDB 영화 검색 API URL
 
-//    private final RestTemplate restTemplate;
-//    private final WebClient webClient;  // redisTemplate -> webClient로 외부 수집 프로토콜 변경
+
+    @Autowired
+    private RedisTemplate<String,Object> redisTemplate;
+    private final RedisTTL ttl;
+
     private final RestClient restClient;  // // redisTemplate -> webClient -> RestClient 로 외부 수집 프로토콜 변경
     private final ObjectMapper objectMapper;
-
+    private static final String KEY = "weeklyBoxOffice";
     // 주간 박스오피스
     public List<MovieRankingResponse> searchWeeklyBoxOffice(String targetDt, String weekGb, String itemPerPage) {
+        // 캐시 먼저 확인
+        if(redisTemplate.hasKey(KEY)){
+            // 캐싱된 데이터 반환
+            return (List<MovieRankingResponse>) redisTemplate.opsForValue().get(KEY);
+        }
+
         // 요청 URL 생성
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(rankUrl)
                 .queryParam("key", kobisApiKey)
@@ -59,14 +73,6 @@ public class MovieService {
         // 응답 JSON으로 받아오기
         String jsonResponse;
         try {
-//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-
-//            jsonResponse = webClient.get() // get 요청 생성
-//                    .uri(requestUrl)    // URL 설정
-//                    .retrieve() // 응답
-//                    .bodyToMono(String.class)   // String 변환
-//                    .block();   // 비동기 작업 -> 동기적 처리
-
             jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
                     .retrieve()     // 응답
@@ -96,7 +102,7 @@ public class MovieService {
             }
 
             // 영화 상세 정보 조회
-            return boxOfficeList.stream()
+            List<MovieRankingResponse> responses = boxOfficeList.stream()
                     .map(movie -> {
                         String posterUrl = getMoviePoster(movie.getMovieNm()); // TMDB에서 포스터 URL 조회
                         return new MovieRankingResponse(
@@ -108,6 +114,9 @@ public class MovieService {
                         );
                     })
                     .collect(Collectors.toList());
+            // 캐싱
+            redisTemplate.opsForValue().set(KEY, responses, ttl.getData(), TimeUnit.SECONDS); // TTL 설정
+            return responses;
         } catch (Exception e) {
             throw new ParsingException("400","API 응답 파싱 실패");
         }
@@ -125,13 +134,6 @@ public class MovieService {
         // API 요청 및 응답 받기
         String jsonResponse;
         try {
-//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-//            jsonResponse = webClient.get() // get 요청 생성
-//                    .uri(requestUrl)    // URL 설정
-//                    .retrieve() // 응답
-//                    .bodyToMono(String.class)   // String 변환
-//                    .block();   // 비동기 작업 -> 동기적 처리
-
             jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
                     .retrieve()     // 응답
@@ -246,13 +248,6 @@ public class MovieService {
         // API 요청 및 응답 받기
         String jsonResponse;
         try {
-//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-//            jsonResponse = webClient.get() // get 요청 생성
-//                    .uri(requestUrl)    // URL 설정
-//                    .retrieve() // 응답
-//                    .bodyToMono(String.class)   // String 변환
-//                    .block();   // 비동기 작업 -> 동기적 처리
-
             jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
                     .retrieve()     // 응답
@@ -280,13 +275,6 @@ public class MovieService {
             // 디테일 URL 생성
             String detailUrl = "https://api.themoviedb.org/3/movie/" + movieId + "?api_key=" + tmdbApiKey;
             // 응답 생성
-//            String detailResponse = restTemplate.getForObject(detailUrl, String.class);
-//            String detailResponse = webClient.get() // get 요청 생성
-//                    .uri(detailUrl)    // URL 설정
-//                    .retrieve() // 응답
-//                    .bodyToMono(String.class)   // String 변환
-//                    .block();   // 비동기 작업 -> 동기적 처리
-
             String detailResponse = restClient.get() // get 요청
                     .uri(detailUrl)    // URL 설정
                     .retrieve()     // 응답
@@ -311,12 +299,6 @@ public class MovieService {
         // API 요청 및 응답
         String jsonResponse;
         try {
-//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-//            jsonResponse = webClient.get() // get 요청 생성
-//                    .uri(requestUrl)    // URL 설정
-//                    .retrieve() // 응답
-//                    .bodyToMono(String.class)   // String 변환
-//                    .block();   // 비동기 작업 -> 동기적 처리
             jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
                     .retrieve()     // 응답
