@@ -42,20 +42,20 @@ public class UserMatchingController {
         return new RsData<>("200", "거리 조회 성공", responses);
     }
 
-    @Operation(summary = "범위 이내 사용자 조회", description = "범위 내에 있는 사용자만 조회")
+    @Operation(summary = "매칭 - 거리로 조회", description = "범위 내에 있는 사용자 무작위 조회")
     @GetMapping("/withinRadius")
-    public RsData<List<UserProfileResponse>> getProfileWithinRadius() {
+    public RsData<UserProfileResponse> getProfileWithinRadius() {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
         UserProfile userProfile = matchingService.findUser(profileId);
         int radius = userProfile.getSearchRadius();
 
-        List<UserProfileResponse> responses = matchingService.findProfileWithinRadius(userProfile, radius);
-        return new RsData<>("200", "거리 조회 성공", responses);
+        UserProfileResponse response = matchingService.recommendByDistance(userProfile, radius);
+        return new RsData<>("200", "거리 조회 성공", response);
     }
 
-    @Operation(summary = "태그로 매칭", description = "겹치는 태그가 있는 사람중 매칭 조회")
+    @Operation(summary = "매칭 - 태그로 조회", description = "겹치는 태그가 있는 사람중 매칭 조회")
     @GetMapping("/tags")
     public RsData<UserProfileResponse> recommendByTags() {
         User user = SecurityUtil.getCurrentUser();
@@ -68,17 +68,17 @@ public class UserMatchingController {
         return new RsData<>("200", "프로필 조회 성공", response);
     }
 
-    @Operation(summary = "추천", description = "유사도가 가장 높은 순서로 추천")
-    @GetMapping("/recommend")
-    public RsData<UserProfileResponse> getRecommend() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
-
-        UserProfile userProfile = matchingService.findUser(profileId);
-        UserProfileResponse response = matchingService.recommend(userProfile);
-
-        return new RsData<>("200", "추천 사용자", response);
-    }
+//    @Operation(summary = "추천", description = "유사도가 가장 높은 순서로 추천")
+//    @GetMapping("/recommend")
+//    public RsData<UserProfileResponse> getRecommend() {
+//        User user = SecurityUtil.getCurrentUser();
+//        Long profileId = user.getUserProfile().getUserId();
+//
+//        UserProfile userProfile = matchingService.findUser(profileId);
+//        UserProfileResponse response = matchingService.recommend(userProfile);
+//
+//        return new RsData<>("200", "추천 사용자", response);
+//    }
 
 
 }

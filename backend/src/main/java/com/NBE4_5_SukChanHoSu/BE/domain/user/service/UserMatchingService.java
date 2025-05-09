@@ -13,10 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +25,7 @@ public class UserMatchingService {
     // 사용자별 추천 리스트 관리
     private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
     private Map<Long, List<UserProfile>> recommendedUsersByTagsMap = new HashMap<>();
+    private Map<Long, List<UserProfile>> recommendedUsersByDistanceMap = new HashMap<>();
 
     public UserProfile findUser(Long userId) {
         UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
@@ -41,6 +39,7 @@ public class UserMatchingService {
                 .toList();
     }
 
+    // 거리 내에 존재하는 사용자 리스트
     public List<UserProfileResponse> findProfileWithinRadius(UserProfile userProfile, Integer radius) {
         // 이성으로 필터링
         List<UserProfile> profileByGender = findProfileByGender(userProfile);
@@ -55,6 +54,45 @@ public class UserMatchingService {
         }
         return responses;
     }
+
+    // 범위 내에 존재하는 사용자 추천
+    public UserProfileResponse recommendByDistance(UserProfile userProfile, Integer distance) {
+        Long userId = userProfile.getUserId();
+        List<UserProfile> recommendedUsers = recommendedUsersByDistanceMap.getOrDefault(userId, new ArrayList<>());
+
+        // 범위 이내에 존재하는 사용자 리스트
+        List<UserProfileResponse> list = findProfileWithinRadius(userProfile, distance);
+
+        // 이미 추천한 사용자 제외
+        List<UserProfileResponse> candidates = list.stream()
+                .filter(response -> !recommendedUsers.contains(convertToUserProfile(response)))
+                .toList();
+
+        // 남아있는 사용자 있는 경우 랜덤 추천
+        if(!candidates.isEmpty()){
+            Random random = new Random();
+            UserProfileResponse recommendedUser = candidates.get(random.nextInt(candidates.size()));
+
+            // 리스트로 관리
+            recommendedUsers.add(convertToUserProfile(recommendedUser));
+            recommendedUsersByDistanceMap.put(userId, recommendedUsers);
+
+            return recommendedUser;
+        }
+
+        throw new NoRecommendException("404", "추천할 사용자가 없습니다.");
+    }
+
+    // response -> profile
+    private UserProfile convertToUserProfile(UserProfileResponse response) {
+        return UserProfile.builder()
+                .userId(response.getUserId())
+                .gender(response.getGender())
+                .searchRadius(response.getSearchRadius())
+                .favoriteGenres(response.getFavoriteGenres())
+                .build();
+    }
+
 
     static final double EARTH_RADIUS = 6371; // 지구의 반지름 (단위: km)
     // 거리 계산
