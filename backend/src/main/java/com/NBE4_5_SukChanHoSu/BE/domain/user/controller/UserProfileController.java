@@ -4,6 +4,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserMatchingService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
@@ -30,6 +31,7 @@ public class UserProfileController {
 
     private final UserProfileService userProfileService;
     private final UserService userService;
+    private final UserMatchingService matchingService;
 
     @Operation(summary = "프로필 등록", description = "회원가입 후 최초 프로필 등록")
     @PostMapping
@@ -65,7 +67,7 @@ public class UserProfileController {
     public RsData<User> getUser() {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
-        UserProfile profile = userProfileService.findUser(profileId);
+        UserProfile profile = matchingService.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", profile.getUser());
     }
 
@@ -75,7 +77,7 @@ public class UserProfileController {
     public RsData<UserProfile> getMyProfile1() {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
-        UserProfile userProfile = userProfileService.findUser(profileId);
+        UserProfile userProfile = matchingService.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
 
@@ -85,8 +87,8 @@ public class UserProfileController {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
-        UserProfile userProfile = userProfileService.findUser(profileId);
-        userProfileService.setRadius(userProfile, radius);
+        UserProfile userProfile = matchingService.findUser(profileId);
+        matchingService.setRadius(userProfile, radius);
 
         return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
@@ -97,13 +99,13 @@ public class UserProfileController {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
-        UserProfile userProfile = userProfileService.findUser(profileId);
-        List<UserProfile> profileByGender = userProfileService.findProfileByGender(userProfile);
+        UserProfile userProfile = matchingService.findUser(profileId);
+        List<UserProfile> profileByGender = matchingService.findProfileByGender(userProfile);
 
         List<UserProfileResponse> responses = new ArrayList<>();
 
         for (UserProfile profile : profileByGender) {
-            int distance = userProfileService.calDistance(userProfile, profile);
+            int distance = matchingService.calDistance(userProfile, profile);
             // UserProfileResponse로 변환하여 리스트에 추가
             responses.add(new UserProfileResponse(profile, distance));
         }
@@ -117,10 +119,10 @@ public class UserProfileController {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
-        UserProfile userProfile = userProfileService.findUser(profileId);
+        UserProfile userProfile = matchingService.findUser(profileId);
         int radius = userProfile.getSearchRadius();
 
-        List<UserProfileResponse> responses = userProfileService.findProfileWithinRadius(userProfile, radius);
+        List<UserProfileResponse> responses = matchingService.findProfileWithinRadius(userProfile, radius);
         return new RsData<>("200", "거리 조회 성공", responses);
     }
 
@@ -130,9 +132,9 @@ public class UserProfileController {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
-        UserProfile userProfile = userProfileService.findUser(profileId);
+        UserProfile userProfile = matchingService.findUser(profileId);
 
-        List<UserProfileResponse> responses = userProfileService.findProfileByTags(userProfile);
+        List<UserProfileResponse> responses = matchingService.findProfileByTags(userProfile);
 
         return new RsData<>("200", "프로필 조회 성공", responses);
     }
@@ -143,8 +145,8 @@ public class UserProfileController {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
-        UserProfile userProfile = userProfileService.findUser(profileId);
-        UserProfileResponse response = userProfileService.recommend(userProfile);
+        UserProfile userProfile = matchingService.findUser(profileId);
+        UserProfileResponse response = matchingService.recommend(userProfile);
 
         return new RsData<>("200", "추천 사용자",response);
     }

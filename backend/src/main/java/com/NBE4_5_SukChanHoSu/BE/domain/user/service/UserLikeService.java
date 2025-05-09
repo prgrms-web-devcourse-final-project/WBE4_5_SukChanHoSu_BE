@@ -32,7 +32,7 @@ public class UserLikeService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTTL ttl;
     private UserProfileService userProfileService;
-
+    private final UserMatchingService matchingService;
 
     @Transactional
     public UserLikes likeUser(UserProfile fromUser, UserProfile toUser) {
@@ -93,7 +93,7 @@ public class UserLikeService {
         cancelLikes(toUser, fromUser);
 
         // 응답 생성
-        int distance = userProfileService.calDistance(fromUser, toUser);
+        int distance = matchingService.calDistance(fromUser, toUser);
         return new MatchingResponse(matching,distance);
     }
 
@@ -113,7 +113,7 @@ public class UserLikeService {
                     Map<String, Object> map = (Map<String, Object>) value;  // Map(키-값 쌍)으로 캐스팅
                     try{
                         UserLikes like = mapper.convertValue(map, UserLikes.class); // Map -> UserLikes 클래스로 변환
-                        int radius = userProfileService.calDistance(like.getFromUser(), like.getToUser());  // 거리 계산
+                        int radius = matchingService.calDistance(like.getFromUser(), like.getToUser());  // 거리 계산
                         likesUsers.add(new UserProfileResponse(like.getToUser(), radius));  // 메모리에 추가
                     }catch (IllegalArgumentException e){
                         throw new RedisSerializationException("500","JSON 역직렬화 실패");
@@ -125,7 +125,7 @@ public class UserLikeService {
                 UserProfile likedUser = like.getToUser();   // 좋아요를 받은 사용자
                 if(likedUser != null) {
                     // 내가 좋아요 한 사용자 리스트에 추가
-                    int radius = userProfileService.calDistance(like.getFromUser(), like.getToUser());  // 거리 계산
+                    int radius = matchingService.calDistance(like.getFromUser(), like.getToUser());  // 거리 계산
                     likesUsers.add(new UserProfileResponse(likedUser, radius));  // 메모리에 추가
                     // 캐싱
                     String key = "likes:" + user.getUserId() + ":" + likedUser.getUserId();
@@ -153,7 +153,7 @@ public class UserLikeService {
                     Map<String,Object> map = (Map<String, Object>) value;
                     try{
                         UserLikes like = mapper.convertValue(map, UserLikes.class);
-                        int distance = userProfileService.calDistance(like.getFromUser(), like.getToUser());    // 거리 계산
+                        int distance = matchingService.calDistance(like.getFromUser(), like.getToUser());    // 거리 계산
                         likedUsers.add(new UserProfileResponse(like.getFromUser(), distance));
                     }catch (IllegalArgumentException e){
                         throw new RedisSerializationException("500","JSON 역직렬화 실패");
@@ -165,7 +165,7 @@ public class UserLikeService {
                 UserProfile likesUser = like.getFromUser(); // 좋아요를 보낸 사용자
                 if(likesUser != null) {
                     // 나를 좋아요한 사용자 리스트에 추가
-                    int distance = userProfileService.calDistance(user, likesUser);    // 거리 계산
+                    int distance = matchingService.calDistance(user, likesUser);    // 거리 계산
                     likedUsers.add(new UserProfileResponse(likesUser, distance));
 
                     // 캐싱
@@ -198,7 +198,7 @@ public class UserLikeService {
                         try{
                             Matching matching = mapper.convertValue(map, Matching.class);
                             System.out.println("추출한 유저: " + matching.getFemaleUser());
-                            int distance = userProfileService.calDistance(user, matching.getFemaleUser());
+                            int distance = matchingService.calDistance(user, matching.getFemaleUser());
                             responses.add(new UserMatchingResponse(matching.getFemaleUser(),matching,distance));
 
                         }catch (IllegalArgumentException e){
@@ -211,7 +211,7 @@ public class UserLikeService {
                 List<Matching> matches = matchingRepository.findByMaleUser(user);
                 for(Matching matching: matches) {
                     // 매칭된 여자 유저 리스트에 등록
-                    int distance = userProfileService.calDistance(user, matching.getFemaleUser());
+                    int distance = matchingService.calDistance(user, matching.getFemaleUser());
                     responses.add(new UserMatchingResponse(matching.getFemaleUser(),matching,distance));
 
                     // 캐싱
@@ -234,7 +234,7 @@ public class UserLikeService {
                         Map<String, Object> map = (Map<String, Object>) value;
                         try {
                             Matching matching = mapper.convertValue(map, Matching.class);
-                            int distance = userProfileService.calDistance(user, matching.getMaleUser());
+                            int distance = matchingService.calDistance(user, matching.getMaleUser());
                             responses.add(new UserMatchingResponse(matching.getMaleUser(),matching,distance));
                             System.out.println("추출한 유저: " + matching.getMaleUser());
                         }catch (IllegalArgumentException e){
@@ -247,7 +247,7 @@ public class UserLikeService {
                 List<Matching> matches = matchingRepository.findByFemaleUser(user);
                 for(Matching matching: matches) {
                     // 매칭된 남자 유저 리스트에 등록
-                    int distance = userProfileService.calDistance(user, matching.getMaleUser());
+                    int distance = matchingService.calDistance(user, matching.getMaleUser());
                     responses.add(new UserMatchingResponse(matching.getMaleUser(),matching,distance));
 
                     // 캐싱

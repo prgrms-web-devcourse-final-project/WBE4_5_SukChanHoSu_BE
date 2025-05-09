@@ -5,6 +5,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserMatchingService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
@@ -50,6 +51,9 @@ class UserProfileControllerTest {
 
     @Autowired
     private UserProfileService userProfileService;
+
+    @Autowired
+    private UserMatchingService matchingService;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -124,7 +128,7 @@ class UserProfileControllerTest {
     @DisplayName("범위 내에 존재하는 사용자 조회")
     void getUserWithinRadius() throws Exception {
         //given
-        UserProfile userProfile = userProfileService.findUser(1L);
+        UserProfile userProfile = matchingService.findUser(1L);
         int radius = userProfile.getSearchRadius();
 
         //when
@@ -213,7 +217,7 @@ class UserProfileControllerTest {
     @DisplayName("태그로 프로필 조회")
     void findProfileByTags() throws Exception {
         // given
-        UserProfile user =userProfileService.findUser(1L);
+        UserProfile user =matchingService.findUser(1L);
         List<Genre> tags = user.getFavoriteGenres();
 
         // when
@@ -257,7 +261,7 @@ class UserProfileControllerTest {
     @DisplayName("추천")
     void recommend() throws Exception {
         // given
-        UserProfile user =userProfileService.findUser(1L);
+        UserProfile user =matchingService.findUser(1L);
 
         // when
         // 추천 1
