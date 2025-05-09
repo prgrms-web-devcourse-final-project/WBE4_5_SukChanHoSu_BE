@@ -30,8 +30,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                                 .requestMatchers("/oauth2/**", "/api/auth/login", "/api/auth/join", "/api/auth/google/url", "/api/email/**").permitAll()
                                 // Swagger
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
@@ -47,7 +49,6 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.POST, "/h2-console/**").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .cors(Customizer.withDefaults())
                 .headers(headers -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 )
@@ -74,11 +75,12 @@ public class SecurityConfig {
                 "https://www.app4.qwas.shop",
                 "https://login.aleph.kr",
                 "https://api.app.mm.ts0608.life",
+                "https://api.app2.mm.ts0608.life",
                 "http://localhost:5173",
-                "https://moive-match-rox9.vercel.app"
+                "https://movie-match-rox9.vercel.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
