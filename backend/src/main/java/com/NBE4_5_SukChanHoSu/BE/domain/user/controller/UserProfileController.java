@@ -30,7 +30,6 @@ import java.util.List;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
-    private final UserService userService;
     private final UserMatchingService matchingService;
 
     @Operation(summary = "프로필 등록", description = "회원가입 후 최초 프로필 등록")
@@ -80,4 +79,17 @@ public class UserProfileController {
         UserProfile userProfile = matchingService.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
+
+    @Operation(summary = "범위 조절", description = "탐색 범위 조절")
+    @PutMapping("/radius")
+    public RsData<?> setRadius(@RequestParam Integer radius) {
+        User user = SecurityUtil.getCurrentUser();
+        Long profileId = user.getUserProfile().getUserId();
+
+        UserProfile userProfile = matchingService.findUser(profileId);
+        userProfileService.setRadius(userProfile, radius);
+
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
+    }
+
 }

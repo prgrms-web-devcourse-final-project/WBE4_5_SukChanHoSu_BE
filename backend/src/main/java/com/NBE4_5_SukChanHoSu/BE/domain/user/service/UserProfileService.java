@@ -114,4 +114,9 @@ public class UserProfileService {
     public boolean existsProfileByUserId(Long userId) {
         return userProfileRepository.existsByUserId(userId);
     }
+
+    @Transactional
+    public void setRadius(UserProfile userProfile, Integer radius) {
+        userProfile.setSearchRadius(radius);
+    }
 }

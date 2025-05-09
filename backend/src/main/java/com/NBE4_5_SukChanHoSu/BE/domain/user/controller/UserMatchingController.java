@@ -22,18 +22,6 @@ public class UserMatchingController {
 
     private final UserMatchingService matchingService;
 
-    @Operation(summary = "범위 조절", description = "탐색 범위 조절")
-    @PutMapping("/radius")
-    public RsData<?> setRadius(@RequestParam Integer radius) {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
-
-        UserProfile userProfile = matchingService.findUser(profileId);
-        matchingService.setRadius(userProfile, radius);
-
-        return new RsData<>("200", "프로필 조회 성공", userProfile);
-    }
-
     @Operation(summary = "이성 조회(거리포함)", description = "거리를 포함한 이성 친구만 조회")
     @GetMapping("/gender")
     public RsData<List<UserProfileResponse>> getProfileByGenderWithDistance() {
@@ -67,17 +55,17 @@ public class UserMatchingController {
         return new RsData<>("200", "거리 조회 성공", responses);
     }
 
-    @Operation(summary = "태그로 프로필 조회", description = "겹치는 태그가 있는 사람만 조회")
+    @Operation(summary = "태그로 매칭", description = "겹치는 태그가 있는 사람중 매칭 조회")
     @GetMapping("/tags")
-    public RsData<List<UserProfileResponse>> getProfileByTags() {
+    public RsData<UserProfileResponse> recommendByTags() {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
         UserProfile userProfile = matchingService.findUser(profileId);
 
-        List<UserProfileResponse> responses = matchingService.findProfileByTags(userProfile);
+        UserProfileResponse response = matchingService.recommendUserByTags(userProfile);
 
-        return new RsData<>("200", "프로필 조회 성공", responses);
+        return new RsData<>("200", "프로필 조회 성공", response);
     }
 
     @Operation(summary = "추천", description = "유사도가 가장 높은 순서로 추천")
@@ -89,7 +77,8 @@ public class UserMatchingController {
         UserProfile userProfile = matchingService.findUser(profileId);
         UserProfileResponse response = matchingService.recommend(userProfile);
 
-        return new RsData<>("200", "추천 사용자",response);
+        return new RsData<>("200", "추천 사용자", response);
     }
+
 
 }

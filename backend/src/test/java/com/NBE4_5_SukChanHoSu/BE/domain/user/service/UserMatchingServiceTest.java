@@ -33,6 +33,9 @@ class UserMatchingServiceTest {
     private UserProfileRepository userProfileRepository;
     @Autowired
     private UserMatchingService matchingService;
+    @Autowired
+    private UserProfileService userProfileService;
+
     private ObjectMapper objectMapper;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
@@ -93,7 +96,7 @@ class UserMatchingServiceTest {
         int newRadius = 10;
 
         // When
-        matchingService.setRadius(male, newRadius);
+        userProfileService.setRadius(male, newRadius);
 
         // Then
         UserProfile updatedUser = userProfileRepository.findById(male.getUserId())
@@ -109,23 +112,6 @@ class UserMatchingServiceTest {
 
         // Then
         profiles.forEach(profile -> assertNotEquals(male.getGender(), profile.getGender()));
-    }
-
-    @Test
-    @DisplayName("태그로 프로필 조회")
-    void findProfileByTags() {
-        // Given
-        List<Genre> tags = male.getFavoriteGenres();
-
-        // When
-        List<UserProfileResponse> responses = matchingService.findProfileByTags(male);
-
-        // Then
-        responses.forEach(response -> {
-            boolean hasMatchingGenre = response.getFavoriteGenres().stream()
-                    .anyMatch(tags::contains);
-            assertTrue(hasMatchingGenre);
-        });
     }
 
     @Test

@@ -132,7 +132,7 @@ class UserMatchingControllerTest {
         int radius = 10;
 
         // when
-        ResultActions action = mvc.perform(put("/api/matching/radius")
+        ResultActions action = mvc.perform(put("/api/profile/radius")
                         .param("radius", String.valueOf(radius))
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
@@ -172,52 +172,8 @@ class UserMatchingControllerTest {
     }
 
     @Test
-    @DisplayName("태그로 프로필 조회")
-    void findProfileByTags() throws Exception {
-        // given
-        UserProfile user =matchingService.findUser(1L);
-        List<Genre> tags = user.getFavoriteGenres();
-
-        // when
-        ResultActions action = mvc.perform(get("/api/matching/tags")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtToken))
-                .andDo(print());
-        // 파싱
-        String responseBody = action.andReturn().getResponse().getContentAsString();
-        JSONObject jsonResponse = new JSONObject(responseBody);
-        JSONArray users = jsonResponse.getJSONArray("data");
-
-        // then
-        action.andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message",containsString("성공")));
-
-        // 태그 겹치는지 확인
-        for (int i = 0; i < users.length(); i++) {
-            JSONObject userProfile = users.getJSONObject(i);
-            JSONArray favoriteGenres = userProfile.getJSONArray("favoriteGenres");
-
-            // 장르 비교
-            boolean hasMatchingGenre = false;
-            for (int j = 0; j < favoriteGenres.length(); j++) {
-                Genre genre = Genre.valueOf(favoriteGenres.getString(j));
-                if (tags.contains(genre)) {
-                    hasMatchingGenre = true;
-                    break;
-                }
-            }
-
-            // 하나라도 겹치지 않는 경우 실패
-            if (!hasMatchingGenre) {
-                fail("겹치지 않는 유저가 발견: " + userProfile.toString());
-            }
-        }
-    }
-
-    @Test
     @DisplayName("추천")
-    void recommend() throws Exception {
+    void recommendByDistance() throws Exception {
         // given
         UserProfile user =matchingService.findUser(1L);
 
@@ -256,7 +212,48 @@ class UserMatchingControllerTest {
 
             assertNotEquals(user1.toString(), user2.toString());
         }
-
     }
+
+    @Test
+    @DisplayName("추천 - 태그")
+    void recommendByTags() throws Exception {
+        // when
+        // 추천 1
+        ResultActions action1 = mvc.perform(get("/api/matching/tags")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andDo(print());
+        // 응답 파싱
+        int status1 = action1.andReturn().getResponse().getStatus();
+        String responseBody1 = action1.andReturn().getResponse().getContentAsString();
+        JSONObject jsonResponse1 = new JSONObject(responseBody1);
+
+        // 추천 2
+        ResultActions action2 = mvc.perform(get("/api/matching/tags")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + jwtToken))
+                .andDo(print());
+        // 응답 파싱
+        int status2 = action2.andReturn().getResponse().getStatus();
+        String responseBody2 = action2.andReturn().getResponse().getContentAsString();
+        JSONObject jsonResponse2 = new JSONObject(responseBody2);
+
+        // Then
+        // 404 체크
+        if (status1 == HttpStatus.NOT_FOUND.value()) {
+            assertEquals("404", jsonResponse1.getString("code"));
+            assertEquals("추천할 사용자가 없습니다.", jsonResponse1.getString("message"));
+        } else if (status2 == HttpStatus.NOT_FOUND.value()) {
+            assertEquals("404", jsonResponse2.getString("code"));
+            assertEquals("추천할 사용자가 없습니다.", jsonResponse2.getString("message"));
+        } else{
+            // 둘다 200 OK를 반환한 경우 ->  응답이 달라야함
+            JSONObject user1 = jsonResponse1.getJSONObject("data");
+            JSONObject user2 = jsonResponse2.getJSONObject("data");
+
+            assertNotEquals(user1.toString(), user2.toString());
+        }
+    }
+
 
 }
