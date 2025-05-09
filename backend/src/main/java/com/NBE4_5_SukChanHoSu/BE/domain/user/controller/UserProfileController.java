@@ -17,7 +17,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -35,22 +34,22 @@ public class UserProfileController {
     @Operation(summary = "프로필 등록", description = "회원가입 후 최초 프로필 등록")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RsData<ProfileResponse> createProfile(@AuthenticationPrincipal User actor, @Valid @RequestBody ProfileRequest dto) {
-        ProfileResponse response = userProfileService.createProfile(actor.getId(), dto);
+    public RsData<ProfileResponse> createProfile(@Valid @RequestBody ProfileRequest dto) {
+        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto);
         return new RsData<>("201", "프로필 등록 완료", response);
     }
 
     @Operation(summary = "프로필 수정", description = "닉네임, 성별, 위치 등 프로필 정보 수정")
     @PutMapping
-    public RsData<ProfileResponse> updateProfile(@AuthenticationPrincipal User actor, @Valid @RequestBody ProfileUpdateRequest dto) {
-        ProfileResponse response = userProfileService.updateProfile(actor.getId(), dto);
+    public RsData<ProfileResponse> updateProfile(@Valid @RequestBody ProfileUpdateRequest dto) {
+        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto);
         return new RsData<>("200", "프로필 수정 완료", response);
     }
 
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
     @GetMapping("/me")
-    public RsData<ProfileResponse> getMyProfile(@AuthenticationPrincipal User actor) {
-        ProfileResponse response = userProfileService.getMyProfile(actor.getId());
+    public RsData<ProfileResponse> getMyProfile() {
+        ProfileResponse response = userProfileService.getMyProfile(SecurityUtil.getCurrentUserId());
         return new RsData<>("200", "프로필 조회 성공", response);
     }
 
@@ -73,7 +72,7 @@ public class UserProfileController {
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
     @GetMapping("/profile/me")
     //todo 임시, 이후 삭제
-    public RsData<UserProfile> getMyProfile() {
+    public RsData<UserProfile> getMyProfile1() {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
         UserProfile userProfile = userProfileService.findUser(profileId);
@@ -87,7 +86,7 @@ public class UserProfileController {
         Long profileId = user.getUserProfile().getUserId();
 
         UserProfile userProfile = userProfileService.findUser(profileId);
-        userProfileService.setRadius(userProfile,radius);
+        userProfileService.setRadius(userProfile, radius);
 
         return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
@@ -121,7 +120,7 @@ public class UserProfileController {
         UserProfile userProfile = userProfileService.findUser(profileId);
         int radius = userProfile.getSearchRadius();
 
-        List<UserProfileResponse> responses  = userProfileService.findProfileWithinRadius(userProfile,radius);
+        List<UserProfileResponse> responses = userProfileService.findProfileWithinRadius(userProfile, radius);
         return new RsData<>("200", "거리 조회 성공", responses);
     }
 
