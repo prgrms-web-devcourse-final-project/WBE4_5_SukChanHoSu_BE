@@ -18,7 +18,9 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,17 +34,27 @@ public class UserProfileController {
     private final UserService userService;
 
     @Operation(summary = "프로필 등록", description = "회원가입 후 최초 프로필 등록")
-    @PostMapping
+    @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
-    public RsData<ProfileResponse> createProfile(@Valid @RequestBody ProfileRequest dto) {
-        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto);
+    public RsData<ProfileResponse> createProfile(@Valid @RequestBody ProfileRequest dto,
+                                                 @RequestPart(value = "profileImage", required = false) MultipartFile profileImageFile) throws IOException {
+        String profileImageUrl = null;
+        if (profileImageFile != null && !profileImageFile.isEmpty()) {
+            profileImageUrl = userProfileService.uploadProfileImage(profileImageFile);
+        }
+        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto,profileImageUrl);
         return new RsData<>("201", "프로필 등록 완료", response);
     }
 
     @Operation(summary = "프로필 수정", description = "닉네임, 성별, 위치 등 프로필 정보 수정")
-    @PutMapping
-    public RsData<ProfileResponse> updateProfile(@Valid @RequestBody ProfileUpdateRequest dto) {
-        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto);
+    @PutMapping(consumes = "multipart/form-data")
+    public RsData<ProfileResponse> updateProfile(@Valid @RequestBody ProfileUpdateRequest dto,
+                                                 @RequestPart(value = "profileImage", required = false) MultipartFile profileImageFile) throws IOException {
+        String profileImageUrl = null;
+        if (profileImageFile != null && !profileImageFile.isEmpty()) {
+            profileImageUrl = userProfileService.uploadProfileImage(profileImageFile);
+        }
+        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto,profileImageUrl);
         return new RsData<>("200", "프로필 수정 완료", response);
     }
 
@@ -146,7 +158,7 @@ public class UserProfileController {
         UserProfile userProfile = userProfileService.findUser(profileId);
         UserProfileResponse response = userProfileService.recommend(userProfile);
 
-        return new RsData<>("200", "추천 사용자",response);
+        return new RsData<>("200", "추천 사용자", response);
     }
 
 }

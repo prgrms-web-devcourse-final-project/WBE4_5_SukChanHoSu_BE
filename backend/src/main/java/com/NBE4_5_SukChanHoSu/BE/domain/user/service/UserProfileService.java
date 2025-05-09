@@ -12,10 +12,13 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.NoRecommendException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
+import com.NBE4_5_SukChanHoSu.BE.global.util.S3Util;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,12 +34,18 @@ public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
     private final UserLikesRepository userLikesRepository;
+    private final S3Util s3Util;
     // 사용자별 추천 리스트 관리
     private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
 
+    // 프로필 이미지 업로드 메서드
+    @Transactional
+    public String uploadProfileImage(MultipartFile profileImageFile) throws IOException {
+        return s3Util.uploadFile(profileImageFile);
+    }
 
     @Transactional
-    public ProfileResponse createProfile(Long userId, ProfileRequest dto) {
+    public ProfileResponse createProfile(Long userId, ProfileRequest dto, String profileImageUrl) {
         User    user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
 
@@ -52,7 +61,7 @@ public class UserProfileService {
                     .user(user)
                     .nickName(dto.getNickname())
                     .gender(dto.getGender())
-                    .profileImage(dto.getProfileImage())
+                    .profileImage(profileImageUrl != null ? profileImageUrl : dto.getProfileImage()) // S3 URL 또는 기존 URL 사용
                     .latitude(dto.getLatitude())
                     .longitude(dto.getLongitude())
                     .birthdate(dto.getBirthdate())
@@ -63,23 +72,19 @@ public class UserProfileService {
                     .watchedMovies(dto.getWatchedMovies())
                     .preferredTheaters(dto.getPreferredTheaters())
                     .build();
-            // User 엔티티 연결 (가정: User 엔티티는 이미 존재한다고 가정)
-            // User user = userRepository.findById(userId)
-            //        .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
-            // userProfile.setUser(user);
+
         } else {
             // 프로필이 이미 존재하면 예외 발생 (또는 업데이트 로직 처리 - API 역할에 따라 다름)
             throw new IllegalStateException("이미 프로필이 등록된 사용자입니다.");
         }
 
-//        updateEntityFromRequest(userProfile, dto);
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);
-        return new ProfileResponse(savedUserProfile); // toDto 대신 생성자 직접 호출
+        return new ProfileResponse(savedUserProfile);
     }
 
     @Transactional
-    public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto) {
-        UserProfile userProfile = userProfileRepository.findByUserId(userId) // 수정: findById -> findByUserId
+    public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto, String profileImageUrl) {
+        UserProfile userProfile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
         userProfile = UserProfile.builder()
@@ -87,7 +92,7 @@ public class UserProfileService {
                 .userId(userProfile.getUserId()) // 기존 ID 유지
                 .nickName(dto.getNickname())
                 .gender(dto.getGender())
-                .profileImage(dto.getProfileImage())
+                .profileImage(profileImageUrl != null ? profileImageUrl : userProfile.getProfileImage()) // S3 URL 또는 기존 URL 유지
                 .latitude(dto.getLatitude())
                 .longitude(dto.getLongitude())
                 .birthdate(dto.getBirthdate())
