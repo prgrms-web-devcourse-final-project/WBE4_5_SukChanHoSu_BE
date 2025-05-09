@@ -15,4 +15,8 @@ public class RedisTTL {
     private long matching;
     @Value("${spring.data.redis.time_to_live.data}")
     private long data;
+    @Value("${spring.data.redis.time_to_live.rank}")
+    private long rank;
+    @Value("${spring.data.redis.time_to_live.detail}")
+    private long detail;
 }
