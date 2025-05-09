@@ -9,8 +9,9 @@ import lombok.experimental.SuperBuilder;
 import java.time.LocalDate;
 import java.util.List;
 
-@Getter
+@Data
 @AllArgsConstructor
+@NoArgsConstructor
 @SuperBuilder
 public class ProfileUpdateRequest {
 
