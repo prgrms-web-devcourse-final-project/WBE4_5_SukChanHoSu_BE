@@ -1,6 +1,5 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
-
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;

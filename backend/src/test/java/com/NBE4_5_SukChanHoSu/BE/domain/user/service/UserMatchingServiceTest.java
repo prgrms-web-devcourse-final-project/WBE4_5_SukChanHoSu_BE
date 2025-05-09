@@ -1,7 +1,5 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
@@ -11,8 +9,6 @@ import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.NoRecommendException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.json.JSONArray;
-import org.json.JSONObject;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,18 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
 import java.util.List;
 
-import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @SpringBootTest
@@ -41,18 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @BaseTestConfig
 class UserMatchingServiceTest {
     @Autowired
-    private MockMvc mvc;
-    @Autowired
-    private UserLikeService userLikeService;
-    @Autowired
     private UserProfileRepository userProfileRepository;
     @Autowired
     private UserMatchingService matchingService;
-    @Autowired
-    private UserService userService;
     private ObjectMapper objectMapper;
-    private static String accessToken;
-    private static String refreshToken;
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
     private UserProfile male;
@@ -87,18 +68,22 @@ class UserMatchingServiceTest {
 
         // When
         List<UserProfileResponse> responses = matchingService.findProfileWithinRadius(male, radius);
-
-        // Then
         if (!responses.isEmpty()) { // responses가 비어있지 않은 경우에만 검증
             responses.forEach(response -> {
-                String distanceStr = response.getDistance().replaceAll("[^0-9]", "");
-                int distance = Integer.parseInt(distanceStr);
+                String distanceStr = response.getDistance();
+                int distanceValue = extractDistanceValue(distanceStr);
 
-                assertTrue(distance <= radius);
+                assertTrue(distanceValue <= radius);
             });
-        } else {
+        } else{
             System.out.println("범위 내에 사용자가 없습니다.");
         }
+    }
+
+    // 거리 문자열에서 숫자만 추출하여 반환 (예: "약 1km" -> 1)
+    private int extractDistanceValue(String distance) {
+        String distanceNumber = distance.replaceAll("[^0-9]", "");
+        return Integer.parseInt(distanceNumber);
     }
 
     @Test
