@@ -132,7 +132,7 @@ class UserProfileControllerTest {
         int radius = userProfile.getSearchRadius();
 
         //when
-        ResultActions action = mvc.perform(get("/api/profile/withinRadius")
+        ResultActions action = mvc.perform(get("/api/matching/withinRadius")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
@@ -174,7 +174,7 @@ class UserProfileControllerTest {
         int radius = 10;
 
         // when
-        ResultActions action = mvc.perform(put("/api/profile/radius")
+        ResultActions action = mvc.perform(put("/api/matching/radius")
                         .param("radius", String.valueOf(radius))
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
@@ -200,7 +200,7 @@ class UserProfileControllerTest {
         // given
 
         // when
-        ResultActions action = mvc.perform(get("/api/profile/profiles/gender")
+        ResultActions action = mvc.perform(get("/api/matching/gender")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
@@ -221,7 +221,7 @@ class UserProfileControllerTest {
         List<Genre> tags = user.getFavoriteGenres();
 
         // when
-        ResultActions action = mvc.perform(get("/api/profile/profile/tags")
+        ResultActions action = mvc.perform(get("/api/matching/tags")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
@@ -265,7 +265,7 @@ class UserProfileControllerTest {
 
         // when
         // 추천 1
-        ResultActions action1 = mvc.perform(get("/api/profile/recommend")
+        ResultActions action1 = mvc.perform(get("/api/matching/recommend")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
@@ -275,7 +275,7 @@ class UserProfileControllerTest {
         JSONObject jsonResponse1 = new JSONObject(responseBody1);
 
         // 추천 2
-        ResultActions action2 = mvc.perform(get("/api/profile/recommend")
+        ResultActions action2 = mvc.perform(get("/api/matching/recommend")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + jwtToken))
                 .andDo(print());
