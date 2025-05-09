@@ -22,7 +22,7 @@ public class SecurityUtil {
                 !(authentication.getPrincipal() instanceof PrincipalDetails)) {
             throw new BadCredentialsException(
                     UserErrorCode.USER_UNAUTHORIZED.getCode(),
-                    UserErrorCode.USER_UNAUTHORIZED.getMessage()
+                    UserErrorCode.USER_UNAUTHORIZED.getMessage() + "id에서 오류 남"
             );
         }
 
@@ -52,7 +52,7 @@ public class SecurityUtil {
                 !(authentication.getPrincipal() instanceof PrincipalDetails)) {
             throw new BadCredentialsException(
                     UserErrorCode.USER_UNAUTHORIZED.getCode(),
-                    UserErrorCode.USER_UNAUTHORIZED.getMessage()
+                    UserErrorCode.USER_UNAUTHORIZED.getMessage() + "User에서 에러남"
             );
         }
 

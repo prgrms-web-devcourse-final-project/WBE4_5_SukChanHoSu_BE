@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class ProfileCheckInterceptor implements HandlerInterceptor {
@@ -28,10 +30,13 @@ public class ProfileCheckInterceptor implements HandlerInterceptor {
         String method = request.getMethod();
 
         // 프로필 등록은 허용
-        if (uri.equals("/api/profile") && method.equalsIgnoreCase("POST")) {
+        if ((uri.equals("/api/profile") && method.equalsIgnoreCase("POST")) ||
+                (uri.equals("/api/email/send") && method.equalsIgnoreCase("POST")) ||
+                (uri.equals("/api/email/verify") && method.equalsIgnoreCase("POST")) ||
+                (uri.equals("/api/token/reissue") && method.equalsIgnoreCase("POST"))
+        ) {
             return true;
         }
-
         Long userId = SecurityUtil.getCurrentUserId();
         boolean hasProfile = userProfileService.existsProfileByUserId(userId);
 
