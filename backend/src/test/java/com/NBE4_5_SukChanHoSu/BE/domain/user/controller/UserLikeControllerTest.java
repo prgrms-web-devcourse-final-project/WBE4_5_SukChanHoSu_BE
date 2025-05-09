@@ -52,7 +52,7 @@ public class UserLikeControllerTest {
     private static String accessToken;
     private static String refreshToken;
 
-    @Mock
+    @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
     @BeforeEach
