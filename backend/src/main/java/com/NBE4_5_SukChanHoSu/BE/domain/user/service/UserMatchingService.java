@@ -1,11 +1,11 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.RecommendUser;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.RecommendUserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.NoRecommendException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -19,13 +19,7 @@ import java.util.*;
 @Transactional(readOnly = true)
 public class UserMatchingService {
     private final UserProfileRepository userProfileRepository;
-    private final UserRepository userRepository;
-    private final UserLikesRepository userLikesRepository;
-
-    // 사용자별 추천 리스트 관리
-//    private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
-    private Map<Long, List<UserProfile>> recommendedUsersByTagsMap = new HashMap<>();
-    private Map<Long, List<UserProfile>> recommendedUsersByDistanceMap = new HashMap<>();
+    private final RecommendUserRepository recommendUserRepository;
 
     public UserProfile findUser(Long userId) {
         UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
@@ -56,16 +50,16 @@ public class UserMatchingService {
     }
 
     // 범위 내에 존재하는 사용자 추천
+    @Transactional
     public UserProfileResponse recommendByDistance(UserProfile userProfile, Integer distance) {
         Long userId = userProfile.getUserId();
-        List<UserProfile> recommendedUsers = recommendedUsersByDistanceMap.getOrDefault(userId, new ArrayList<>());
 
         // 범위 이내에 존재하는 사용자 리스트
         List<UserProfileResponse> list = findProfileWithinRadius(userProfile, distance);
 
         // 이미 추천한 사용자 제외
         List<UserProfileResponse> candidates = list.stream()
-                .filter(response -> !recommendedUsers.contains(convertToUserProfile(response)))
+                .filter(candidate -> !isRecommended(userId,candidate.getUserId(),"distance"))
                 .toList();
 
         // 남아있는 사용자 있는 경우 랜덤 추천
@@ -73,10 +67,8 @@ public class UserMatchingService {
             Random random = new Random();
             UserProfileResponse recommendedUser = candidates.get(random.nextInt(candidates.size()));
 
-            // 리스트로 관리
-            recommendedUsers.add(convertToUserProfile(recommendedUser));
-            recommendedUsersByDistanceMap.put(userId, recommendedUsers);
-
+            // 객체화 하여 DB에 저장
+            saveRecommendUser(userId,recommendedUser.getUserId(),"distance");
             return recommendedUser;
         }
 
@@ -92,7 +84,6 @@ public class UserMatchingService {
                 .favoriteGenres(response.getFavoriteGenres())
                 .build();
     }
-
 
     static final double EARTH_RADIUS = 6371; // 지구의 반지름 (단위: km)
     // 거리 계산
@@ -122,9 +113,9 @@ public class UserMatchingService {
     }
 
     // 태그 기반 매칭
+    @Transactional
     public UserProfileResponse recommendUserByTags(UserProfile userProfile) {
         long userId = userProfile.getUserId();
-        List<UserProfile> recommendedUsers = recommendedUsersByTagsMap.getOrDefault(userId, new ArrayList<>());
         int radius = userProfile.getSearchRadius();
         List<Genre> tags = userProfile.getFavoriteGenres();
         int maxScore = -1;
@@ -137,8 +128,7 @@ public class UserMatchingService {
         // 거리 및 태그
         for (UserProfile profile : profileByGender) {
             // 이미 추천한 사용자 pass
-            if (recommendedUsers.contains(profile)) continue;
-
+            if(isRecommended(userId, profile.getUserId(),"tags")) continue;
             // 거리 계산
             int distance = calDistance(userProfile, profile);
             // 범위 밖 사용자 패스
@@ -155,12 +145,23 @@ public class UserMatchingService {
 
         // 추천할 사용자가 있는 경우
         if(recommendedUser != null) {
-            recommendedUsers.add(recommendedUser);  // 리스트에 등록
-            recommendedUsersByTagsMap.put(userId, recommendedUsers); // 사용자별 리스트 업데이트
+            // 객체화 하여 DB에 저장
+            saveRecommendUser(userId,recommendedUser.getUserId(),"tags");
             return new UserProfileResponse(recommendedUser,recommendDistance);
         }
 
         throw new NoRecommendException("404","추천할 사용자가 없습니다.");
+    }
+
+    // 추천 리스트 저장
+    private void saveRecommendUser(long userId, Long recommendedUserId, String type) {
+        RecommendUser recommendUser = new RecommendUser(userId,recommendedUserId,type);
+        recommendUserRepository.save(recommendUser);
+    }
+
+    // 이미 추천한 사용지인지 검증
+    private boolean isRecommended(long userId, Long recommendedUserId, String type) {
+        return recommendUserRepository.existsByUserIdAndRecommendedUserIdAndType(userId,recommendedUserId,type);
     }
 
     // 두 사용자의 겹치는 태그 수 계산
