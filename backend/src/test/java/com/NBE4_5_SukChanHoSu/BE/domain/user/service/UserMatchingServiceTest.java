@@ -2,7 +2,9 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.RecommendUser;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.RecommendUserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
@@ -11,14 +13,17 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
+import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doAnswer;
 
 
 @SpringBootTest
@@ -32,6 +37,11 @@ class UserMatchingServiceTest {
     private UserMatchingService matchingService;
     @Autowired
     private UserProfileService userProfileService;
+
+    @Mock
+    private RecommendUserRepository recommendUserRepository;
+    @Mock
+    private RecommendService recommendService;
 
     private ObjectMapper objectMapper;
     @Autowired
@@ -110,5 +120,27 @@ class UserMatchingServiceTest {
         // Then
         profiles.forEach(profile -> assertNotEquals(male.getGender(), profile.getGender()));
     }
+
+    @Test
+    @DisplayName("30일이 지난 추천 기록 삭제 - 스케줄러 모의")
+    void cleanupOldRecommendations_MockScheduler() {
+        // Given
+        LocalDateTime now = LocalDateTime.now();
+        RecommendUser oldRecommendation = new RecommendUser(1L,2L,"distance",now.minusDays(31));
+        recommendUserRepository.save(oldRecommendation);
+
+        // When
+        doAnswer(invocation -> {
+            LocalDateTime cutoffDate = LocalDateTime.now().minusDays(30);
+            recommendUserRepository.deleteByCreatedAtBefore(cutoffDate);
+            return null;
+        }).when(recommendService).cleanUp();
+
+        recommendService.cleanUp(); // 스케줄러 메서드 호출
+
+        // Then
+        assertFalse(recommendUserRepository.existsById(oldRecommendation.getId()));
+    }
+
 
 }

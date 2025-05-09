@@ -1,17 +1,15 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
 @Entity
-@AllArgsConstructor
 @NoArgsConstructor
+@Getter
 public class RecommendUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,6 +18,8 @@ public class RecommendUser {
     private Long userId;
     private Long recommendedUserId;
     private String type; // 추천 타입 ("tags", "distance")
+
+    @Column(nullable = false)
     private LocalDateTime createdAt;
 
     public RecommendUser(Long userId, Long recommendedUserId, String type) {
@@ -27,6 +27,13 @@ public class RecommendUser {
         this.recommendedUserId = recommendedUserId;
         this.type = type;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public RecommendUser(Long userId, Long recommendedUserId, String type,LocalDateTime createdAt) {
+        this.userId = userId;
+        this.recommendedUserId = recommendedUserId;
+        this.type = type;
+        this.createdAt = createdAt;
     }
 
 }
