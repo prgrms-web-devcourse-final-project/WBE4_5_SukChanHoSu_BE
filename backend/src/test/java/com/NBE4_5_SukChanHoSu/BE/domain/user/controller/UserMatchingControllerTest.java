@@ -83,7 +83,7 @@ class UserMatchingControllerTest {
     }
 
     @Test
-    @DisplayName("범위 내에 존재하는 사용자 조회")
+    @DisplayName("추천 - 거리")
     void getUserWithinRadius() throws Exception {
         //given
         UserProfile userProfile = matchingService.findUser(1L);
@@ -146,25 +146,6 @@ class UserMatchingControllerTest {
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("성공")))
                 .andExpect(jsonPath("$.data.searchRadius").value(radius));
-    }
-
-    @Test
-    @DisplayName("이성 조회(거리 포함)")
-    void findProfileByGender() throws Exception {
-        // given
-
-        // when
-        ResultActions action = mvc.perform(get("/api/matching/gender")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + jwtToken))
-                .andDo(print());
-
-        // then
-        action.andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message",containsString("성공")))
-                .andExpect(jsonPath("$.data[*].distance").exists());
-
     }
 
     @Test

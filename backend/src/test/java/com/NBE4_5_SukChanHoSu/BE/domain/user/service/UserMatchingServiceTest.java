@@ -114,20 +114,4 @@ class UserMatchingServiceTest {
         profiles.forEach(profile -> assertNotEquals(male.getGender(), profile.getGender()));
     }
 
-    @Test
-    @DisplayName("추천")
-    void recommend() {
-        // When
-        UserProfileResponse recommendedUser = null;
-        try {
-            recommendedUser = matchingService.recommend(male);
-        } catch (NoRecommendException e) {
-            // 예외가 발생하면 테스트 성공
-            return;
-        }
-
-        // Then
-        assertNotNull(recommendedUser);
-        assertNotEquals(male.getGender(), recommendedUser.getGender());
-    }
 }

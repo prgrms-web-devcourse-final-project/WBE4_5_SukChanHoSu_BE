@@ -12,7 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -22,8 +21,9 @@ public class UserMatchingService {
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
     private final UserLikesRepository userLikesRepository;
+
     // 사용자별 추천 리스트 관리
-    private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
+//    private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
     private Map<Long, List<UserProfile>> recommendedUsersByTagsMap = new HashMap<>();
     private Map<Long, List<UserProfile>> recommendedUsersByDistanceMap = new HashMap<>();
 
@@ -121,76 +121,7 @@ public class UserMatchingService {
         return (int) Math.round(distance); // 반올림하여 int형으로 반환
     }
 
-    // 추천 알고리즘
-    public UserProfileResponse recommend(UserProfile userProfile) {
-        Long userId = userProfile.getUserId();
-        List<UserProfile> recommendedUsers = recommendedUsersMap.getOrDefault(userId, new ArrayList<>());
-        int radius = userProfile.getSearchRadius();
-        UserProfile recommendedUser = null;
-        int maxScore = 0;
-        int recommendDistance =0; // 추천 사용자의 거리 저장 필드
-        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
-
-        // 1차: 이성
-        List<UserProfile> profileByGender = findProfileByGender(userProfile);
-
-        // 거리 및 태그
-        for (UserProfile profile : profileByGender) {
-            // 이미 추천한 사용자는 패스
-            if (recommendedUsers.contains(profile)) {
-                continue;
-            }
-
-            LocalDateTime lastLikeTime = userLikesRepository.findLastLikeTimeByUserId(profile.getUserId());
-            if (lastLikeTime == null || lastLikeTime.isBefore(oneMonthAgo)) {
-                continue;
-            }
-
-            int distance = calDistance(userProfile, profile); // 거리 계산
-            int distanceScore = 0;
-            int tagScore = 0;
-            int totalScore = -1;
-
-            // 2차: 거리
-            if (distance <= radius) { // 범위 내에 있는 경우만 추가
-                distanceScore = 100 - (distance * 3);   // 키로당 3점 감점
-
-                // 3차: 태그
-                for(Genre genre : profile.getFavoriteGenres()) {
-                    // 나와 태그가 겹친다면
-                    if(userProfile.getFavoriteGenres().contains(genre)) {
-                        tagScore+=10;   // 하나당 10점
-                    }
-                }
-            }
-            totalScore = distanceScore + tagScore; // 총점
-            System.out.println("User ID: " + profile.getUserId() + ", Distance: " + distance + ", Distance Score: " + distanceScore + ", Tag Score: " + tagScore + ", Total Score: " + totalScore); // 로깅 추가
-
-            // 최고 점수 사용자 업데이트(0점 이하는 등록x)
-            if (totalScore > maxScore) {
-                maxScore = totalScore;
-                recommendDistance = distance;
-                recommendedUser = profile;
-            }
-        }
-
-        // 추천할 사용자가 있는 경우
-        if(recommendedUser != null) {
-            recommendedUsers.add(recommendedUser);  // 리스트에 등록
-            recommendedUsersMap.put(userId, recommendedUsers); // 사용자별 리스트 업데이트
-            System.out.println("리스트관리: "+recommendedUsers);
-            return new UserProfileResponse(recommendedUser,recommendDistance);
-        }
-
-        // 리스트가 차있는데, 추천할 사용자가 없는 경우, 리스트 초기화
-        if (!recommendedUsers.isEmpty()) {
-            recommendedUsers.clear(); // 리스트 초기화
-            recommendedUsersMap.put(userId, recommendedUsers);  // 초기화 업데이트
-        }
-
-        throw new NoRecommendException("404","추천할 사용자가 없습니다.");
-    }
-
+    // 태그 기반 매칭
     public UserProfileResponse recommendUserByTags(UserProfile userProfile) {
         long userId = userProfile.getUserId();
         List<UserProfile> recommendedUsers = recommendedUsersByTagsMap.getOrDefault(userId, new ArrayList<>());

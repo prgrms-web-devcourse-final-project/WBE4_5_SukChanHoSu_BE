@@ -9,10 +9,9 @@ import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/matching")
@@ -21,26 +20,6 @@ import java.util.List;
 public class UserMatchingController {
 
     private final UserMatchingService matchingService;
-
-    @Operation(summary = "이성 조회(거리포함)", description = "거리를 포함한 이성 친구만 조회")
-    @GetMapping("/gender")
-    public RsData<List<UserProfileResponse>> getProfileByGenderWithDistance() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
-
-        UserProfile userProfile = matchingService.findUser(profileId);
-        List<UserProfile> profileByGender = matchingService.findProfileByGender(userProfile);
-
-        List<UserProfileResponse> responses = new ArrayList<>();
-
-        for (UserProfile profile : profileByGender) {
-            int distance = matchingService.calDistance(userProfile, profile);
-            // UserProfileResponse로 변환하여 리스트에 추가
-            responses.add(new UserProfileResponse(profile, distance));
-        }
-
-        return new RsData<>("200", "거리 조회 성공", responses);
-    }
 
     @Operation(summary = "매칭 - 거리로 조회", description = "범위 내에 있는 사용자 무작위 조회")
     @GetMapping("/withinRadius")
@@ -67,18 +46,5 @@ public class UserMatchingController {
 
         return new RsData<>("200", "프로필 조회 성공", response);
     }
-
-//    @Operation(summary = "추천", description = "유사도가 가장 높은 순서로 추천")
-//    @GetMapping("/recommend")
-//    public RsData<UserProfileResponse> getRecommend() {
-//        User user = SecurityUtil.getCurrentUser();
-//        Long profileId = user.getUserProfile().getUserId();
-//
-//        UserProfile userProfile = matchingService.findUser(profileId);
-//        UserProfileResponse response = matchingService.recommend(userProfile);
-//
-//        return new RsData<>("200", "추천 사용자", response);
-//    }
-
 
 }
