@@ -1,7 +1,5 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieRankingResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
@@ -13,8 +11,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,12 +20,9 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.client.RestClient;
 
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -53,7 +46,8 @@ class MovieControllerTest {
     private static String accessToken;
     private static String refreshToken;
 
-    private static final String KEY = "weeklyBoxOffice";
+    private static final String BOXOFFICE_KEY = "weeklyBoxOffice";
+    private static final String MOVIE_KEY = "MovieCd:";
 
     @BeforeEach
     void setUp() {
@@ -93,7 +87,7 @@ class MovieControllerTest {
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("박스 오피스 Top 10")))
                 .andExpect(jsonPath("$.data.size()").value(10));
-        assertTrue(redisTemplate.hasKey(KEY));
+        assertTrue(redisTemplate.hasKey(BOXOFFICE_KEY));
     }
 
     @Test
@@ -116,7 +110,7 @@ class MovieControllerTest {
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("박스 오피스 Top 10")))
                 .andExpect(jsonPath("$.data.size()").value(10));
-        assertTrue(redisTemplate.hasKey(KEY));
+        assertTrue(redisTemplate.hasKey(BOXOFFICE_KEY));
 
         // When
         long startTime2 = System.currentTimeMillis();
@@ -127,8 +121,8 @@ class MovieControllerTest {
         long endTime2 = System.currentTimeMillis();
         long responseTime2 = endTime2 - startTime2;
 
-        String responseBody2 = action1.andReturn().getResponse().getContentAsString();
-        JSONObject jsonResponse2 = new JSONObject(responseBody1);
+        String responseBody2 = action2.andReturn().getResponse().getContentAsString();
+        JSONObject jsonResponse2 = new JSONObject(responseBody2);
         JSONArray dataArray2 = jsonResponse2.getJSONArray("data");
 
         // Then
@@ -159,7 +153,61 @@ class MovieControllerTest {
     }
 
     @Test
-    void getMovieDetail() {
+    @DisplayName("영화 상세 정보")
+    void getMovieDetail() throws Exception {
+        // Given
+        String key = MOVIE_KEY+"20228797";
+
+        long startTime1 = System.currentTimeMillis();
+        ResultActions action1 = mvc.perform(get("/api/movie/detail") // 박스 오피스 데이터 가져오기
+                        .param("movieCd","20228797")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print());
+
+        long endTime1 = System.currentTimeMillis();
+        long responseTime1 = endTime1 - startTime1; // 응답 시간
+
+        String responseBody1 = action1.andReturn().getResponse().getContentAsString();
+        JSONObject jsonResponse1 = new JSONObject(responseBody1);
+        JSONObject data1 = jsonResponse1.getJSONObject("data");
+
+        action1.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("영화 상세 정보")));
+        // 캐싱 검증
+        assertTrue(redisTemplate.hasKey(key));
+
+        // When
+        long startTime2 = System.currentTimeMillis();
+        ResultActions action2 = mvc.perform(get("/api/movie/detail") // 박스 오피스 데이터 가져오기
+                        .param("movieCd","20228797")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print());
+
+        long endTime2 = System.currentTimeMillis();
+        long responseTime2 = endTime2 - startTime2;
+
+        String responseBody2 = action2.andReturn().getResponse().getContentAsString();
+        JSONObject jsonResponse2 = new JSONObject(responseBody2);
+        JSONObject data2 = jsonResponse2.getJSONObject("data");
+
+        // Then
+        action2.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("영화 상세 정보")));
+
+        // 데이터 비교
+        assertEquals(data1.getString("movieNm"), data2.getString("movieNm"));
+        assertEquals(data1.getString("openDt"), data2.getString("openDt"));
+        assertEquals(data1.getString("showTm"), data2.getString("showTm"));
+        assertEquals(data1.getString("director"), data2.getString("director"));
+        assertEquals(data1.getString("posterUrl"), data2.getString("posterUrl"));
+
+        // 응답 속도 비교
+        assertTrue(responseTime2 < responseTime1);
+        System.out.println("responseTime1: " + responseTime1);
+        System.out.println("responseTime2: " + responseTime2);
 
     }
 }
