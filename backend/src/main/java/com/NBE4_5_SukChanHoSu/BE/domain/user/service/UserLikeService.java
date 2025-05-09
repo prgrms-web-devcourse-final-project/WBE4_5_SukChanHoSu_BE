@@ -18,10 +18,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -47,6 +44,12 @@ public class UserLikeService {
         String key = "likes:" + fromUser.getUserId() + ":" + toUser.getUserId();
         redisTemplate.opsForValue().set(key, like,ttl.getLikes(), TimeUnit.SECONDS); // TTL 설정
 
+        // like 상태 업데이트
+        String key2 ="user:" + fromUser.getUserId();
+        // value값(movieCd) 보존 , 기본값: ""
+        String existingValue = Optional.ofNullable((String) redisTemplate.opsForValue().get(key2)).orElse("");
+        // like 전송시 레디스에 유저 정보 업데이트
+        redisTemplate.opsForValue().set(key2,existingValue, ttl.getData(), TimeUnit.SECONDS);
         return like;
     }
 

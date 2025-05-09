@@ -13,4 +13,6 @@ public class RedisTTL {
     private long liked;
     @Value("${spring.data.redis.time_to_live.matching}")
     private long matching;
+    @Value("${spring.data.redis.time_to_live.data}")
+    private long data;
 }

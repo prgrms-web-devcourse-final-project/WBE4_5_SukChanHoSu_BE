@@ -24,6 +24,7 @@ spring:
         likes: 86400 # 24h
         liked: 86400 # 24h
         matching: 3600 # 1h
+        data: 604800 # 1주일
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DATABASE.URL}
