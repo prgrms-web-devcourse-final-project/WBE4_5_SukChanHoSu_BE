@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.global.interceptor;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserMatchingService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -23,6 +24,7 @@ public class ProfileCheckInterceptor implements HandlerInterceptor {
 
     private final UserProfileService userProfileService;
     private final ObjectMapper objectMapper; // JSON 변환을 위한 ObjectMapper 주입
+    private final UserMatchingService matchingService;
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {

@@ -42,6 +42,5 @@ public class MovieController {
     public RsData<MovieResponse> getMovieDetail(@RequestParam String movieCd) {
         MovieResponse response = movieService.getMovieDetail(movieCd);
         return new RsData<>("200","영화 상세 정보", response);
-
     }
 }

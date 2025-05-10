@@ -7,17 +7,22 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.MovieGenre;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.NullResponseException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ParsingException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ResponseNotFound;
+import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,13 +44,23 @@ public class MovieService {
     @Value("${movie.api.tmdb-search-url}")
     private String tmdbSearchUrl; // TMDB 영화 검색 API URL
 
-//    private final RestTemplate restTemplate;
-//    private final WebClient webClient;  // redisTemplate -> webClient로 외부 수집 프로토콜 변경
+
+    @Autowired
+    private RedisTemplate<String,Object> redisTemplate;
+    private final RedisTTL ttl;
+
     private final RestClient restClient;  // // redisTemplate -> webClient -> RestClient 로 외부 수집 프로토콜 변경
     private final ObjectMapper objectMapper;
-
+    private static final String BOXOFFICE_KEY = "weeklyBoxOffice";
+    private static final String MOVIE_KEY = "MovieCd:";
     // 주간 박스오피스
     public List<MovieRankingResponse> searchWeeklyBoxOffice(String targetDt, String weekGb, String itemPerPage) {
+        // 캐시 먼저 확인
+        if(redisTemplate.hasKey(BOXOFFICE_KEY)){
+            // 캐싱된 데이터 반환
+            return (List<MovieRankingResponse>) redisTemplate.opsForValue().get(BOXOFFICE_KEY);
+        }
+
         // 요청 URL 생성
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(rankUrl)
                 .queryParam("key", kobisApiKey)
@@ -59,14 +74,6 @@ public class MovieService {
         // 응답 JSON으로 받아오기
         String jsonResponse;
         try {
-//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-
-//            jsonResponse = webClient.get() // get 요청 생성
-//                    .uri(requestUrl)    // URL 설정
-//                    .retrieve() // 응답
-//                    .bodyToMono(String.class)   // String 변환
-//                    .block();   // 비동기 작업 -> 동기적 처리
-
             jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
                     .retrieve()     // 응답
@@ -96,7 +103,7 @@ public class MovieService {
             }
 
             // 영화 상세 정보 조회
-            return boxOfficeList.stream()
+            List<MovieRankingResponse> responses = boxOfficeList.stream()
                     .map(movie -> {
                         String posterUrl = getMoviePoster(movie.getMovieNm()); // TMDB에서 포스터 URL 조회
                         return new MovieRankingResponse(
@@ -108,6 +115,9 @@ public class MovieService {
                         );
                     })
                     .collect(Collectors.toList());
+            // 캐싱
+            redisTemplate.opsForValue().set(BOXOFFICE_KEY, responses, ttl.getRank(), TimeUnit.SECONDS); // TTL 설정
+            return responses;
         } catch (Exception e) {
             throw new ParsingException("400","API 응답 파싱 실패");
         }
@@ -115,6 +125,19 @@ public class MovieService {
 
     // 영화 상세 페이지
     public MovieResponse getMovieDetail(String movieCd) {
+        String key = MOVIE_KEY + movieCd;
+        // 캐싱 데이터 먼저 확인
+        if(redisTemplate.hasKey(key)){
+            String cachedData =(String) redisTemplate.opsForValue().get(key);
+            if(cachedData != null){
+                try{
+                    // 직렬화
+                    return objectMapper.readValue(cachedData, MovieResponse.class);
+                }catch (Exception e){
+                    throw new ParsingException("400","캐시 데이터 역직렬화 실패");
+                }
+            }
+        }
         // 요청 URL 생성
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(detailUrl)
                 .queryParam("key", kobisApiKey)
@@ -125,13 +148,6 @@ public class MovieService {
         // API 요청 및 응답 받기
         String jsonResponse;
         try {
-//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-//            jsonResponse = webClient.get() // get 요청 생성
-//                    .uri(requestUrl)    // URL 설정
-//                    .retrieve() // 응답
-//                    .bodyToMono(String.class)   // String 변환
-//                    .block();   // 비동기 작업 -> 동기적 처리
-
             jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
                     .retrieve()     // 응답
@@ -218,7 +234,7 @@ public class MovieService {
             }
 
             // MovieResponse 객체 생성 및 반환
-            return new MovieResponse(
+            MovieResponse response = new MovieResponse(
                     movieNm, // 영화명
                     openDt, // 개봉일
                     showTm, // 상영 시간
@@ -229,6 +245,16 @@ public class MovieService {
                     posterUrl, // 포스터 URL
                     overview // 줄거리 (TMDB)
             );
+
+            try{
+                // MovieResponse -> Json 문자열로 직렬화하여 저장
+                String json = objectMapper.writeValueAsString(response);
+                redisTemplate.opsForValue().set(key, json,ttl.getDetail(),TimeUnit.SECONDS);    // 1주일
+            } catch (ParsingException e) {
+                throw new ParsingException("400","캐시 데이터 직렬화 실패");
+            }
+
+            return response;
         } catch (Exception e) {
             throw new ParsingException("400","API 응답 파싱 실패");
         }
@@ -246,13 +272,6 @@ public class MovieService {
         // API 요청 및 응답 받기
         String jsonResponse;
         try {
-//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-//            jsonResponse = webClient.get() // get 요청 생성
-//                    .uri(requestUrl)    // URL 설정
-//                    .retrieve() // 응답
-//                    .bodyToMono(String.class)   // String 변환
-//                    .block();   // 비동기 작업 -> 동기적 처리
-
             jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
                     .retrieve()     // 응답
@@ -280,13 +299,6 @@ public class MovieService {
             // 디테일 URL 생성
             String detailUrl = "https://api.themoviedb.org/3/movie/" + movieId + "?api_key=" + tmdbApiKey;
             // 응답 생성
-//            String detailResponse = restTemplate.getForObject(detailUrl, String.class);
-//            String detailResponse = webClient.get() // get 요청 생성
-//                    .uri(detailUrl)    // URL 설정
-//                    .retrieve() // 응답
-//                    .bodyToMono(String.class)   // String 변환
-//                    .block();   // 비동기 작업 -> 동기적 처리
-
             String detailResponse = restClient.get() // get 요청
                     .uri(detailUrl)    // URL 설정
                     .retrieve()     // 응답
@@ -311,12 +323,6 @@ public class MovieService {
         // API 요청 및 응답
         String jsonResponse;
         try {
-//            jsonResponse = restTemplate.getForObject(requestUrl, String.class);
-//            jsonResponse = webClient.get() // get 요청 생성
-//                    .uri(requestUrl)    // URL 설정
-//                    .retrieve() // 응답
-//                    .bodyToMono(String.class)   // String 변환
-//                    .block();   // 비동기 작업 -> 동기적 처리
             jsonResponse = restClient.get() // get 요청
                     .uri(requestUrl)    // URL 설정
                     .retrieve()     // 응답
