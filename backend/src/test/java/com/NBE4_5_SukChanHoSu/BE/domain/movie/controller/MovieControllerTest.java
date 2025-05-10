@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
@@ -24,6 +25,7 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -43,17 +45,22 @@ class MovieControllerTest {
     private ObjectMapper objectMapper;
     @Autowired
     private UserService userService;
+    @Autowired
+    private MovieService movieService;
     private static String accessToken;
     private static String refreshToken;
 
     private static final String BOXOFFICE_KEY = "weeklyBoxOffice";
     private static final String MOVIE_KEY = "MovieCd:";
+    private static final String movieCd = "20232394";
 
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         login();
+        // 시작 전, 레디스 초기화
         redisTemplate.delete("weeklyBoxOffice");
+        redisTemplate.delete("MovieCd:"+movieCd);
     }
 
     @DisplayName("로그인")
@@ -156,11 +163,11 @@ class MovieControllerTest {
     @DisplayName("영화 상세 정보")
     void getMovieDetail() throws Exception {
         // Given
-        String key = MOVIE_KEY+"20228797";
+        String key = MOVIE_KEY+movieCd;
 
         long startTime1 = System.currentTimeMillis();
         ResultActions action1 = mvc.perform(get("/api/movie/detail") // 박스 오피스 데이터 가져오기
-                        .param("movieCd","20228797")
+                        .param("movieCd",movieCd)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
@@ -181,7 +188,7 @@ class MovieControllerTest {
         // When
         long startTime2 = System.currentTimeMillis();
         ResultActions action2 = mvc.perform(get("/api/movie/detail") // 박스 오피스 데이터 가져오기
-                        .param("movieCd","20228797")
+                        .param("movieCd",movieCd)
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print());
 
@@ -208,6 +215,28 @@ class MovieControllerTest {
         assertTrue(responseTime2 < responseTime1);
         System.out.println("responseTime1: " + responseTime1);
         System.out.println("responseTime2: " + responseTime2);
+    }
 
+    @Test
+    @DisplayName("보고싶은 영화 등록")
+    void bookmarkMovie() throws Exception {
+        // Given
+        Long profileId = 1L;
+
+        String key = "user:" + profileId;
+
+        // When
+        ResultActions action = mvc.perform(post("/api/movie/bookmark")
+                        .param("movieCd", movieCd)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print());
+
+        // Then
+        action.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message").value("보고 싶은 영화 등록"));
+
+        String cachedData = movieService.getBookmarkDataFromRedis(key);
+        assertEquals(cachedData,movieCd);
     }
 }

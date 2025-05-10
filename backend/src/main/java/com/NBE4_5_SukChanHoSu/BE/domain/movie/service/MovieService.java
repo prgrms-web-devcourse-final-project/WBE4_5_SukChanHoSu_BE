@@ -364,7 +364,7 @@ public class MovieService {
     }
 
     // 레디스에 저장된 데이터
-    private String getBookmarkDataFromRedis(String key) {
+    public String getBookmarkDataFromRedis(String key) {
         if(redisTemplate.hasKey(key)){
             return Optional.ofNullable((String)redisTemplate.opsForValue().get(key))
                     .orElseThrow(() -> new NullResponseException("404","데이터가 비어있습니다."));
