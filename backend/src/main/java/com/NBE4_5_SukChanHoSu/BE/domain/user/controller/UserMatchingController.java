@@ -29,10 +29,10 @@ public class UserMatchingController {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
-        UserProfile userProfile = matchingService.findUser(profileId);
-        int radius = userProfile.getSearchRadius();
+        UserProfile profile = matchingService.findUser(profileId);
+        int radius = profile.getSearchRadius();
 
-        UserProfileResponse response = matchingService.recommendByDistance(userProfile, radius);
+        UserProfileResponse response = matchingService.recommendByDistance(profile, radius);
         return new RsData<>("200", "거리 조회 성공", response);
     }
 
@@ -42,9 +42,9 @@ public class UserMatchingController {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
-        UserProfile userProfile = matchingService.findUser(profileId);
+        UserProfile profile = matchingService.findUser(profileId);
 
-        UserProfileResponse response = matchingService.recommendUserByTags(userProfile);
+        UserProfileResponse response = matchingService.recommendUserByTags(profile);
 
         return new RsData<>("200", "프로필 조회 성공", response);
     }

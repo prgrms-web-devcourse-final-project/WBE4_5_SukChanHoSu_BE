@@ -31,7 +31,6 @@ public class UserLikeService {
     private final EntityManager entityManager;
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTTL ttl;
-    private UserProfileService userProfileService;
     private final UserMatchingService matchingService;
 
     @Transactional

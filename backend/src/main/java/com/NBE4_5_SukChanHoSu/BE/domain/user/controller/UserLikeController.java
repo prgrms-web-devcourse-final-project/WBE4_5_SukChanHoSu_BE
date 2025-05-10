@@ -34,7 +34,6 @@ public class UserLikeController {
 
     @PostMapping("/like")
     @Operation(summary = "like 전송", description = "toUser에게 like 전송")
-    // todo: 인증 구현시 파라미터에서 인증정보로 변경
     public RsData<?> likeUser(@RequestParam Long toUserId) {
         User user = SecurityUtil.getCurrentUser();
         Long fromUserId = user.getUserProfile().getUserId();
@@ -76,15 +75,15 @@ public class UserLikeController {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
-        UserProfile userProfile = matchingService.findUser(profileId);
-        List<UserProfileResponse> userProfileResponses = userLikeService.getUserLikes(userProfile);
+        UserProfile profile = matchingService.findUser(profileId);
+        List<UserProfileResponse> userProfileResponses = userLikeService.getUserLikes(profile);
         UserLikeResponse response = new UserLikeResponse(userProfileResponses);
 
         if(response.getUserLikes().isEmpty()){
             return new RsData<>("404", "like 한 사용자가 없습니다.");
         }
 
-        return new RsData<>("200",userProfile.getNickName()+"가 좋아요한 유저 목록 반환",response);
+        return new RsData<>("200",profile.getNickName()+"가 좋아요한 유저 목록 반환",response);
     }
 
     @GetMapping("/liked")

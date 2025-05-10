@@ -27,8 +27,7 @@ public class UserMatchingService {
     private final UserLikesRepository userLikesRepository;
 
     public UserProfile findUser(Long userId) {
-        UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
-        return userProfile;
+        return userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
     }
 
     // 이성만 조회

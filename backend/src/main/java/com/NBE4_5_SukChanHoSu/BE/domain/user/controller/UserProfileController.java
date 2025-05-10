@@ -76,8 +76,8 @@ public class UserProfileController {
     public RsData<UserProfile> getMyProfile1() {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
-        UserProfile userProfile = matchingService.findUser(profileId);
-        return new RsData<>("200", "프로필 조회 성공", userProfile);
+        UserProfile profile = matchingService.findUser(profileId);
+        return new RsData<>("200", "프로필 조회 성공", profile);
     }
 
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
@@ -86,10 +86,10 @@ public class UserProfileController {
         User user = SecurityUtil.getCurrentUser();
         Long profileId = user.getUserProfile().getUserId();
 
-        UserProfile userProfile = matchingService.findUser(profileId);
-        userProfileService.setRadius(userProfile, radius);
+        UserProfile profile = matchingService.findUser(profileId);
+        userProfileService.setRadius(profile, radius);
 
-        return new RsData<>("200", "프로필 조회 성공", userProfile);
+        return new RsData<>("200", "프로필 조회 성공", profile);
     }
 
 }
