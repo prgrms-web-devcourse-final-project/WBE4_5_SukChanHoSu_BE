@@ -25,7 +25,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @AllArgsConstructor
-@Tag(name = "User API", description = "사용자 관련 API")
+@Tag(name = "Like API", description = "LIKE 관련 API")
 public class UserLikeController {
 
     private final UserLikeService userLikeService;

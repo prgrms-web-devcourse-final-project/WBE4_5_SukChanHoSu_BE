@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/matching")
 @RequiredArgsConstructor
-@Tag(name = "프로필 관리", description = "프로필 수정 및 닉네임 중복 검사 등 API")
+@Tag(name = "Matching API", description = "매칭 관련 API")
 public class UserMatchingController {
 
     private final UserMatchingService matchingService;
