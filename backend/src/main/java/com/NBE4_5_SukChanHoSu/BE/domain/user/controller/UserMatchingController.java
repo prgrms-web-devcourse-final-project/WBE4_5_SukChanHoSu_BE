@@ -58,7 +58,7 @@ public class UserMatchingController {
         String key =  "user:" + profile.getUserId();
         String movieCd = movieService.getBookmarkDataFromRedis(key);
 
-        UserProfileResponse response = matchingService.recommendUserByMovie(profile,key,movieCd);
+        UserProfileResponse response = matchingService.recommendUserByMovie(profile,movieCd);
 
         return new RsData<>("200", "프로필 조회 성공", response);
     }

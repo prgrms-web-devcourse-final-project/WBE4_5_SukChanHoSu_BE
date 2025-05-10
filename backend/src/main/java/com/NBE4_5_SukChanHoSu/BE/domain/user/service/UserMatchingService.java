@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.RecommendUser;
@@ -13,6 +14,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
@@ -22,6 +24,7 @@ public class UserMatchingService {
     private final UserProfileRepository userProfileRepository;
     private final RecommendUserRepository recommendUserRepository;
     private final RedisTemplate<String, Object> redisTemplate;
+    private final UserLikesRepository userLikesRepository;
 
     public UserProfile findUser(Long userId) {
         UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
@@ -173,30 +176,32 @@ public class UserMatchingService {
 
     // 영화로 추천
     @Transactional
-    public UserProfileResponse recommendUserByMovie(UserProfile profile,String myKey, String movieCd) {
+    public UserProfileResponse recommendUserByMovie(UserProfile profile, String movieCd) {
         String pattern = "user:*";
         Set<String> keys = redisTemplate.keys(pattern); // 패턴에 해당하는 키 탐색
         UserProfile recommendedUser = null;
         int distance = 0;
         int radius = profile.getSearchRadius();
+
+        // 1. 레디스에 저장된 사람들 우선 추천(마지막 활동이 1주일 이내인 사람들)
         if(keys != null) {
             for(String key:keys){
-                // 본인 키 제외
-                if(key.equals(myKey)) continue;
-
-                String value = (String) redisTemplate.opsForValue().get(key);   // movieCd 추출
                 Long userId = Long.valueOf(key.split(":")[1]);  // Id 추출
-
-                // 중복 추천 방지
-                if(isRecommended(profile.getUserId(), userId, "movie")) continue;
-
-                // 범위 밖 사용자 제외
                 UserProfile profile2 = userProfileRepository.findById(userId)
                         .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
+
+                // 2. 동성 제외
+                if(profile.getGender().equals(profile2.getGender())) continue;
+
+                // 3. 중복 추천 방지
+                if(isRecommended(profile.getUserId(), userId, "movie")) continue;
+
+                // 4. 범위 밖 사용자 제외
                 distance = calDistance(profile, profile2);
                 if(radius < distance) continue;
 
-                // 보고싶은 영화가 겹치는 사람들 우선 탐색
+                String value = (String) redisTemplate.opsForValue().get(key);   // movieCd 추출
+                // 5. 보고싶은 영화가 겹치는 사람들 우선 탐색
                 if(movieCd.equals(value)) {
                     // user:3 -> 3
                     recommendedUser = profile2;
@@ -206,12 +211,36 @@ public class UserMatchingService {
                     }
                 }
 
-                // 보고싶은 영화가 겹치는 사람이 없을 경우에 후순위 추천
+                // 6. 보고싶은 영화가 겹치는 사람이 없을 경우에 후순위 추천
                 recommendedUser = profile2;
                 if(recommendedUser != null) {
                     saveRecommendUser(profile.getUserId(),userId,"movie");
                     return new UserProfileResponse(recommendedUser,distance);
                 }
+            }
+        }
+
+        // 7. 레디스에 저장되지 않은 1달 이내 사용자들 중에서 추천
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+        // 이성 사용자
+        List<UserProfile> profilesByGender = findProfileByGender(profile);
+
+        for(UserProfile profile2 : profilesByGender) {
+            // 1달 이내 사용자만 조건 목록 포함
+            LocalDateTime lastLikeTime = userLikesRepository.findLastLikeTimeByUserId(profile2.getUserId());
+            if (lastLikeTime == null || lastLikeTime.isBefore(oneMonthAgo)) continue;
+
+            // 중복 추천 방지
+            if(isRecommended(profile.getUserId(), profile2.getUserId(), "movie")) continue;
+
+            //  범위 밖 사용자 제외
+            distance = calDistance(profile, profile2);
+            if(radius < distance) continue;
+
+            recommendedUser = profile2;
+            if(recommendedUser != null) {
+                saveRecommendUser(profile.getUserId(),profile2.getUserId(),"movie");
+                return new UserProfileResponse(recommendedUser,distance);
             }
         }
         throw new NoRecommendException("404","추천할 사용자가 없습니다.");
