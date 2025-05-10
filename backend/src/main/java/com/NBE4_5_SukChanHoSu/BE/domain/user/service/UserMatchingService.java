@@ -9,6 +9,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.NoRecommendException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +21,7 @@ import java.util.*;
 public class UserMatchingService {
     private final UserProfileRepository userProfileRepository;
     private final RecommendUserRepository recommendUserRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     public UserProfile findUser(Long userId) {
         UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
@@ -169,4 +171,35 @@ public class UserMatchingService {
         return (int) user.getFavoriteGenres().stream().filter(tags::contains).count();
     }
 
+    // 영화로 추천
+    @Transactional
+    public UserProfileResponse recommendUserByMovie(UserProfile profile,String myKey, String movieCd) {
+        String pattern = "user:*";
+        Set<String> keys = redisTemplate.keys(pattern); // 패턴에 해당하는 키 탐색
+
+        UserProfile recommendedUser = null;
+
+        if(keys != null) {
+            for(String key:keys){
+                if(key.equals(myKey)) continue; // 본인 키 제외
+
+                String value = (String) redisTemplate.opsForValue().get(key);   // movieCd 추출
+                Long userId = Long.valueOf(key.split(":")[1]);  // Id 추출
+
+                if(isRecommended(profile.getUserId(), userId, "movie")) continue;   // 중복 추천 방지
+                // 보고싶은 영화가 겹치는 사람들 우선 탐색
+                if(movieCd.equals(value)) {
+                    // user:3 -> 3
+                    recommendedUser = userProfileRepository.findById(userId)
+                            .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
+                    if(recommendedUser != null) {
+                        saveRecommendUser(profile.getUserId(),userId,"movie");  // DB에 저장
+                        int distance = calDistance(profile,recommendedUser);
+                        return new UserProfileResponse(recommendedUser,distance);
+                    }
+                }
+            }
+        }
+        throw new NoRecommendException("404","추천할 사용자가 없습니다.");
+    }
 }
