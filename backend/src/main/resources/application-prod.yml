@@ -51,6 +51,9 @@ spring:
         likes: 86400 # 24h
         liked: 86400 # 24h
         matching: 3600 # 1h
+        data: 604800 # 1주일
+        rank: 604800 # 1주일
+        detail: 86400 # 1일
   logging:
     level:
       com.example: INFO
