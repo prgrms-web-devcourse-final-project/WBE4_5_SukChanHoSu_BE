@@ -94,7 +94,7 @@ class UserProfileServiceTest {
             when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.empty());
             when(userProfileRepository.save(any(UserProfile.class))).thenReturn(savedUserProfile);
 
-            ProfileResponse response = userProfileService.createProfile(userId, dto, "s3://profile.jpg"); // 이미지 URL 직접 전달
+            ProfileResponse response = userProfileService.createProfile(userId, dto, null); // 이미지 URL 직접 전달
 
             assertThat(response.getNickname()).isEqualTo(dto.getNickname());
             assertThat(response.getProfileImage()).isEqualTo("s3://profile.jpg");
@@ -159,7 +159,6 @@ class UserProfileServiceTest {
                 ProfileUpdateRequest dto = ProfileUpdateRequest.builder()
                         .nickname("newnickname")
                         .introduce("새로운 소개")
-                        .profileImage("new.jpg")
                         .latitude(38.0)
                         .longitude(128.0)
                         .build();
@@ -182,7 +181,7 @@ class UserProfileServiceTest {
                 when(userProfileRepository.save(any(UserProfile.class))).thenReturn(updatedUserProfile);
 
                 // when
-                ProfileResponse responseDto = userProfileService.updateProfile(userId, dto, "s3://new.jpg");
+                ProfileResponse responseDto = userProfileService.updateProfile(userId, dto, null);
 
                 // then
                 assertThat(responseDto.getNickname()).isEqualTo(dto.getNickname());

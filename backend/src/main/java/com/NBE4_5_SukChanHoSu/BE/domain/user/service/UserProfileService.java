@@ -38,21 +38,16 @@ public class UserProfileService {
     // 사용자별 추천 리스트 관리
     private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
 
-    // 프로필 이미지 업로드 메서드
     @Transactional
-    public String uploadProfileImage(MultipartFile profileImageFile) throws IOException {
-        return s3Util.uploadFile(profileImageFile);
-    }
-
-    @Transactional
-    public ProfileResponse createProfile(Long userId, ProfileRequest dto, String profileImageUrl) {
-        User    user = userRepository.findById(userId)
+    public ProfileResponse createProfile(Long userId, ProfileRequest dto, MultipartFile profileImageFile) throws IOException {
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
 
         // 해당 userId를 가진 UserProfile이 이미 존재하는지 확인
         Optional<UserProfile> existingProfile = userProfileRepository.findByUserId(userId);
-
+        String profileImageUrl = null;
         UserProfile userProfile;
+        profileImageUrl = s3Util.uploadFile(profileImageFile);
 
         // 프로필이 없으면 새로 생성
         if (!existingProfile.isPresent()) {
@@ -83,9 +78,16 @@ public class UserProfileService {
     }
 
     @Transactional
-    public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto, String profileImageUrl) {
+    public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto, MultipartFile profileImageFile) throws IOException {
         UserProfile userProfile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        String profileImageUrl = userProfile.getProfileImage();
+
+        // 프로필 이미지가 새로 업로드된 경우에만 S3 저장
+        if (profileImageFile != null && !profileImageFile.isEmpty()) {
+            profileImageUrl = s3Util.uploadFile(profileImageFile);
+        }
 
         userProfile = UserProfile.builder()
                 .user(userProfile.getUser()) // 기존 User 연결 유지

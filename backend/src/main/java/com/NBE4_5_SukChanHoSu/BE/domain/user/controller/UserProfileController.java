@@ -38,11 +38,8 @@ public class UserProfileController {
     @ResponseStatus(HttpStatus.CREATED)
     public RsData<ProfileResponse> createProfile(@ModelAttribute  ProfileRequest dto,
                                                  @RequestPart(value = "profileImage", required = false) MultipartFile profileImageFile) throws IOException {
-        String profileImageUrl = null;
-        if (profileImageFile != null && !profileImageFile.isEmpty()) {
-            profileImageUrl = userProfileService.uploadProfileImage(profileImageFile);
-        }
-        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto,profileImageUrl);
+
+        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto,profileImageFile);
         return new RsData<>("201", "프로필 등록 완료", response);
     }
 
@@ -50,11 +47,7 @@ public class UserProfileController {
     @PutMapping(consumes = "multipart/form-data")
     public RsData<ProfileResponse> updateProfile(@ModelAttribute ProfileUpdateRequest dto,
                                                  @RequestPart(value = "profileImage", required = false) MultipartFile profileImageFile) throws IOException {
-        String profileImageUrl = null;
-        if (profileImageFile != null && !profileImageFile.isEmpty()) {
-            profileImageUrl = userProfileService.uploadProfileImage(profileImageFile);
-        }
-        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto,profileImageUrl);
+        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto,profileImageFile);
         return new RsData<>("200", "프로필 수정 완료", response);
     }
 

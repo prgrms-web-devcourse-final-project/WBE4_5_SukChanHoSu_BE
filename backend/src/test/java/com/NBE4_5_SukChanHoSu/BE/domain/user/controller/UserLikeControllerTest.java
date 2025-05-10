@@ -7,6 +7,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
+import com.NBE4_5_SukChanHoSu.BE.global.interceptor.ProfileCheckInterceptor;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -15,6 +16,8 @@ import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -33,6 +36,8 @@ public class UserLikeControllerTest {
 
     @Autowired
     private MockMvc mvc;
+    @SpyBean
+    private ProfileCheckInterceptor profileCheckInterceptor;
     @Autowired
     private UserLikeService userLikeService;
     @Autowired
