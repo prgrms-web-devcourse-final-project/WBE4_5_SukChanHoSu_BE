@@ -7,12 +7,12 @@ import java.util.List;
 @Data
 public class AllReviewDto {
     private List<ReviewResponseDto> reviews;
-    private int totalReviews;
+    private Long totalReviews;
     private Double totalRating;
 
-    public AllReviewDto(List<ReviewResponseDto> reviewList, Object totalReviews, Object totalRating) {
+    public AllReviewDto(List<ReviewResponseDto> reviewList, Long totalReviews, Double totalRating) {
         this.reviews = reviewList;
-        this.totalReviews = (int) totalReviews;
-        this.totalRating = (Double) totalRating;
+        this.totalReviews = totalReviews;
+        this.totalRating = Math.round(totalRating * 10) / 10.0;
     }
 }
