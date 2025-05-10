@@ -14,12 +14,13 @@ import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
+
 public class S3Util {
 
-    private final AmazonS3 amazonS3Client;  // ✅ @Qualifier 제거
+    private final AmazonS3 amazonS3Client;
 
 //    @Value("${cloud.aws.s3.bucket}")
-    private String bucketName="profile-image";
+    private String bucketName="team06-moviematch-bucket";
 
     public String uploadFile(MultipartFile file) throws IOException {
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
@@ -29,7 +30,7 @@ public class S3Util {
 
         amazonS3Client.putObject(
                 new PutObjectRequest(bucketName, fileName, file.getInputStream(), metadata)
-                        .withCannedAcl(CannedAccessControlList.PublicRead)
+//                        .withCannedAcl(CannedAccessControlList.PublicRead)
         );
 
         return amazonS3Client.getUrl(bucketName, fileName).toString();

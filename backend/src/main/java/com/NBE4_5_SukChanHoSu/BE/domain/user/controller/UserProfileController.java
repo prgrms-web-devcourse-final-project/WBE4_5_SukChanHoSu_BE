@@ -36,7 +36,7 @@ public class UserProfileController {
     @Operation(summary = "프로필 등록", description = "회원가입 후 최초 프로필 등록")
     @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
-    public RsData<ProfileResponse> createProfile(@Valid @RequestBody ProfileRequest dto,
+    public RsData<ProfileResponse> createProfile(@ModelAttribute  ProfileRequest dto,
                                                  @RequestPart(value = "profileImage", required = false) MultipartFile profileImageFile) throws IOException {
         String profileImageUrl = null;
         if (profileImageFile != null && !profileImageFile.isEmpty()) {
@@ -48,7 +48,7 @@ public class UserProfileController {
 
     @Operation(summary = "프로필 수정", description = "닉네임, 성별, 위치 등 프로필 정보 수정")
     @PutMapping(consumes = "multipart/form-data")
-    public RsData<ProfileResponse> updateProfile(@Valid @RequestBody ProfileUpdateRequest dto,
+    public RsData<ProfileResponse> updateProfile(@ModelAttribute ProfileUpdateRequest dto,
                                                  @RequestPart(value = "profileImage", required = false) MultipartFile profileImageFile) throws IOException {
         String profileImageUrl = null;
         if (profileImageFile != null && !profileImageFile.isEmpty()) {

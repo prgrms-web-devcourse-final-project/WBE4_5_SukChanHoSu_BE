@@ -70,7 +70,7 @@ spring:
   cloud: # AWS 클라우드 설정
     aws:
       s3:
-        bucket: profile-image # S3 버킷 이름 설정
+        bucket: profile-image-20240510-devcos5 # S3 버킷 이름 설정
       credentials:
         access-key: ${AWS.ACCESS_KEY}  # 환경 변수로 AWS 접근 키 설정
         secret-key: ${AWS.SECRET_KEY}  # 환경 변수로 AWS 비밀 키 설정

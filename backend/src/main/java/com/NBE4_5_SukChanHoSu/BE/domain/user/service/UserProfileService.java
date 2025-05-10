@@ -61,7 +61,7 @@ public class UserProfileService {
                     .user(user)
                     .nickName(dto.getNickname())
                     .gender(dto.getGender())
-                    .profileImage(profileImageUrl != null ? profileImageUrl : dto.getProfileImage()) // S3 URL 또는 기존 URL 사용
+                    .profileImage(profileImageUrl)
                     .latitude(dto.getLatitude())
                     .longitude(dto.getLongitude())
                     .birthdate(dto.getBirthdate())
@@ -92,7 +92,7 @@ public class UserProfileService {
                 .userId(userProfile.getUserId()) // 기존 ID 유지
                 .nickName(dto.getNickname())
                 .gender(dto.getGender())
-                .profileImage(profileImageUrl != null ? profileImageUrl : userProfile.getProfileImage()) // S3 URL 또는 기존 URL 유지
+                .profileImage(profileImageUrl)
                 .latitude(dto.getLatitude())
                 .longitude(dto.getLongitude())
                 .birthdate(dto.getBirthdate())

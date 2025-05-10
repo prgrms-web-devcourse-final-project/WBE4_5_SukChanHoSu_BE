@@ -79,7 +79,6 @@ class UserProfileServiceTest {
                     .latitude(37.5665)
                     .longitude(126.9780)
                     .birthdate(LocalDate.of(2000, 1, 1))
-                    .profileImage("profile.jpg") // DTO에도 이미지 정보 포함 (기존 URL)
                     .introduce("소개입니다.")
                     .searchRadius(10)
                     .lifeMovie("인생영화")

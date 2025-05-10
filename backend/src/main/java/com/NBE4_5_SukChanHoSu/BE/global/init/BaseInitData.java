@@ -77,34 +77,34 @@ public class BaseInitData {
                     .limit(3) // 상위 3개 선택
                     .collect(Collectors.toList());
 
-            // 빌더 패턴으로 프로필 생성
-            UserProfile userProfile = UserProfile.builder()
-                    .nickName("TempUser" + i)
-                    .gender(i % 2 == 0 ? Gender.Female : Gender.Male)
-                    .profileImage("https://example.com/profile" + i + ".jpg")
-                    .favoriteGenres(genres) // 장르 리스트 설정
-                    .introduce("안녕하세요! 임시 유저 " + i + "입니다.")
-                    .latitude(37.5665 + (i * 0.03)) // 임의의 위도 값
-                    .longitude(126.9780 + (i * 0.03)) // 임의의 경도 값
-                    .searchRadius(20)
-                    .user(user) // 유저와 매핑
-                    .build();
+//            // 빌더 패턴으로 프로필 생성
+//            UserProfile userProfile = UserProfile.builder()
+//                    .nickName("TempUser" + i)
+//                    .gender(i % 2 == 0 ? Gender.Female : Gender.Male)
+//                    .profileImage("https://example.com/profile" + i + ".jpg")
+//                    .favoriteGenres(genres) // 장르 리스트 설정
+//                    .introduce("안녕하세요! 임시 유저 " + i + "입니다.")
+//                    .latitude(37.5665 + (i * 0.03)) // 임의의 위도 값
+//                    .longitude(126.9780 + (i * 0.03)) // 임의의 경도 값
+//                    .searchRadius(20)
+//                    .user(user) // 유저와 매핑
+//                    .build();
+//
+//            // 데이터베이스에 저장
+//            userProfileRepository.save(userProfile);
 
-            // 데이터베이스에 저장
-            userProfileRepository.save(userProfile);
-
-            // 로그 출력
-            System.out.println("임시 유저 프로필 데이터 생성 완료 (" + i + "):");
-            System.out.println("회원가입 완료: " + user.getEmail() + ", 프로필 생성 완료: " + userProfile.getNickName());
-            System.out.println("userId: " + userProfile.getUserId());
-            System.out.println("nickName: " + userProfile.getNickName());
-            System.out.println("gender: " + userProfile.getGender());
-            System.out.println("profileImage: " + userProfile.getProfileImage());
-            System.out.println("favoriteGenres: " + userProfile.getFavoriteGenres());
-            System.out.println("introduce: " + userProfile.getIntroduce());
-            System.out.println("latitude: " + userProfile.getLatitude());
-            System.out.println("longitude: " + userProfile.getLongitude());
-            System.out.println("-----------------------------");
+//            // 로그 출력
+//            System.out.println("임시 유저 프로필 데이터 생성 완료 (" + i + "):");
+//            System.out.println("회원가입 완료: " + user.getEmail() + ", 프로필 생성 완료: " + userProfile.getNickName());
+//            System.out.println("userId: " + userProfile.getUserId());
+//            System.out.println("nickName: " + userProfile.getNickName());
+//            System.out.println("gender: " + userProfile.getGender());
+//            System.out.println("profileImage: " + userProfile.getProfileImage());
+//            System.out.println("favoriteGenres: " + userProfile.getFavoriteGenres());
+//            System.out.println("introduce: " + userProfile.getIntroduce());
+//            System.out.println("latitude: " + userProfile.getLatitude());
+//            System.out.println("longitude: " + userProfile.getLongitude());
+//            System.out.println("-----------------------------");
         }
     }
 
