@@ -1,10 +1,10 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
+package com.NBE4_5_SukChanHoSu.BE.domain.recommend.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserMatchingService;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,9 +18,9 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/matching")
 @RequiredArgsConstructor
 @Tag(name = "Matching API", description = "매칭 관련 API")
-public class UserMatchingController {
+public class RecommendController {
 
-    private final UserMatchingService matchingService;
+    private final RecommendService matchingService;
     private final MovieService movieService;
 
     @Operation(summary = "매칭 - 거리로 조회", description = "범위 내에 있는 사용자 무작위 조회")

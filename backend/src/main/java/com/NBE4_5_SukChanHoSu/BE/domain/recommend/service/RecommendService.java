@@ -1,11 +1,11 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
+package com.NBE4_5_SukChanHoSu.BE.domain.recommend.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.RecommendUser;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.entity.RecommendUser;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.RecommendUserRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.repository.RecommendUserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.NoRecommendException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
@@ -20,7 +20,7 @@ import java.util.*;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class UserMatchingService {
+public class RecommendService {
     private final UserProfileRepository userProfileRepository;
     private final RecommendUserRepository recommendUserRepository;
     private final RedisTemplate<String, Object> redisTemplate;

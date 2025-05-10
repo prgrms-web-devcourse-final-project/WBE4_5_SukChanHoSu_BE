@@ -1,11 +1,9 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserMatchingService;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -20,9 +18,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/profile")
 @RequiredArgsConstructor
@@ -30,7 +25,7 @@ import java.util.List;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
-    private final UserMatchingService matchingService;
+    private final RecommendService matchingService;
 
     @Operation(summary = "프로필 등록", description = "회원가입 후 최초 프로필 등록")
     @PostMapping

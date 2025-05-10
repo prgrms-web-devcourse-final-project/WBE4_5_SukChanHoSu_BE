@@ -4,7 +4,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.service.UserLikeService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;

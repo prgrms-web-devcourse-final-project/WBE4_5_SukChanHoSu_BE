@@ -3,9 +3,7 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserMatchingService;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -34,7 +32,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @BaseTestConfig
-class UserMatchingControllerTest {
+class RecommendControllerTest {
 
     @Autowired
     private MockMvc mvc;
@@ -43,7 +41,7 @@ class UserMatchingControllerTest {
     private UserService userService;
 
     @Autowired
-    private UserMatchingService matchingService;
+    private RecommendService matchingService;
 
     @Autowired
     private ObjectMapper objectMapper;

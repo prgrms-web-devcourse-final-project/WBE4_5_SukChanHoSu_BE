@@ -1,15 +1,14 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
+package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.LikeResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserLikeResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserMatchingService;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.service.UserLikeService;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.Empty;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
@@ -30,7 +29,7 @@ public class UserLikeController {
 
     private final UserLikeService userLikeService;
     private final UserProfileService userProfileService;
-    private final UserMatchingService matchingService;
+    private final RecommendService matchingService;
 
     @PostMapping("/like")
     @Operation(summary = "like 전송", description = "toUser에게 like 전송")
