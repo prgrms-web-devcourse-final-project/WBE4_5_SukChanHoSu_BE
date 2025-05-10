@@ -40,7 +40,7 @@ public class SecurityConfig {
                                 .requestMatchers("/.well-known/**").permitAll()
 
                                 // 채팅 정적 리소스 허용
-                                .requestMatchers("/chat.html", "/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws-stomp/**", "/ws-stomp").permitAll()
+                                .requestMatchers("/chat_rooms.html", "/chat_room.html","/chat.html", "/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws-stomp/**", "/ws-stomp", "/chat/rooms", "/chat/rooms/**").permitAll()
 
                                 // Public endpoints
                                 .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
@@ -71,6 +71,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(List.of(
+                "http://localhost:8080",
                 "https://www.app4.qwas.shop",
                 "https://login.aleph.kr",
                 "https://api.app.mm.ts0608.life"
