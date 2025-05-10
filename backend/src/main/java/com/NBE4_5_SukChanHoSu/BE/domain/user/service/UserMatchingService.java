@@ -176,27 +176,41 @@ public class UserMatchingService {
     public UserProfileResponse recommendUserByMovie(UserProfile profile,String myKey, String movieCd) {
         String pattern = "user:*";
         Set<String> keys = redisTemplate.keys(pattern); // 패턴에 해당하는 키 탐색
-
         UserProfile recommendedUser = null;
-
+        int distance = 0;
+        int radius = profile.getSearchRadius();
         if(keys != null) {
             for(String key:keys){
-                if(key.equals(myKey)) continue; // 본인 키 제외
+                // 본인 키 제외
+                if(key.equals(myKey)) continue;
 
                 String value = (String) redisTemplate.opsForValue().get(key);   // movieCd 추출
                 Long userId = Long.valueOf(key.split(":")[1]);  // Id 추출
 
-                if(isRecommended(profile.getUserId(), userId, "movie")) continue;   // 중복 추천 방지
+                // 중복 추천 방지
+                if(isRecommended(profile.getUserId(), userId, "movie")) continue;
+
+                // 범위 밖 사용자 제외
+                UserProfile profile2 = userProfileRepository.findById(userId)
+                        .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
+                distance = calDistance(profile, profile2);
+                if(radius < distance) continue;
+
                 // 보고싶은 영화가 겹치는 사람들 우선 탐색
                 if(movieCd.equals(value)) {
                     // user:3 -> 3
-                    recommendedUser = userProfileRepository.findById(userId)
-                            .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
+                    recommendedUser = profile2;
                     if(recommendedUser != null) {
                         saveRecommendUser(profile.getUserId(),userId,"movie");  // DB에 저장
-                        int distance = calDistance(profile,recommendedUser);
                         return new UserProfileResponse(recommendedUser,distance);
                     }
+                }
+
+                // 보고싶은 영화가 겹치는 사람이 없을 경우에 후순위 추천
+                recommendedUser = profile2;
+                if(recommendedUser != null) {
+                    saveRecommendUser(profile.getUserId(),userId,"movie");
+                    return new UserProfileResponse(recommendedUser,distance);
                 }
             }
         }
