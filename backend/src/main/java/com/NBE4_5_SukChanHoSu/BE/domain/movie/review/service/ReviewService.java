@@ -7,6 +7,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.repository.ReviewRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -76,6 +77,7 @@ public class ReviewService {
         return new AllReviewDto(reviewList, count, avg);
     }
 
+    @Transactional
     public void updateReview(Long reviewId, ReviewRequestDto requestDto) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("null"));
