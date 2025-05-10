@@ -22,8 +22,8 @@ public class MovieController {
 
     private final MovieService movieService;
 
-    public MovieController(MovieService movieApiService) {
-        this.movieService = movieApiService;
+    public MovieController(MovieService movieService) {
+        this.movieService = movieService;
     }
 
     @Operation(summary = "박스오피스 조회", description = "1주일전 박스 오피스 탑텐 조회")
