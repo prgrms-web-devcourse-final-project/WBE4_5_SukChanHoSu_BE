@@ -35,8 +35,7 @@ public class UserLikeController {
     @PostMapping("/like")
     @Operation(summary = "like 전송", description = "toUser에게 like 전송")
     public RsData<?> likeUser(@RequestParam Long toUserId) {
-        User user = SecurityUtil.getCurrentUser();
-        Long fromUserId = user.getUserProfile().getUserId();
+        Long fromUserId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         // 유저 탐색
         UserProfile fromUser = matchingService.findUser(fromUserId);
@@ -72,8 +71,7 @@ public class UserLikeController {
     @GetMapping("/like")
     @Operation(summary = "like 테이블 조회", description = "사용자의 like 테이블 조회")
     public RsData<UserLikeResponse> getUserLikes() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
         List<UserProfileResponse> userProfileResponses = userLikeService.getUserLikes(profile);
@@ -89,8 +87,7 @@ public class UserLikeController {
     @GetMapping("/liked")
     @Operation(summary = "liked 테이블 조회", description = "사용자의 liked 테이블 조회")
     public RsData<UserLikeResponse> getUserLiked() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
         List<UserProfileResponse> userProfileResponses = userLikeService.getUserLiked(profile);
@@ -106,8 +103,7 @@ public class UserLikeController {
     @GetMapping("/matching")
     @Operation(summary = "match 테이블 조회", description = "사용자의 match 테이블 조회")
     public RsData<?> getUserMatch() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
         List<UserMatchingResponse> response = userLikeService.getUserMatches(profile);
@@ -119,10 +115,8 @@ public class UserLikeController {
 
     @DeleteMapping("/like")
     @Operation(summary = "like/matching 취소", description = "like/matching 취소")
-    // todo: 인증 구현시 파라미터에서 인증정보로 변경
     public RsData<?> cancelLikeUser(@RequestParam Long toUserId){
-        User user = SecurityUtil.getCurrentUser();
-        Long fromUserId = user.getUserProfile().getUserId();
+        Long fromUserId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         // 유저 탐색
         UserProfile fromUser = matchingService.findUser(fromUserId);

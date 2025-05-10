@@ -52,8 +52,7 @@ public class MovieController {
     @Operation(summary = "보고 싶은 영화 등록", description = "레디스에 저장된 영화 넘버를 이용하여 보고 싶은 영화 등록")
     @PostMapping("/bookmark")
     public RsData<MovieResponse> bookmarkMovie(@RequestParam String movieCd) {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
         String cachedData = movieService.bookmarkMovie(profileId,movieCd);
 
         // 영화 상세 정보

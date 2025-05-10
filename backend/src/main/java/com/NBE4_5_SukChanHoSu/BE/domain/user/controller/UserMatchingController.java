@@ -26,8 +26,7 @@ public class UserMatchingController {
     @Operation(summary = "매칭 - 거리로 조회", description = "범위 내에 있는 사용자 무작위 조회")
     @GetMapping("/withinRadius")
     public RsData<UserProfileResponse> getProfileWithinRadius() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
         int radius = profile.getSearchRadius();
@@ -39,8 +38,7 @@ public class UserMatchingController {
     @Operation(summary = "매칭 - 태그로 조회", description = "겹치는 태그가 있는 사람중 매칭 조회")
     @GetMapping("/tags")
     public RsData<UserProfileResponse> recommendByTags() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
 
