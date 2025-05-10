@@ -8,10 +8,7 @@ import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,6 +17,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.client.RestClient;
+
+import java.util.Set;
 
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -58,9 +57,6 @@ class MovieControllerTest {
     void setUp() {
         objectMapper = new ObjectMapper();
         login();
-        // 시작 전, 레디스 초기화
-        redisTemplate.delete("weeklyBoxOffice");
-        redisTemplate.delete("MovieCd:"+movieCd);
     }
 
     @DisplayName("로그인")
@@ -101,6 +97,7 @@ class MovieControllerTest {
     @DisplayName("주간 박스오피스 조회 - 캐싱 검증")
     void cachingWeeklyBoxOffice() throws Exception {
         // Given
+        redisTemplate.delete("weeklyBoxOffice");
         long startTime1 = System.currentTimeMillis();
         ResultActions action1 = mvc.perform(get("/api/movie/weekly") // 박스 오피스 데이터 가져오기
                         .contentType(MediaType.APPLICATION_JSON)
@@ -164,6 +161,7 @@ class MovieControllerTest {
     void getMovieDetail() throws Exception {
         // Given
         String key = MOVIE_KEY+movieCd;
+        redisTemplate.delete(key);
 
         long startTime1 = System.currentTimeMillis();
         ResultActions action1 = mvc.perform(get("/api/movie/detail") // 박스 오피스 데이터 가져오기
