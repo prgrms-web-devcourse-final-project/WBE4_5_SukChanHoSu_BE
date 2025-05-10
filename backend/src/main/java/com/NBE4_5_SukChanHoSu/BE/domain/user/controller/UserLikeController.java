@@ -37,9 +37,10 @@ public class UserLikeController {
     // todo: 인증 구현시 파라미터에서 인증정보로 변경
     public RsData<?> likeUser(@RequestParam Long toUserId) {
         User user = SecurityUtil.getCurrentUser();
+        Long fromUserId = user.getUserProfile().getUserId();
 
         // 유저 탐색
-        UserProfile fromUser = user.getUserProfile();
+        UserProfile fromUser = matchingService.findUser(fromUserId);
         UserProfile toUser = matchingService.findUser(toUserId);
 
         if(userLikeService.isSameGender(fromUser,toUser)){
@@ -73,24 +74,26 @@ public class UserLikeController {
     @Operation(summary = "like 테이블 조회", description = "사용자의 like 테이블 조회")
     public RsData<UserLikeResponse> getUserLikes() {
         User user = SecurityUtil.getCurrentUser();
-        UserProfile profile = user.getUserProfile();
+        Long profileId = user.getUserProfile().getUserId();
 
-        List<UserProfileResponse> userProfileResponses = userLikeService.getUserLikes(profile);
+        UserProfile userProfile = matchingService.findUser(profileId);
+        List<UserProfileResponse> userProfileResponses = userLikeService.getUserLikes(userProfile);
         UserLikeResponse response = new UserLikeResponse(userProfileResponses);
 
         if(response.getUserLikes().isEmpty()){
             return new RsData<>("404", "like 한 사용자가 없습니다.");
         }
 
-        return new RsData<>("200",profile.getNickName()+"가 좋아요한 유저 목록 반환",response);
+        return new RsData<>("200",userProfile.getNickName()+"가 좋아요한 유저 목록 반환",response);
     }
 
     @GetMapping("/liked")
     @Operation(summary = "liked 테이블 조회", description = "사용자의 liked 테이블 조회")
     public RsData<UserLikeResponse> getUserLiked() {
         User user = SecurityUtil.getCurrentUser();
-        UserProfile profile = user.getUserProfile();
+        Long profileId = user.getUserProfile().getUserId();
 
+        UserProfile profile = matchingService.findUser(profileId);
         List<UserProfileResponse> userProfileResponses = userLikeService.getUserLiked(profile);
         UserLikeResponse response = new UserLikeResponse(userProfileResponses);
 
@@ -105,8 +108,9 @@ public class UserLikeController {
     @Operation(summary = "match 테이블 조회", description = "사용자의 match 테이블 조회")
     public RsData<?> getUserMatch() {
         User user = SecurityUtil.getCurrentUser();
-        UserProfile profile = user.getUserProfile();
+        Long profileId = user.getUserProfile().getUserId();
 
+        UserProfile profile = matchingService.findUser(profileId);
         List<UserMatchingResponse> response = userLikeService.getUserMatches(profile);
         if(response.isEmpty()){
             return new RsData<>("404", "매칭된 사용자가 없습니다.",new Empty());
@@ -119,9 +123,10 @@ public class UserLikeController {
     // todo: 인증 구현시 파라미터에서 인증정보로 변경
     public RsData<?> cancelLikeUser(@RequestParam Long toUserId){
         User user = SecurityUtil.getCurrentUser();
-        UserProfile fromUser = user.getUserProfile();
+        Long fromUserId = user.getUserProfile().getUserId();
 
         // 유저 탐색
+        UserProfile fromUser = matchingService.findUser(fromUserId);
         UserProfile toUser = matchingService.findUser(toUserId);
 
         // 매칭 된 사용자인지 검증

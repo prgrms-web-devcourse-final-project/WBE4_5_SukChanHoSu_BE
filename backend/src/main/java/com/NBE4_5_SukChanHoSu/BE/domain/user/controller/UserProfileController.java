@@ -65,7 +65,8 @@ public class UserProfileController {
     @GetMapping("/user")
     public RsData<User> getUser() {
         User user = SecurityUtil.getCurrentUser();
-        UserProfile profile = user.getUserProfile();
+        Long profileId = user.getUserProfile().getUserId();
+        UserProfile profile = matchingService.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", profile.getUser());
     }
 
@@ -74,19 +75,21 @@ public class UserProfileController {
     //todo 임시, 이후 삭제
     public RsData<UserProfile> getMyProfile1() {
         User user = SecurityUtil.getCurrentUser();
-        UserProfile profile = user.getUserProfile();
-        return new RsData<>("200", "프로필 조회 성공", profile);
+        Long profileId = user.getUserProfile().getUserId();
+        UserProfile userProfile = matchingService.findUser(profileId);
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
 
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
     @PutMapping("/radius")
     public RsData<?> setRadius(@RequestParam Integer radius) {
         User user = SecurityUtil.getCurrentUser();
-        UserProfile profile = user.getUserProfile();
+        Long profileId = user.getUserProfile().getUserId();
 
-        userProfileService.setRadius(profile, radius);
+        UserProfile userProfile = matchingService.findUser(profileId);
+        userProfileService.setRadius(userProfile, radius);
 
-        return new RsData<>("200", "프로필 조회 성공", profile);
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
 
 }
