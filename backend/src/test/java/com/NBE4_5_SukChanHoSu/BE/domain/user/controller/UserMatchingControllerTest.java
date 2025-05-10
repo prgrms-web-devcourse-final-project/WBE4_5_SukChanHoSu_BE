@@ -76,8 +76,8 @@ class UserMatchingControllerTest {
     @DisplayName("추천 - 거리")
     void getUserWithinRadius() throws Exception {
         //given
-        UserProfile userProfile = matchingService.findUser(1L);
-        int radius = userProfile.getSearchRadius();
+        UserProfile profile = matchingService.findUser(1L);
+        int radius = profile.getSearchRadius();
 
         //when
         ResultActions action = mvc.perform(get("/api/matching/withinRadius")

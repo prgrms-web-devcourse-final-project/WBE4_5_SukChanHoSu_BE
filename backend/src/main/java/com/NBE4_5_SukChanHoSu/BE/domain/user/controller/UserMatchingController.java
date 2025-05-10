@@ -25,12 +25,11 @@ public class UserMatchingController {
     @GetMapping("/withinRadius")
     public RsData<UserProfileResponse> getProfileWithinRadius() {
         User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        UserProfile profile = user.getUserProfile();
 
-        UserProfile userProfile = matchingService.findUser(profileId);
-        int radius = userProfile.getSearchRadius();
+        int radius = profile.getSearchRadius();
 
-        UserProfileResponse response = matchingService.recommendByDistance(userProfile, radius);
+        UserProfileResponse response = matchingService.recommendByDistance(profile, radius);
         return new RsData<>("200", "거리 조회 성공", response);
     }
 
@@ -38,11 +37,10 @@ public class UserMatchingController {
     @GetMapping("/tags")
     public RsData<UserProfileResponse> recommendByTags() {
         User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        UserProfile profile = user.getUserProfile();
 
-        UserProfile userProfile = matchingService.findUser(profileId);
 
-        UserProfileResponse response = matchingService.recommendUserByTags(userProfile);
+        UserProfileResponse response = matchingService.recommendUserByTags(profile);
 
         return new RsData<>("200", "프로필 조회 성공", response);
     }
