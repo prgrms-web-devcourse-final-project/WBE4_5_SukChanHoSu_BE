@@ -46,11 +46,13 @@ public class ReviewController {
     // 다건 조회
     // todo 영화 id로 변경해야댐
     @GetMapping
-    public RsData<AllReviewDto> getAllReviews(@RequestParam String movieTitle) {
+    public RsData<AllReviewDto> getAllReviews(
+            @RequestParam String movieTitle,
+            @RequestParam(required = false) String sort) {
         return new RsData<>(
                 "200",
                 "성공",
-                reviewService.getAllReviewsByTitle(movieTitle)
+                reviewService.getAllReviewsByTitle(movieTitle, sort)
         );
     }
 

@@ -9,9 +9,8 @@ import java.util.List;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     @Query("select count(r), coalesce(avg(r.rating), 0.0) from Review r where r.title = :movieTitle")
-    List<Object[]> getReviewStats(@Param("movieTitle") String movieTitle);
+    List<Object[]> getReviewStatsByTitle(@Param("movieTitle") String movieTitle);
 
     // todo 영화 객체의 id 받아서 반환하도록 수정해야댐
-    // List<Review> findByMovieId(Long movieId);
-    List<Review> findByTitle(String title);
+    List<Review> findByTitleOrderByCreatedDateDesc(String movieTitle);
 }

@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -18,6 +19,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ReviewService {
     private final ReviewRepository reviewRepository;
+    private static final String LIKE_PREFIX = "like";
 
     public ReviewResponseDto createReviewPost(ReviewRequestDto requestDto) {
         User user = SecurityUtil.getCurrentUser();
@@ -35,7 +37,7 @@ public class ReviewService {
     }
 
     // initData 용 메서드
-    public ReviewResponseDto initCreateReviewPost(ReviewRequestDto requestDto, User user) {
+    public void initCreateReviewPost(ReviewRequestDto requestDto, User user) {
 
         Review review = Review.builder()
                 .title(requestDto.getTitle())
@@ -46,7 +48,7 @@ public class ReviewService {
 
         reviewRepository.save(review);
 
-        return new ReviewResponseDto(review);
+        new ReviewResponseDto(review);
     }
 
     public ReviewResponseDto getOneReview(Long reviewId) {
@@ -56,13 +58,18 @@ public class ReviewService {
     }
 
     // todo 추후 영화 id 로 변경
-    public AllReviewDto getAllReviewsByTitle(String title) {
-        List<Review> reviews = reviewRepository.findByTitle(title);
-        List<ReviewResponseDto> reviewList = reviews.stream()
-                .map(ReviewResponseDto::new)
-                .toList();
-        List<Object[]> statList = reviewRepository.getReviewStats(title);
-        Object[] stats = statList.getFirst();
+    public AllReviewDto getAllReviewsByTitle(String title, String sort) {
+        List<ReviewResponseDto> reviewList = new ArrayList<>();
+
+        if (sort.isEmpty()) {
+            List<Review> reviews = reviewRepository.findByTitleOrderByCreatedDateDesc(title);
+            reviewList = reviews.stream()
+                    .map(ReviewResponseDto::new)
+                    .toList();
+        }
+
+        List<Object[]> statList = reviewRepository.getReviewStatsByTitle(title);
+        Object[] stats = statList.get(0);
 
         Long count = ((Number) stats[0]).longValue();
         Double avg = ((Number) stats[1]).doubleValue();
@@ -72,9 +79,11 @@ public class ReviewService {
     public void updateReview(Long reviewId, ReviewRequestDto requestDto) {
         Review review = reviewRepository.findById(reviewId)
                 .orElseThrow(() -> new RuntimeException("null"));
+
         if (requestDto.getContent() != null) {
             review.setContent(requestDto.getContent());
         }
+
         if (requestDto.getRating() != null) {
             review.setRating(requestDto.getRating());
         }
