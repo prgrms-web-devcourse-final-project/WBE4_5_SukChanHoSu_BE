@@ -9,16 +9,15 @@ import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ParsingException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ResponseNotFound;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.redis.RedisSerializationException;
 import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
+import com.NBE4_5_SukChanHoSu.BE.global.restClient.ApiClient;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
@@ -46,21 +45,20 @@ public class MovieService {
     @Value("${movie.api.tmdb-search-url}")
     private String tmdbSearchUrl; // TMDB 영화 검색 API URL
 
-
-    @Autowired
-    private RedisTemplate<String,Object> redisTemplate;
+    private final RedisTemplate<String,Object> redisTemplate;
     private final RedisTTL ttl;
-
     private final RestClient restClient;  // // redisTemplate -> webClient -> RestClient 로 외부 수집 프로토콜 변경
     private final ObjectMapper objectMapper;
-    private static final String BOXOFFICE_KEY = "weeklyBoxOffice";
+    private final ApiClient apiClient;
+
+    private static final String BOX_OFFICE_KEY = "weeklyBoxOffice";
     private static final String MOVIE_KEY = "MovieCd:";
     // 주간 박스오피스
     public List<MovieRankingResponse> searchWeeklyBoxOffice(String targetDt, String weekGb, String itemPerPage) {
         // 캐시 먼저 확인
-        if(redisTemplate.hasKey(BOXOFFICE_KEY)){
+        if(redisTemplate.hasKey(BOX_OFFICE_KEY)){
             // 캐싱된 데이터 반환
-            return (List<MovieRankingResponse>) redisTemplate.opsForValue().get(BOXOFFICE_KEY);
+            return (List<MovieRankingResponse>) redisTemplate.opsForValue().get(BOX_OFFICE_KEY);
         }
 
         // 요청 URL 생성
@@ -74,20 +72,7 @@ public class MovieService {
         String requestUrl = builder.toUriString();
 
         // 응답 JSON으로 받아오기
-        String jsonResponse;
-        try {
-            jsonResponse = restClient.get() // get 요청
-                    .uri(requestUrl)    // URL 설정
-                    .retrieve()     // 응답
-                    .body(String.class);    // String 변환
-
-            // 응답이 비어있는 경우
-            if (jsonResponse == null || jsonResponse.isEmpty()) {
-                throw new ResponseNotFound("404","KOBIS 응답 요청이 비어있습니다.");
-            }
-        } catch (Exception e) {
-            throw new NullResponseException("404","응답이 비어있습니다.");
-        }
+        String jsonResponse = apiClient.getResponse(requestUrl);
 
         // JSON 파싱/데이터 처리
         try {
@@ -118,7 +103,7 @@ public class MovieService {
                     })
                     .collect(Collectors.toList());
             // 캐싱
-            redisTemplate.opsForValue().set(BOXOFFICE_KEY, responses, ttl.getRank(), TimeUnit.SECONDS); // TTL 설정
+            redisTemplate.opsForValue().set(BOX_OFFICE_KEY, responses, ttl.getRank(), TimeUnit.SECONDS); // TTL 설정
             return responses;
         } catch (Exception e) {
             throw new ParsingException("400","API 응답 파싱 실패");
@@ -148,19 +133,7 @@ public class MovieService {
         String requestUrl = builder.toUriString();
 
         // API 요청 및 응답 받기
-        String jsonResponse;
-        try {
-            jsonResponse = restClient.get() // get 요청
-                    .uri(requestUrl)    // URL 설정
-                    .retrieve()     // 응답
-                    .body(String.class);    // String 변환
-
-            if (jsonResponse == null || jsonResponse.isEmpty()) {
-                throw new ResponseNotFound("404","KOBIS 응답 요청이 비어있습니다.");
-            }
-        } catch (Exception e) {
-            throw new ResponseNotFound("404","KOBIS 응답 요청을 가져올 수 없습니다.");
-        }
+        String jsonResponse = apiClient.getResponse(requestUrl);
 
         // JSON 파싱 및 정보 추출
         try {
@@ -272,19 +245,7 @@ public class MovieService {
         String requestUrl = builder.toUriString();
 
         // API 요청 및 응답 받기
-        String jsonResponse;
-        try {
-            jsonResponse = restClient.get() // get 요청
-                    .uri(requestUrl)    // URL 설정
-                    .retrieve()     // 응답
-                    .body(String.class);    // String 변환
-
-            if (jsonResponse == null || jsonResponse.isEmpty()) {
-                throw new ResponseNotFound("404","TMDB 응답 요청이 비어있습니다.");
-            }
-        } catch (Exception e) {
-            return null;
-        }
+        String jsonResponse = apiClient.getResponse(requestUrl);
 
         // JSON 파싱 및 상세 정보 추출
         try {
@@ -323,21 +284,13 @@ public class MovieService {
         String requestUrl = builder.toUriString();
 
         // API 요청 및 응답
-        String jsonResponse;
-        try {
-            jsonResponse = restClient.get() // get 요청
-                    .uri(requestUrl)    // URL 설정
-                    .retrieve()     // 응답
-                    .body(String.class);    // String 변환
+        String jsonResponse = apiClient.getResponse(requestUrl);
 
-            if (jsonResponse == null || jsonResponse.isEmpty()) {
-                throw new ResponseNotFound("404","TMDB 응답 요청이 비어있습니다.");
-            }
-        } catch (Exception e) {
-            return "포스터 정보 없음";
-        }
+        return getPostUrl(jsonResponse);
+    }
 
-        // JSON 파싱 및 포스터 URL 추출
+    // JSON 파싱 및 포스터 URL 추출
+    private String getPostUrl(String jsonResponse) {
         try {
             Map<String, Object> responseMap = objectMapper.readValue(jsonResponse, new TypeReference<Map<String, Object>>() {});
             List<Map<String, Object>> results = (List<Map<String, Object>>) responseMap.get("results");
@@ -354,6 +307,7 @@ public class MovieService {
         } catch (Exception e) {
             throw new ParsingException("400","API 응답 파싱 실패");
         }
+
     }
 
     @Transactional

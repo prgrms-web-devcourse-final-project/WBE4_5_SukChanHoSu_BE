@@ -49,7 +49,7 @@ class MovieControllerTest {
     private static String accessToken;
     private static String refreshToken;
 
-    private static final String BOXOFFICE_KEY = "weeklyBoxOffice";
+    private static final String BOX_OFFICE_KEY = "weeklyBoxOffice";
     private static final String MOVIE_KEY = "MovieCd:";
     private static final String movieCd = "20232394";
 
@@ -90,7 +90,7 @@ class MovieControllerTest {
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("박스 오피스 Top 10")))
                 .andExpect(jsonPath("$.data.size()").value(10));
-        assertTrue(redisTemplate.hasKey(BOXOFFICE_KEY));
+        assertTrue(redisTemplate.hasKey(BOX_OFFICE_KEY));
     }
 
     @Test
@@ -114,7 +114,7 @@ class MovieControllerTest {
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("박스 오피스 Top 10")))
                 .andExpect(jsonPath("$.data.size()").value(10));
-        assertTrue(redisTemplate.hasKey(BOXOFFICE_KEY));
+        assertTrue(redisTemplate.hasKey(BOX_OFFICE_KEY));
 
         // When
         long startTime2 = System.currentTimeMillis();
