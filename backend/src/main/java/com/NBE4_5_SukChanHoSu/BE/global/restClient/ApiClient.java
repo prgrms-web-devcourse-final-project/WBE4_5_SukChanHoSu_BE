@@ -5,7 +5,6 @@ import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ResponseNotFound;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
-import org.springframework.web.util.UriComponentsBuilder;
 
 @Component
 @RequiredArgsConstructor

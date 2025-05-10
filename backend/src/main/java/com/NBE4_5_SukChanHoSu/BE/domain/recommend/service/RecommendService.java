@@ -26,6 +26,8 @@ public class RecommendService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final UserLikesRepository userLikesRepository;
 
+    static final double EARTH_RADIUS = 6371; // 지구의 반지름 (단위: km)
+
     public UserProfile findUser(Long userId) {
         return userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
     }
@@ -79,17 +81,6 @@ public class RecommendService {
         throw new NoRecommendException("404", "추천할 사용자가 없습니다.");
     }
 
-    // response -> profile
-    private UserProfile convertToUserProfile(UserProfileResponse response) {
-        return UserProfile.builder()
-                .userId(response.getUserId())
-                .gender(response.getGender())
-                .searchRadius(response.getSearchRadius())
-                .favoriteGenres(response.getFavoriteGenres())
-                .build();
-    }
-
-    static final double EARTH_RADIUS = 6371; // 지구의 반지름 (단위: km)
     // 거리 계산
     public int calDistance(UserProfile userProfile1, UserProfile userProfile2) {
         // 내 위/경도
@@ -120,9 +111,9 @@ public class RecommendService {
     @Transactional
     public UserProfileResponse recommendUserByTags(UserProfile userProfile) {
         long userId = userProfile.getUserId();
-        int radius = userProfile.getSearchRadius();
         List<Genre> tags = userProfile.getFavoriteGenres();
         int maxScore = -1;
+        int radius = userProfile.getSearchRadius();
         int recommendDistance = 0;
         UserProfile recommendedUser = null;
 
@@ -182,6 +173,55 @@ public class RecommendService {
         int radius = profile.getSearchRadius();
         int distance = 0;
 
+        // 레디스의 사용자 필터링: 1순위(영화 겹치는 사용자) + 2순위(안겹치는 사용자)
+        List<UserProfile> filteredUser = filterFromRedis(keys,profile,distance,radius,movieCd);
+
+        // 레디스에 저장된 사용자 우선 반환
+        if(!filteredUser.isEmpty()){
+            recommendedUser = getRandomUser(filteredUser);
+            saveRecommendUser(profile.getUserId(), recommendedUser.getUserId(),"movie");
+            return new UserProfileResponse(recommendedUser,distance);
+        }
+
+        // 3순위: DB에 저장된 사용자
+        List<UserProfile> dbUsers = filterFromDb(profile,recommendedUser,distance,radius,movieCd);
+        if(!dbUsers.isEmpty()) {
+            recommendedUser = getRandomUser(dbUsers);
+            saveRecommendUser(profile.getUserId(), recommendedUser.getUserId(),"movie");
+            return new UserProfileResponse(recommendedUser,distance);
+        }
+
+        // 없음
+        throw new NoRecommendException("404","추천할 사용자가 없습니다.");
+    }
+
+    private List<UserProfile> filterFromDb(UserProfile profile,UserProfile recommendedUser, int distance, int radius, String movieCd) {
+        // 이성 사용자
+        List<UserProfile> profilesByGender = findProfileByGender(profile);
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+
+        // 3순위 사용자 저장할 리스트
+        List<UserProfile> candidates = new ArrayList<>();
+        // 3순위: 레디스에 저장되지 않은 사용자들 중에서 추천
+        for(UserProfile profile2 : profilesByGender) {
+            // 1달 이내 사용자만 조건 목록 포함
+            LocalDateTime lastLikeTime = userLikesRepository.findLastLikeTimeByUserId(profile2.getUserId());
+            if (lastLikeTime == null || lastLikeTime.isBefore(oneMonthAgo)) continue;
+
+            // 중복 추천 방지
+            if(isRecommended(profile.getUserId(), profile2.getUserId(), "movie")) continue;
+
+            //  범위 밖 사용자 제외
+            distance = calDistance(profile, profile2);
+            if(radius < distance) continue;
+
+            candidates.add(profile2);
+        }
+
+        return candidates;
+    }
+
+    private List<UserProfile> filterFromRedis(Set<String> keys, UserProfile profile, int distance, int radius, String movieCd) {
         // 영화가 겹치는 사용자 목록
         List<UserProfile> matchingMovieUsers = new ArrayList<>();
         // 영화가 겹치지 않는 사용자 목록
@@ -216,51 +256,8 @@ public class RecommendService {
             }
         }
 
-        // 1순위: 영화가 겹치는 사용자 우선 추천
-        if(!matchingMovieUsers.isEmpty()) {
-            recommendedUser = getRandomUser(matchingMovieUsers);
-            saveRecommendUser(profile.getUserId(), recommendedUser.getUserId(),"movie");
-            return new UserProfileResponse(recommendedUser,distance);
-        }
-
-        // 2순위: 영화가 겹치지 않는 사용자 추천
-        if(!nonMatchingMovieUsers.isEmpty()) {
-            recommendedUser = getRandomUser(nonMatchingMovieUsers);
-            saveRecommendUser(profile.getUserId(), recommendedUser.getUserId(),"movie");
-            return new UserProfileResponse(recommendedUser,distance);
-        }
-
-        // 이성 사용자
-        List<UserProfile> profilesByGender = findProfileByGender(profile);
-        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
-
-        // 3순위 사용자 저장할 리스트
-        List<UserProfile> candidates = new ArrayList<>();
-        // 3순위: 레디스에 저장되지 않은 사용자들 중에서 추천
-        for(UserProfile profile2 : profilesByGender) {
-            // 1달 이내 사용자만 조건 목록 포함
-            LocalDateTime lastLikeTime = userLikesRepository.findLastLikeTimeByUserId(profile2.getUserId());
-            if (lastLikeTime == null || lastLikeTime.isBefore(oneMonthAgo)) continue;
-
-            // 중복 추천 방지
-            if(isRecommended(profile.getUserId(), profile2.getUserId(), "movie")) continue;
-
-            //  범위 밖 사용자 제외
-            distance = calDistance(profile, profile2);
-            if(radius < distance) continue;
-
-            candidates.add(profile2);
-        }
-
-        // 3순위: DB에서 가져온 활동중인 사용자
-        if(!candidates.isEmpty()) {
-            recommendedUser = getRandomUser(candidates);
-            saveRecommendUser(profile.getUserId(), recommendedUser.getUserId(),"movie");
-            return new UserProfileResponse(recommendedUser,distance);
-        }
-
-        // 없음
-        throw new NoRecommendException("404","추천할 사용자가 없습니다.");
+        // 겹치는 사용자가 있으면 겹치는 사용자 목록 반환, 겹치는 사용자가 없으면 일반 사용자 반환
+        return matchingMovieUsers.isEmpty() ? nonMatchingMovieUsers : matchingMovieUsers;
     }
 
     // 우선순위가 같은 유저에서 랜덤 선택
