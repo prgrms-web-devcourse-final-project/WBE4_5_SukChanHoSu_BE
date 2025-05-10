@@ -7,6 +7,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.MovieGenre;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.NullResponseException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ParsingException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.movie.ResponseNotFound;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.redis.RedisSerializationException;
 import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -352,5 +354,21 @@ public class MovieService {
         } catch (Exception e) {
             throw new ParsingException("400","API 응답 파싱 실패");
         }
+    }
+
+    @Transactional
+    public String bookmarkMovie(long profileId, String movieCd) {
+        String key = "user:" + profileId;   // Redis에 저장된 key(like 전송시 생성)
+        redisTemplate.opsForValue().set(key,movieCd,ttl.getData(),TimeUnit.SECONDS);    // 1주일 저장
+        return getBookmarkDataFromRedis(key);
+    }
+
+    // 레디스에 저장된 데이터
+    private String getBookmarkDataFromRedis(String key) {
+        if(redisTemplate.hasKey(key)){
+            return Optional.ofNullable((String)redisTemplate.opsForValue().get(key))
+                    .orElseThrow(() -> new NullResponseException("404","데이터가 비어있습니다."));
+        }
+        throw new RedisSerializationException("500","레디스 키 저장 실패");
     }
 }

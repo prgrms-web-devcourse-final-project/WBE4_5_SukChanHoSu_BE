@@ -3,8 +3,10 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieRankingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.util.DateUtils;
+import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,5 +44,18 @@ public class MovieController {
     public RsData<MovieResponse> getMovieDetail(@RequestParam String movieCd) {
         MovieResponse response = movieService.getMovieDetail(movieCd);
         return new RsData<>("200","영화 상세 정보", response);
+    }
+
+    // 보고 싶은 영화 등록
+    @Operation(summary = "보고 싶은 영화 등록", description = "레디스에 저장된 영화 넘버를 이용하여 보고 싶은 영화 등록")
+    @PostMapping("/bookmark")
+    public RsData<MovieResponse> bookmarkMovie(@RequestParam String movieCd) {
+        User user = SecurityUtil.getCurrentUser();
+        Long profileId = user.getUserProfile().getUserId();
+        String cachedData = movieService.bookmarkMovie(profileId,movieCd);
+
+        // 영화 상세 정보
+        MovieResponse response = movieService.getMovieDetail(cachedData);
+        return new RsData<>("200","보고 싶은 영화 등록", response);
     }
 }
