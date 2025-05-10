@@ -8,6 +8,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.Date;
 
@@ -15,7 +16,10 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
-@Table(name = "user_likes")
+@Table( name = "user_likes",
+        indexes = {
+                @Index(name = "idx_like_time", columnList = "like_time")
+        })
 public class UserLikes {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -1,21 +1,26 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.NoRecommendException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 import java.util.Map;
 
 @Service
@@ -24,30 +29,77 @@ import java.util.Map;
 public class UserProfileService {
 
     private final UserProfileRepository userProfileRepository;
+    private final UserRepository userRepository;
+    private final UserLikesRepository userLikesRepository;
     // 사용자별 추천 리스트 관리
     private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
 
 
     @Transactional
     public ProfileResponse createProfile(Long userId, ProfileRequest dto) {
-        UserProfile userProfile = userProfileRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        User    user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
 
-        if (userProfile.getNickName() != null) {
+        // 해당 userId를 가진 UserProfile이 이미 존재하는지 확인
+        Optional<UserProfile> existingProfile = userProfileRepository.findByUserId(userId);
+
+        UserProfile userProfile;
+
+        // 프로필이 없으면 새로 생성
+        if (!existingProfile.isPresent()) {
+            userProfile = new UserProfile();
+            userProfile = UserProfile.builder()
+                    .user(user)
+                    .nickName(dto.getNickname())
+                    .gender(dto.getGender())
+                    .profileImage(dto.getProfileImage())
+                    .latitude(dto.getLatitude())
+                    .longitude(dto.getLongitude())
+                    .birthdate(dto.getBirthdate())
+                    .introduce(dto.getIntroduce())
+                    .searchRadius(dto.getSearchRadius())
+                    .lifeMovie(dto.getLifeMovie())
+                    .favoriteGenres(dto.getFavoriteGenres())
+                    .watchedMovies(dto.getWatchedMovies())
+                    .preferredTheaters(dto.getPreferredTheaters())
+                    .build();
+            // User 엔티티 연결 (가정: User 엔티티는 이미 존재한다고 가정)
+            // User user = userRepository.findById(userId)
+            //        .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
+            // userProfile.setUser(user);
+        } else {
+            // 프로필이 이미 존재하면 예외 발생 (또는 업데이트 로직 처리 - API 역할에 따라 다름)
             throw new IllegalStateException("이미 프로필이 등록된 사용자입니다.");
         }
 
-        updateEntityFromRequest(userProfile, dto);
-        return toDto(userProfileRepository.save(userProfile));
+//        updateEntityFromRequest(userProfile, dto);
+        UserProfile savedUserProfile = userProfileRepository.save(userProfile);
+        return new ProfileResponse(savedUserProfile); // toDto 대신 생성자 직접 호출
     }
 
     @Transactional
     public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto) {
-        UserProfile userProfile = userProfileRepository.findById(userId)
+        UserProfile userProfile = userProfileRepository.findByUserId(userId) // 수정: findById -> findByUserId
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        updateEntityFromUpdateRequest(userProfile, dto);
-        return toDto(userProfileRepository.save(userProfile));
+        userProfile = UserProfile.builder()
+                .user(userProfile.getUser()) // 기존 User 연결 유지
+                .userId(userProfile.getUserId()) // 기존 ID 유지
+                .nickName(dto.getNickname())
+                .gender(dto.getGender())
+                .profileImage(dto.getProfileImage())
+                .latitude(dto.getLatitude())
+                .longitude(dto.getLongitude())
+                .birthdate(dto.getBirthdate())
+                .introduce(dto.getIntroduce())
+                .searchRadius(dto.getSearchRadius())
+                .lifeMovie(dto.getLifeMovie())
+                .favoriteGenres(dto.getFavoriteGenres())
+                .watchedMovies(dto.getWatchedMovies())
+                .preferredTheaters(dto.getPreferredTheaters())
+                .build();
+        UserProfile savedUserProfile = userProfileRepository.save(userProfile);
+        return new ProfileResponse(savedUserProfile);
     }
 
     public boolean isNicknameDuplicated(String nickname) {
@@ -55,55 +107,18 @@ public class UserProfileService {
     }
 
     public ProfileResponse getMyProfile(Long userId) {
-        UserProfile userProfile = userProfileRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-        return toDto(userProfile);
-    }
-
-    private void updateEntityFromRequest(UserProfile profile, ProfileRequest dto) {
-        profile.setNickName(dto.getNickname());
-//        profile.setGender(dto.getGender());
-        profile.setProfileImage(dto.getProfileImage());
-        profile.setLatitude(dto.getLatitude());
-        profile.setLongitude(dto.getLongitude());
-//        profile.setBirthdate(dto.getBirthdate());
-        profile.setIntroduce(dto.getIntroduce());
-        // TODO: Favorite genres, lifeMovie, watchedMovies, preferredTheaters, distance 등 매핑 추가
-    }
-
-    private void updateEntityFromUpdateRequest(UserProfile profile, ProfileUpdateRequest dto) {
-        if (dto.getNickname() != null) profile.setNickName(dto.getNickname());
-//        if (dto.getGender() != null) profile.setGender(dto.getGender());
-        if (dto.getProfileImage() != null) profile.setProfileImage(dto.getProfileImage());
-        if (dto.getLatitude() != null) profile.setLatitude(dto.getLatitude());
-        if (dto.getLongitude() != null) profile.setLongitude(dto.getLongitude());
-//        if (dto.getBirthdate() != null) profile.setBirthdate(dto.getBirthdate());
-        if (dto.getIntroduce() != null) profile.setIntroduce(dto.getIntroduce());
-        // TODO: 생략된 필드 동일하게 적용
-    }
-
-    private ProfileResponse toDto(UserProfile userProfile) {
-        return ProfileResponse.builder()
-                .nickname(userProfile.getNickName())
-                .gender(userProfile.getGender())
-                .profileImage(userProfile.getProfileImage())
-                .latitude(userProfile.getLatitude())
-                .longitude(userProfile.getLongitude())
-                .birthdate(userProfile.getBirthdate())
-                .introduce(userProfile.getIntroduce())
-                .build();
+        UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+        return new ProfileResponse(userProfile);
     }
 
     public UserProfile findUser(Long userId) {
-        UserProfile userProfile =  userProfileRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException("401","존재하지 않는 유저입니다."));
+        UserProfile userProfile = userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
         return userProfile;
     }
 
     // 이성만 조회
     public List<UserProfile> findProfileByGender(UserProfile userProfile) {
-        return userProfileRepository.findAll().stream()
-                .filter(profile -> !profile.getUserId().equals(userProfile.getUserId())) // 자신 제외
+        return userProfileRepository.findAll().stream().filter(profile -> !profile.getUserId().equals(userProfile.getUserId())) // 자신 제외
                 .filter(profile -> !profile.getGender().equals(userProfile.getGender())) // 성별이 다른 유저 필터링
                 .toList();
     }
@@ -155,6 +170,9 @@ public class UserProfileService {
         userProfile.setSearchRadius(radius);
     }
 
+    public boolean existsProfileByUserId(Long userId) {
+        return userProfileRepository.existsByUserId(userId);
+    }
     // 태그로 검색
     public List<UserProfileResponse> findProfileByTags(UserProfile userProfile) {
         // 범위 이내에 있는 사용자만 조회
@@ -171,6 +189,7 @@ public class UserProfileService {
         return filteredResponses;
     }
 
+
     // 추천 알고리즘
     public UserProfileResponse recommend(UserProfile userProfile) {
         Long userId = userProfile.getUserId();
@@ -179,6 +198,7 @@ public class UserProfileService {
         UserProfile recommendedUser = null;
         int maxScore = 0;
         int recommendDistance =0; // 추천 사용자의 거리 저장 필드
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
 
         // 1차: 이성
         List<UserProfile> profileByGender = findProfileByGender(userProfile);
@@ -187,6 +207,11 @@ public class UserProfileService {
         for (UserProfile profile : profileByGender) {
             // 이미 추천한 사용자는 패스
             if (recommendedUsers.contains(profile)) {
+                continue;
+            }
+
+            LocalDateTime lastLikeTime = userLikesRepository.findLastLikeTimeByUserId(profile.getUserId());
+            if (lastLikeTime == null || lastLikeTime.isBefore(oneMonthAgo)) {
                 continue;
             }
 
@@ -208,6 +233,7 @@ public class UserProfileService {
                 }
             }
             totalScore = distanceScore + tagScore; // 총점
+            System.out.println("User ID: " + profile.getUserId() + ", Distance: " + distance + ", Distance Score: " + distanceScore + ", Tag Score: " + tagScore + ", Total Score: " + totalScore); // 로깅 추가
 
             // 최고 점수 사용자 업데이트(0점 이하는 등록x)
             if (totalScore > maxScore) {

@@ -1,32 +1,46 @@
 package com.NBE4_5_SukChanHoSu.BE.global.init;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.*;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Configuration
 @ActiveProfiles("test")
 public class TestInitData {
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
 
     @Bean
-    public ApplicationRunner initData(UserProfileRepository userProfileRepository, UserService userService,UserRepository userRepository) {
+    public ApplicationRunner initData(UserProfileRepository userProfileRepository, UserService userService, UserRepository userRepository) {
         Random random = new Random();
         return args -> {
+            if (userRepository.count() > 0) {
+                System.out.println("⚠️ 유저가 이미 존재하여 profileInit() 스킵됨.");
+                return;
+            }
             // 테스트 데이터 생성
             for (int i = 1; i <= 10; i++) {
+                String newEmail = "initUser" + i + "@example.com";
+                redisTemplate.opsForValue().set("emailVerify:" + newEmail, "true", 5, TimeUnit.MINUTES);
                 UserSignUpRequest signUpDto = UserSignUpRequest.builder()
-                        .email("testUser" + i + "@example.com")
+                        .email(newEmail)
                         .password("testPassword123!")
                         .passwordConfirm("testPassword123!")
                         .build();
