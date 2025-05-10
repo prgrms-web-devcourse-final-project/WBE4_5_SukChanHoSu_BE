@@ -180,8 +180,13 @@ public class UserMatchingService {
         String pattern = "user:*";
         Set<String> keys = redisTemplate.keys(pattern); // 패턴에 해당하는 키 탐색
         UserProfile recommendedUser = null;
-        int distance = 0;
         int radius = profile.getSearchRadius();
+        int distance = 0;
+
+        // 영화가 겹치는 사용자 목록
+        List<UserProfile> matchingMovieUsers = new ArrayList<>();
+        // 영화가 겹치지 않는 사용자 목록
+        List<UserProfile> nonMatchingMovieUsers = new ArrayList<>();
 
         // 1. 레디스에 저장된 사람들 우선 추천(마지막 활동이 1주일 이내인 사람들)
         if(keys != null) {
@@ -204,27 +209,35 @@ public class UserMatchingService {
                 // 5. 보고싶은 영화가 겹치는 사람들 우선 탐색
                 if(movieCd.equals(value)) {
                     // user:3 -> 3
-                    recommendedUser = profile2;
-                    if(recommendedUser != null) {
-                        saveRecommendUser(profile.getUserId(),userId,"movie");  // DB에 저장
-                        return new UserProfileResponse(recommendedUser,distance);
-                    }
-                }
-
-                // 6. 보고싶은 영화가 겹치는 사람이 없을 경우에 후순위 추천
-                recommendedUser = profile2;
-                if(recommendedUser != null) {
-                    saveRecommendUser(profile.getUserId(),userId,"movie");
-                    return new UserProfileResponse(recommendedUser,distance);
+                    matchingMovieUsers.add(profile2);
+                }else{
+                    // 6. 보고싶은 영화가 겹치는 사람이 없을 경우에 후순위 추천
+                    nonMatchingMovieUsers.add(profile2);
                 }
             }
         }
 
-        // 7. 레디스에 저장되지 않은 1달 이내 사용자들 중에서 추천
-        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
+        // 1순위: 영화가 겹치는 사용자 우선 추천
+        if(!matchingMovieUsers.isEmpty()) {
+            recommendedUser = getRandomUser(matchingMovieUsers);
+            saveRecommendUser(profile.getUserId(), recommendedUser.getUserId(),"movie");
+            return new UserProfileResponse(recommendedUser,distance);
+        }
+
+        // 2순위: 영화가 겹치지 않는 사용자 추천
+        if(!nonMatchingMovieUsers.isEmpty()) {
+            recommendedUser = getRandomUser(nonMatchingMovieUsers);
+            saveRecommendUser(profile.getUserId(), recommendedUser.getUserId(),"movie");
+            return new UserProfileResponse(recommendedUser,distance);
+        }
+
         // 이성 사용자
         List<UserProfile> profilesByGender = findProfileByGender(profile);
+        LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
 
+        // 3순위 사용자 저장할 리스트
+        List<UserProfile> candidates = new ArrayList<>();
+        // 3순위: 레디스에 저장되지 않은 사용자들 중에서 추천
         for(UserProfile profile2 : profilesByGender) {
             // 1달 이내 사용자만 조건 목록 포함
             LocalDateTime lastLikeTime = userLikesRepository.findLastLikeTimeByUserId(profile2.getUserId());
@@ -237,12 +250,24 @@ public class UserMatchingService {
             distance = calDistance(profile, profile2);
             if(radius < distance) continue;
 
-            recommendedUser = profile2;
-            if(recommendedUser != null) {
-                saveRecommendUser(profile.getUserId(),profile2.getUserId(),"movie");
-                return new UserProfileResponse(recommendedUser,distance);
-            }
+            candidates.add(profile2);
         }
+
+        // 3순위: DB에서 가져온 활동중인 사용자
+        if(!candidates.isEmpty()) {
+            recommendedUser = getRandomUser(candidates);
+            saveRecommendUser(profile.getUserId(), recommendedUser.getUserId(),"movie");
+            return new UserProfileResponse(recommendedUser,distance);
+        }
+
+        // 없음
         throw new NoRecommendException("404","추천할 사용자가 없습니다.");
     }
+
+    // 우선순위가 같은 유저에서 랜덤 선택
+    private UserProfile getRandomUser(List<UserProfile> userProfiles) {
+        Random random = new Random();
+        return userProfiles.get(random.nextInt(userProfiles.size()));
+    }
+
 }
