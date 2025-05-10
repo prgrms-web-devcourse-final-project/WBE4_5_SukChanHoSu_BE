@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.AllReviewDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.ReviewResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.repository.ReviewRepository;
@@ -38,11 +39,14 @@ public class ReviewService {
         return new ReviewResponseDto(review);
     }
 
-    public List<ReviewResponseDto> getAllReviews() {
+    public AllReviewDto getAllReviews() {
         List<Review> reviews = reviewRepository.findAll();
-        return reviews.stream()
+        List<ReviewResponseDto> reviewList = reviews.stream()
                 .map(ReviewResponseDto::new)
-                .collect(Collectors.toList());
+                .toList();
+        Object[] reviewStat = reviewRepository.getReviewStats();
+
+        return new AllReviewDto(reviewList, reviewStat[0], reviewStat[1]);
     }
 
     public void updateReview(Long reviewId, ReviewRequestDto requestDto) {
