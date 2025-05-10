@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.AllReviewDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.ReviewResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
@@ -36,7 +37,7 @@ public class ReviewController {
 
     // 다건 조회
     @GetMapping
-    public RsData<List<ReviewResponseDto>> getAllReviews() {
+    public RsData<AllReviewDto> getAllReviews() {
         return new RsData<>(
                 "200",
                 "성공",
