@@ -1,7 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieRankingResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.response.MovieRankingResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.response.MovieResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.WeeklyBoxOfficeResult;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.MovieGenre;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.NullResponseException;
