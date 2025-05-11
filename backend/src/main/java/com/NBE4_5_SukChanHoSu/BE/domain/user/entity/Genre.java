@@ -3,6 +3,8 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.fasterxml.jackson.annotation.JsonCreator;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.stream.Stream;
 
 public enum Genre {
@@ -52,5 +54,18 @@ public enum Genre {
                 .filter(g -> g.label.equalsIgnoreCase(input.trim()))
                 .findFirst()
                 .orElse(UNKNOWN);
+    }
+
+    // 복수개의 장르 문자열 -> List 장르로 파싱
+    public static List<Genre> parseGenres(String input) {
+        if (input == null || input.isBlank()) {
+            return List.of(Genre.UNKNOWN);
+        }
+
+        return Arrays.stream(input.split(","))
+                .map(String::trim)
+                .map(Genre::from)  // ← 대소문자/공백 처리 포함된 from 메서드 호출
+                .distinct()
+                .toList();
     }
 }
