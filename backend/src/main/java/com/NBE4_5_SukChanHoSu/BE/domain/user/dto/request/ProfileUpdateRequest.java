@@ -20,7 +20,7 @@ public class ProfileUpdateRequest {
     private Double latitude;
     private Double longitude;
     private LocalDate birthdate;
-    private int searchRadius;
+    private Integer searchRadius;
     private String lifeMovie;
     private List<Genre> favoriteGenres;
     private List<String> watchedMovies;

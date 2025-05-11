@@ -90,20 +90,20 @@ public class UserProfileService {
         }
 
         userProfile = UserProfile.builder()
-                .user(userProfile.getUser()) // 기존 User 연결 유지
-                .userId(userProfile.getUserId()) // 기존 ID 유지
-                .nickName(dto.getNickname())
-                .gender(dto.getGender())
+                .user(userProfile.getUser())
+                .userId(userProfile.getUserId())
+                .nickName(dto.getNickname() != null ? dto.getNickname() : userProfile.getNickName())
+                .gender(dto.getGender() != null ? dto.getGender() : userProfile.getGender())
                 .profileImage(profileImageUrl)
-                .latitude(dto.getLatitude())
-                .longitude(dto.getLongitude())
-                .birthdate(dto.getBirthdate())
-                .introduce(dto.getIntroduce())
-                .searchRadius(dto.getSearchRadius())
-                .lifeMovie(dto.getLifeMovie())
-                .favoriteGenres(dto.getFavoriteGenres())
-                .watchedMovies(dto.getWatchedMovies())
-                .preferredTheaters(dto.getPreferredTheaters())
+                .latitude(dto.getLatitude() != null ? dto.getLatitude() : userProfile.getLatitude())
+                .longitude(dto.getLongitude() != null ? dto.getLongitude() : userProfile.getLongitude())
+                .birthdate(dto.getBirthdate() != null ? dto.getBirthdate() : userProfile.getBirthdate())
+                .introduce(dto.getIntroduce() != null ? dto.getIntroduce() : userProfile.getIntroduce())
+                .searchRadius(dto.getSearchRadius() != null ? dto.getSearchRadius() : userProfile.getSearchRadius())
+                .lifeMovie(dto.getLifeMovie() != null ? dto.getLifeMovie() : userProfile.getLifeMovie())
+                .favoriteGenres(dto.getFavoriteGenres() != null ? dto.getFavoriteGenres() : userProfile.getFavoriteGenres())
+                .watchedMovies(dto.getWatchedMovies() != null ? dto.getWatchedMovies() : userProfile.getWatchedMovies())
+                .preferredTheaters(dto.getPreferredTheaters() != null ? dto.getPreferredTheaters() : userProfile.getPreferredTheaters())
                 .build();
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);
         return new ProfileResponse(savedUserProfile);
