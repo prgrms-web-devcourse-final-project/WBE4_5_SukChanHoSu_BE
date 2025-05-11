@@ -17,22 +17,22 @@ import java.time.LocalDate;
 public class Movie {
 
     @Id
-    @Column(name = "movie_id", nullable = false, length = 20)
+    @Column(name = "movieCd", nullable = false, length = 20)
     private Long movieId; // = movieCd
 
-    @Column(name = "genre")
-    private Genre genre; // = genres
+    @Column(name = "genres")
+    private Genre genres; // = genres
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "movieNm", nullable = false)
     private String title; // = movieNm
 
-    @Column(name = "release_year")
-    private String releaseYear; // = openDt 데이터 파싱 필요
+    @Column(name = "openDt")
+    private String releaseDate; // = openDt 데이터 파싱 필요
 
-    @Column(name = "poster_image", length = 1000)
+    @Column(name = "posterUrl", length = 1000)
     private String posterImage; // = posterUrl
 
-    @Column(name = "description", columnDefinition = "TEXT")
+    @Column(name = "overview", columnDefinition = "TEXT")
     private String description; // = overview
 
     @Column(name = "rating")
