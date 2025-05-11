@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class MovieService {
+public class MovieApiService {
 
     @Value("${movie.api.key}")
     private String kobisApiKey; // KOBIS API 키
