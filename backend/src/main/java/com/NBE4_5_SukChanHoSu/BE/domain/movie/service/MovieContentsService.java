@@ -57,6 +57,7 @@ public class MovieContentsService {
         return movieRepository.save(movie);
     }
 
+    @Transactional
     public void delete(Long movieId) {
         movieRepository.deleteById(movieId);
     }

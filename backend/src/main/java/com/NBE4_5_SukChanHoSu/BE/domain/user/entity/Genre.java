@@ -1,11 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
-import com.fasterxml.jackson.annotation.JsonCreator;
-
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 public enum Genre {
     // Java에선 Action, mysql에선 Action으로 취급됨
@@ -46,12 +42,9 @@ public enum Genre {
         return label;
     }
 
-    @JsonCreator
-    public static Genre from(String input) {
-        if (input == null || input.isBlank()) return UNKNOWN;
-
-        return Stream.of(values())
-                .filter(g -> g.label.equalsIgnoreCase(input.trim()))
+    public static Genre fromLabel(String label) {
+        return Arrays.stream(Genre.values())
+                .filter(g -> g.label.equalsIgnoreCase(label.trim()))
                 .findFirst()
                 .orElse(UNKNOWN);
     }
@@ -64,7 +57,7 @@ public enum Genre {
 
         return Arrays.stream(input.split(","))
                 .map(String::trim)
-                .map(Genre::from)  // ← 대소문자/공백 처리 포함된 from 메서드 호출
+                .map(Genre::fromLabel)  // ← 대소문자/공백 처리 포함된 from 메서드 호출
                 .distinct()
                 .toList();
     }

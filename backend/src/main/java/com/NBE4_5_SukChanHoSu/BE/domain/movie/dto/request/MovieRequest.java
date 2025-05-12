@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.NBE4_5_SukChanHoSu.BE.global.util.GenreUtil.convertGenreListToRaw;
 
@@ -26,7 +27,6 @@ public class MovieRequest {
 
     @NotBlank
     private String title;
-
     private String releaseDate;
     private String posterImage;
     private String description;
@@ -34,9 +34,14 @@ public class MovieRequest {
     private String director;
 
     public Movie toEntity() {
-        return Movie.builder()
+        String genresRaw = (genres != null && !genres.isEmpty()) ?
+                genres.stream().map(Genre::getLabel).collect(Collectors.joining(", "))
+                : null;
+
+        Movie movie = Movie.builder()
                 .movieId(this.movieId)
-                .genresRaw(convertGenreListToRaw(this.genres))
+                .genres(this.genres)
+                .genresRaw(genresRaw) // 🎯 명시적으로 세팅
                 .title(this.title)
                 .releaseDate(this.releaseDate)
                 .posterImage(this.posterImage)
@@ -44,5 +49,9 @@ public class MovieRequest {
                 .rating(this.rating)
                 .director(this.director)
                 .build();
+
+        movie.loadGenresFromRaw();
+
+        return movie;
     }
 }

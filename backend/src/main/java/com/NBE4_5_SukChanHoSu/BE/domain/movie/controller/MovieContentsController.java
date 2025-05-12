@@ -8,6 +8,7 @@ import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Slf4j
 @Tag(name = "영화", description = "영화 정보 관련 API")
 @RestController
 @RequiredArgsConstructor
@@ -27,6 +29,7 @@ public class MovieContentsController {
     @Operation(summary = "영화 생성", description = "영화 데이터를 생성합니다.")
     @PostMapping
     public RsData<Movie> createMovie(@RequestBody MovieRequest request) {
+        log.info("🎬 영화 생성 요청 수신: {}", request.getTitle());
         Movie saved = movieContentsService.save(request.toEntity());
         return new RsData<>("200", "영화 생성 완료", saved);
     }

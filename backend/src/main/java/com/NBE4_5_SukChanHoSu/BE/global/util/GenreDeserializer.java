@@ -22,16 +22,22 @@ public class GenreDeserializer extends JsonDeserializer<List<Genre>> {
     @Override
     public List<Genre> deserialize(JsonParser p, DeserializationContext ctxt) throws IOException {
         JsonNode node = p.getCodec().readTree(p);
+        System.out.println("🎯 GenreDeserializer activated");
 
         if (node.isArray()) {
             List<Genre> result = new ArrayList<>();
             for (JsonNode element : node) {
-                result.add(Genre.valueOf(element.asText().toUpperCase()));
+                String label = element.asText();
+                Genre genre = Genre.fromLabel(label);
+                System.out.println("🎯 GenreDeserializer element: " + label + " -> " + genre);
+                result.add(genre);
             }
             return result;
         } else {
             String input = node.asText();
-            return Genre.parseGenres(input);
+            List<Genre> parsed = Genre.parseGenres(input);
+            System.out.println("🎯 GenreDeserializer input: " + input + " -> " + parsed);
+            return parsed;
         }
     }
 }

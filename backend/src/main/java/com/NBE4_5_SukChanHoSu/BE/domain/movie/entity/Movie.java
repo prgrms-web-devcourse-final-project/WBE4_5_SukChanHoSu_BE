@@ -1,6 +1,8 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.entity;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
+import com.NBE4_5_SukChanHoSu.BE.global.util.GenreDeserializer;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -46,27 +48,14 @@ public class Movie {
     private String director; // = director
 
     @PostLoad
-    private void onLoad() {
-        if (genresRaw != null && !genresRaw.isBlank()) {
+    public void loadGenresFromRaw() {
+        if (this.genresRaw != null && !this.genresRaw.isBlank()) {
             this.genres = Arrays.stream(genresRaw.split(","))
                     .map(String::trim)
-                    .map(String::toUpperCase)
-                    .map(Genre::valueOf)
+                    .map(Genre::fromLabel)
                     .collect(Collectors.toList());
         } else {
             this.genres = new ArrayList<>();
-        }
-    }
-
-    @PrePersist
-    @PreUpdate
-    private void onSave() {
-        if (genres != null && !genres.isEmpty()) {
-            this.genresRaw = genres.stream()
-                    .map(Enum::name)
-                    .collect(Collectors.joining(", "));
-        } else {
-            this.genresRaw = null;
         }
     }
 }

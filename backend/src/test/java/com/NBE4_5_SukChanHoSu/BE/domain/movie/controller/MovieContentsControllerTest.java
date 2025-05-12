@@ -4,6 +4,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.request.MovieRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieContentsService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +14,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -82,7 +86,7 @@ public class MovieContentsControllerTest {
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("200"));
+                .andExpect(jsonPath("$.code").value("205"));
     }
 
     @Test
@@ -108,9 +112,33 @@ public class MovieContentsControllerTest {
     @Test
     @DisplayName("영화 삭제")
     void deleteMovie() throws Exception {
-        mockMvc.perform(delete("/api/movie/20030410")
+        // ✅ 먼저 영화 저장
+        List<Genre> genreList = List.of(Genre.ACTION, Genre.SCIENCE_FICTION);
+
+        MovieRequest movie = new MovieRequest();
+        movie.setMovieId(20070011L);
+        movie.setTitle("Interstellar");
+        movie.setGenres(genreList);
+        movie.setReleaseDate("20141107");
+        movie.setPosterImage("https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg");
+        movie.setDescription("우주의 끝에서 미래를 찾다");
+        movie.setRating("PG-13");
+        movie.setDirector("Christopher Nolan");
+        mockMvc.perform(post("/api/movie")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(movie)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(get("/api/movie/20070011")
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print())
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"));
+
+        // ✅ 그 다음 삭제
+        mockMvc.perform(delete("/api/movie/20070011")
+                        .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("204"));
     }
@@ -132,4 +160,3 @@ public class MovieContentsControllerTest {
                 .andExpect(jsonPath("$.data.title").value("Updated Title"));
     }
 }
-
