@@ -6,6 +6,10 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieContentsService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -28,6 +32,17 @@ public class MovieContentsController {
     @GetMapping
     public RsData<List<Movie>> getAllMovies() {
         List<Movie> movies = movieContentsService.findAll();
+        return new RsData<>("200", "영화 목록 조회", movies);
+    }
+
+    @Operation(summary = "영화 전체 조회 (페이징)", description = "저장된 모든 영화를 페이지 단위로 조회합니다.")
+    @GetMapping
+    public RsData<Page<Movie>> getAllMovies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "releaseDate"));
+        Page<Movie> movies = movieContentsService.findAll(pageable);
         return new RsData<>("200", "영화 목록 조회", movies);
     }
 

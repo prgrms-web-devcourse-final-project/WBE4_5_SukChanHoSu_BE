@@ -4,6 +4,8 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
@@ -24,6 +26,10 @@ public class MovieContentsService {
 
     public Optional<Movie> findById(Long movieId) {
         return movieRepository.findById(movieId);
+    }
+
+    public Page<Movie> findAll(Pageable pageable) {
+        return movieRepository.findAll(pageable);
     }
 
     public Movie update(Long movieId, Movie updatedMovie) {
