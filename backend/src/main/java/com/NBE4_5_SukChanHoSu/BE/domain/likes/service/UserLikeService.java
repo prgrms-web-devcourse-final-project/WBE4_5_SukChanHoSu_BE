@@ -1,18 +1,17 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.Matching;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.MatchingRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.Matching;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.MatchingRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.redis.RedisSerializationException;
 import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
-import com.NBE4_5_SukChanHoSu.BE.global.util.DateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
@@ -47,7 +46,7 @@ public class UserLikeService {
 
         // Redis에 저장
         String key = "likes:" + fromUser.getUserId() + ":" + toUser.getUserId();
-        redisTemplate.opsForValue().set(key, like, ttl.getLikes(), TimeUnit.SECONDS); // TTL 설정
+        redisTemplate.opsForValue().set(key, like,ttl.getLikes(), TimeUnit.SECONDS);
 
         // like 이벤트 발행 (메시지와 시간 분리)
         Map<String, String> likeEvent = new HashMap<>();
@@ -63,11 +62,11 @@ public class UserLikeService {
         }
 
         // like 상태 업데이트
-        String key2 = "user:" + fromUser.getUserId();
+        String key2 ="user:" + fromUser.getUserId();
         // value값(movieCd) 보존 , 기본값: ""
         String existingValue = Optional.ofNullable((String) redisTemplate.opsForValue().get(key2)).orElse("");
         // like 전송시 레디스에 유저 정보 업데이트
-        redisTemplate.opsForValue().set(key2, existingValue, ttl.getData(), TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(key2,existingValue, ttl.getData(), TimeUnit.SECONDS);
         return like;
     }
 
@@ -94,17 +93,17 @@ public class UserLikeService {
         // fromUser가 남자인 경우
         if (isMale(fromUser)) {
             matching = new Matching(fromUser, toUser);
-            key = generateMatchingKey(fromUser.getUserId(), toUser.getUserId());
+            key = generateMatchingKey(fromUser.getUserId(),toUser.getUserId());
         }
         // fromUser가 여자인 경우(toUser가 남자인 경우)
         else {
             matching = new Matching(toUser, fromUser);
-            key = generateMatchingKey(toUser.getUserId(), fromUser.getUserId());
+            key = generateMatchingKey(toUser.getUserId(),fromUser.getUserId());
         }
         // DB 저장
         matchingRepository.save(matching);
         // Redis 저장
-        redisTemplate.opsForValue().set(key, matching, ttl.getMatching(), TimeUnit.SECONDS); // TTL 설정
+        redisTemplate.opsForValue().set(key, matching,ttl.getMatching(), TimeUnit.SECONDS); // TTL 설정
 
         // 매칭 이벤트 발행
         Map<String, String> matchingEvent = new HashMap<>();
@@ -128,7 +127,7 @@ public class UserLikeService {
 
         // 응답 생성
         int distance = matchingService.calDistance(fromUser, toUser);
-        return new MatchingResponse(matching, distance);
+        return new MatchingResponse(matching,distance);
     }
 
     // like 목록 조회
