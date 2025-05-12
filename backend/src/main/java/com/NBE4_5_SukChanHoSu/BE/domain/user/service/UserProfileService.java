@@ -97,7 +97,7 @@ public class UserProfileService {
                 .longitude(dto.getLongitude() != null ? dto.getLongitude() : userProfile.getLongitude())
                 .birthdate(dto.getBirthdate() != null ? dto.getBirthdate() : userProfile.getBirthdate())
                 .introduce(dto.getIntroduce() != null ? dto.getIntroduce() : userProfile.getIntroduce())
-                .searchRadius(dto.getSearchRadius() != null ? dto.getSearchRadius() : userProfile.getSearchRadius())
+                .searchRadius(Optional.ofNullable(dto.getSearchRadius()).orElse(userProfile.getSearchRadius()))
                 .lifeMovie(dto.getLifeMovie() != null ? dto.getLifeMovie() : userProfile.getLifeMovie())
                 .favoriteGenres(dto.getFavoriteGenres() != null ? dto.getFavoriteGenres() : userProfile.getFavoriteGenres())
                 .watchedMovies(dto.getWatchedMovies() != null ? dto.getWatchedMovies() : userProfile.getWatchedMovies())
