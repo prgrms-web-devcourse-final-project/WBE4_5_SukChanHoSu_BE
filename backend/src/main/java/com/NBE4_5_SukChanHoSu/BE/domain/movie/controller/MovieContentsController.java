@@ -31,14 +31,14 @@ public class MovieContentsController {
     }
 
     @Operation(summary = "영화 전체 조회", description = "저장된 모든 영화를 조회합니다.")
-    @GetMapping
+    @GetMapping("/list")
     public RsData<List<Movie>> getAllMovies() {
         List<Movie> movies = movieContentsService.findAll();
         return new RsData<>("200", "영화 목록 조회", movies);
     }
 
     @Operation(summary = "영화 전체 조회 (페이징)", description = "저장된 모든 영화를 페이지 단위로 조회합니다.")
-    @GetMapping
+    @GetMapping("/paged")
     public RsData<Page<Movie>> getAllMovies(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
