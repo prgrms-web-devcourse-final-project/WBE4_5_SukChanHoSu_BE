@@ -2,8 +2,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: howns10221@gmail.com
-    password: rola qhya inua ujrp
+    username: ${MAIL.SENDER}
+    password: ${MAIL.PASSWORD}
     properties:
       mail:
         smtp:
@@ -24,6 +24,9 @@ spring:
         likes: 86400 # 24h
         liked: 86400 # 24h
         matching: 3600 # 1h
+        data: 604800 # 1주일
+        rank: 604800 # 1주일
+        detail: 86400 # 1일
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: ${DATABASE.URL}
@@ -65,3 +68,11 @@ logging:
     org.hibernate.orm.jdbc.bind: trace
     orh.hibernate.orm.jdbc.extract: trace
     org.springframework.transaction.interceptor: trace
+
+movie:
+  api:
+    kofic_key: ${MOVIE.API.KEY}
+    tmdb_key: ${MOVIE.API.KEY2}
+    rank-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchWeeklyBoxOfficeList.json"
+    detail-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json"
+    tmdb-search-url: "https://api.themoviedb.org/3/search/movie"

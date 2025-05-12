@@ -30,21 +30,32 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
-                                .requestMatchers("/oauth2/**", "/api/auth/login", "/api/auth/join", "/api/auth/google/", "/api/email/**").permitAll()
+                                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/movie/review/**").permitAll()
+                                .requestMatchers(
+                                        "/oauth2/**",
+                                        "/api/auth/login",
+                                        "/api/auth/join",
+                                        "/api/auth/google/url",
+                                        "/api/email/**"
+                                ).permitAll()
                                 // Swagger
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 // Actuator
                                 .requestMatchers("/actuator/**").permitAll()
                                 .requestMatchers("/.well-known/**").permitAll()
 
+                                // 채팅 정적 리소스 허용
+                                .requestMatchers("/chat_rooms.html", "/chat_room.html","/chat.html", "/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws-stomp/**", "/ws-stomp", "/chat/rooms", "/chat/rooms/**").permitAll()
+
                                 // Public endpoints
                                 .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/h2-console/**").permitAll()
                                 .anyRequest().authenticated()
                 )
-                .cors(Customizer.withDefaults())
                 .headers(headers -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 )
@@ -68,12 +79,16 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(List.of(
+                "http://localhost:8080",
                 "https://www.app4.qwas.shop",
                 "https://login.aleph.kr",
-                "https://api.app.mm.ts0608.life"
+                "https://api.app.mm.ts0608.life",
+                "https://api.app2.mm.ts0608.life",
+                "http://localhost:5173",
+                "https://movie-match-rox9.vercel.app"
         ));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setExposedHeaders(List.of("Authorization", "Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
