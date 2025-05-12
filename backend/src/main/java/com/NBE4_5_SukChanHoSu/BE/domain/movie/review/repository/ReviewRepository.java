@@ -13,4 +13,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     // todo 영화 객체의 id 받아서 반환하도록 수정해야댐
     List<Review> findByTitleOrderByCreatedDateDesc(String movieTitle);
+    List<Review> findByTitleOrderByLikeCountDescCreatedDateDesc(String title);
 }

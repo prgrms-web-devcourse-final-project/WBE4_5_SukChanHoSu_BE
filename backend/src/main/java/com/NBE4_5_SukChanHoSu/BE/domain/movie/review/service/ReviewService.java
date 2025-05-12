@@ -23,6 +23,9 @@ import java.util.List;
 public class ReviewService {
     private final ReviewRepository reviewRepository;
     private static final String LIKE_PREFIX = "like";
+    private static final int FIRST_LINE = 0;
+    private static final int FIRST_INDEX = 0;
+    private static final int SECOND_INDEX = 1;
 
     public ReviewResponseDto createReviewPost(ReviewRequestDto requestDto) {
         User user = SecurityUtil.getCurrentUser();
@@ -75,11 +78,18 @@ public class ReviewService {
                     .toList();
         }
 
-        List<Object[]> statList = reviewRepository.getReviewStatsByTitle(title);
-        Object[] stats = statList.get(0);
+        if (sort.equalsIgnoreCase(LIKE_PREFIX)) {
+            List<Review> reviews = reviewRepository.findByTitleOrderByLikeCountDescCreatedDateDesc(title);
+            reviewList = reviews.stream()
+                    .map(ReviewResponseDto::new)
+                    .toList();
+        }
 
-        Long count = ((Number) stats[0]).longValue();
-        Double avg = ((Number) stats[1]).doubleValue();
+        List<Object[]> statList = reviewRepository.getReviewStatsByTitle(title);
+        Object[] stats = statList.get(FIRST_LINE);
+
+        Long count = ((Number) stats[FIRST_INDEX]).longValue();
+        Double avg = ((Number) stats[SECOND_INDEX]).doubleValue();
         return new AllReviewDto(reviewList, count, avg);
     }
 
