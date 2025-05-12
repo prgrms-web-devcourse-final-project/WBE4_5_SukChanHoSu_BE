@@ -3,8 +3,9 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.request.MovieRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieContentsService;
+import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,33 +17,39 @@ public class MovieContentsController {
 
     private final MovieContentsService movieContentsService;
 
+    @Operation(summary = "영화 생성", description = "영화 데이터를 생성합니다.")
     @PostMapping
-    public ResponseEntity<Movie> createMovie(@RequestBody MovieRequest request) {
-        Movie movie = request.toEntity(); // MovieRequest → Movie 변환
-        Movie saved = movieContentsService.save(movie);
-        return ResponseEntity.ok(saved);
+    public RsData<Movie> createMovie(@RequestBody MovieRequest request) {
+        Movie saved = movieContentsService.save(request.toEntity());
+        return new RsData<>("200", "영화 생성 완료", saved);
     }
 
+    @Operation(summary = "영화 전체 조회", description = "저장된 모든 영화를 조회합니다.")
     @GetMapping
-    public ResponseEntity<List<Movie>> getAllMovies() {
-        return ResponseEntity.ok(movieContentsService.findAll());
+    public RsData<List<Movie>> getAllMovies() {
+        List<Movie> movies = movieContentsService.findAll();
+        return new RsData<>("200", "영화 목록 조회", movies);
     }
 
+    @Operation(summary = "영화 단건 조회", description = "영화 ID로 상세 정보를 조회합니다.")
     @GetMapping("/{id}")
-    public ResponseEntity<Movie> getMovieById(@PathVariable Long id) {
+    public RsData<Movie> getMovieById(@PathVariable Long id) {
         return movieContentsService.findById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(movie -> new RsData<>("200", "영화 조회 완료", movie))
+                .orElseGet(() -> new RsData<>("404", "해당 ID의 영화가 존재하지 않습니다.", null));
     }
 
+    @Operation(summary = "영화 수정", description = "영화 ID에 해당하는 영화를 수정합니다.")
     @PutMapping("/{id}")
-    public ResponseEntity<Movie> updateMovie(@PathVariable Long id, @RequestBody Movie movie) {
-        return ResponseEntity.ok(movieContentsService.update(id, movie));
+    public RsData<Movie> updateMovie(@PathVariable Long id, @RequestBody Movie movie) {
+        Movie updated = movieContentsService.update(id, movie);
+        return new RsData<>("200", "영화 수정 완료", updated);
     }
 
+    @Operation(summary = "영화 삭제", description = "영화 ID로 영화를 삭제합니다.")
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
+    public RsData<Void> deleteMovie(@PathVariable Long id) {
         movieContentsService.delete(id);
-        return ResponseEntity.noContent().build();
+        return new RsData<>("204", "영화 삭제 완료", null);
     }
 }
