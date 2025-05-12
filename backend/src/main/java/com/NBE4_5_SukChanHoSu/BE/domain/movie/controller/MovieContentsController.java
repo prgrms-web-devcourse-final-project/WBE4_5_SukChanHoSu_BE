@@ -50,9 +50,9 @@ public class MovieContentsController {
     }
 
     @Operation(summary = "영화 단건 조회", description = "영화 ID로 상세 정보를 조회합니다.")
-    @GetMapping("/{id}")
-    public RsData<Movie> getMovieById(@PathVariable Long id) {
-        return movieContentsService.findById(id)
+    @GetMapping("/{movieId}")
+    public RsData<Movie> getMovieById(@PathVariable Long movieId) {
+        return movieContentsService.findById(movieId)
                 .map(movie -> new RsData<>("200", "영화 조회 완료", movie))
                 .orElseThrow(() -> new ServiceException("404", "해당 ID의 영화가 존재하지 않습니다."));
     }
@@ -72,10 +72,10 @@ public class MovieContentsController {
     }
 
     @Operation(summary = "영화 수정", description = "영화 ID에 해당하는 영화를 수정합니다.")
-    @PutMapping("/{id}")
-    public RsData<Movie> updateMovie(@PathVariable Long id, @RequestBody Movie movie) {
+    @PutMapping("/{movieId}")
+    public RsData<Movie> updateMovie(@PathVariable Long movieId, @RequestBody Movie movie) {
         try {
-            Movie updated = movieContentsService.update(id, movie);
+            Movie updated = movieContentsService.update(movieId, movie);
             return new RsData<>("200", "영화 수정 완료", updated);
         } catch (IllegalArgumentException e) {
             throw new ServiceException("404", "해당 ID의 영화가 존재하지 않습니다.");
@@ -83,10 +83,10 @@ public class MovieContentsController {
     }
 
     @Operation(summary = "영화 삭제", description = "영화 ID로 영화를 삭제합니다.")
-    @DeleteMapping("/{id}")
-    public RsData<Void> deleteMovie(@PathVariable Long id) {
+    @DeleteMapping("/{movieId}")
+    public RsData<Void> deleteMovie(@PathVariable Long movieId) {
         try {
-            movieContentsService.delete(id);
+            movieContentsService.delete(movieId);
             return new RsData<>("204", "영화 삭제 완료", null);
         } catch (Exception e) {
             throw new ServiceException("404", "해당 ID의 영화가 존재하지 않습니다.");

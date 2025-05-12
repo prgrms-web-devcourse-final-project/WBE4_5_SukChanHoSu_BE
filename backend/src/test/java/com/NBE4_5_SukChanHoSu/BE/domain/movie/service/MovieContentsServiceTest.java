@@ -3,6 +3,7 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.service;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -26,6 +27,7 @@ public class MovieContentsServiceTest {
     }
 
     @Test
+    @DisplayName("영화 저장 시 저장된 Movie 반환")
     void save_shouldReturnSavedMovie() {
         Movie movie = Movie.builder().movieId(1L).title("Test Movie").build();
         when(movieRepository.save(movie)).thenReturn(movie);
@@ -37,6 +39,7 @@ public class MovieContentsServiceTest {
     }
 
     @Test
+    @DisplayName("모든 영화 조회 시 전체 목록 반환")
     void findAll_shouldReturnListOfMovies() {
         List<Movie> movies = List.of(new Movie(), new Movie());
         when(movieRepository.findAll()).thenReturn(movies);
@@ -48,6 +51,7 @@ public class MovieContentsServiceTest {
     }
 
     @Test
+    @DisplayName("ID로 영화 조회 시 결과가 있으면 반환")
     void findById_shouldReturnMovieIfFound() {
         Movie movie = Movie.builder().movieId(1L).build();
         when(movieRepository.findById(1L)).thenReturn(Optional.of(movie));
@@ -59,6 +63,7 @@ public class MovieContentsServiceTest {
     }
 
     @Test
+    @DisplayName("영화 제목으로 검색 시 repository 메서드 호출 확인")
     void findByTitle_shouldCallRepositoryCorrectly() {
         String keyword = "action";
         List<Movie> mockList = List.of(new Movie());
@@ -71,6 +76,7 @@ public class MovieContentsServiceTest {
     }
 
     @Test
+    @DisplayName("영화 장르로 검색 시 repository 메서드 호출 확인")
     void findByGenre_shouldCallRepositoryCorrectly() {
         String genre = "DRAMA";
         when(movieRepository.findByGenresRawContainingIgnoreCase(genre)).thenReturn(List.of(new Movie()));
@@ -82,6 +88,7 @@ public class MovieContentsServiceTest {
     }
 
     @Test
+    @DisplayName("기존 영화 수정 시 새로운 정보로 업데이트")
     void update_shouldUpdateExistingMovie() {
         Movie existing = Movie.builder().movieId(1L).title("Old").build();
         Movie updated = Movie.builder().title("New").build();
@@ -95,6 +102,7 @@ public class MovieContentsServiceTest {
     }
 
     @Test
+    @DisplayName("영화 삭제 시 deleteById 호출됨")
     void delete_shouldCallDeleteById() {
         movieService.delete(1L);
         verify(movieRepository).deleteById(1L);

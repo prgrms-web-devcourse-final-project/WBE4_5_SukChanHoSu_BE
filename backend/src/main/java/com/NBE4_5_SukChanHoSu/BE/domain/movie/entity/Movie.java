@@ -4,7 +4,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

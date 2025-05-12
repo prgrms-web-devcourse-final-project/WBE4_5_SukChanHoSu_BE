@@ -3,6 +3,8 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.request.MovieRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieContentsService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -12,9 +14,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.ResultActions;
 
-import java.nio.charset.StandardCharsets;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -23,18 +23,20 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @AutoConfigureMockMvc
 public class MovieContentsControllerTest {
 
-    @Autowired
-    private MockMvc mockMvc;
+    @Autowired private MockMvc mockMvc;
+    @Autowired private MovieContentsService movieContentsService;
+    @Autowired private ObjectMapper objectMapper;
+    @Autowired private UserService userService;
 
-    @Autowired
-    private MovieContentsService movieContentsService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+    private String accessToken;
 
     @BeforeEach
     void setUp() {
-        // 필요한 테스트 데이터 셋업
+        // 로그인하여 accessToken 발급
+        UserLoginRequest request = new UserLoginRequest();
+        request.setEmail("initUser1@example.com");
+        request.setPassword("testPassword123!");
+        accessToken = userService.login(request).getAccessToken();
     }
 
     @Test
@@ -44,72 +46,72 @@ public class MovieContentsControllerTest {
         request.setMovieId(1L);
         request.setTitle("Inception");
 
-        ResultActions result = mockMvc.perform(post("/api/movie")
+        mockMvc.perform(post("/api/movie")
+                        .header("Authorization", "Bearer " + accessToken)
                         .content(objectMapper.writeValueAsString(request))
-                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.title").value("Inception"));
     }
 
     @Test
     @DisplayName("영화 전체 조회")
     void getAllMovies() throws Exception {
-        ResultActions result = mockMvc.perform(get("/api/movie/list"))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+        mockMvc.perform(get("/api/movie/list")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"));
     }
 
     @Test
     @DisplayName("영화 페이징 조회")
     void getAllMoviesPaged() throws Exception {
-        ResultActions result = mockMvc.perform(get("/api/movie/paged?page=0&size=10"))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+        mockMvc.perform(get("/api/movie/paged?page=0&size=10")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"));
     }
 
     @Test
     @DisplayName("영화 단건 조회")
     void getMovieById() throws Exception {
-        ResultActions result = mockMvc.perform(get("/api/movie/1"))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+        mockMvc.perform(get("/api/movie/1")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"));
     }
 
     @Test
     @DisplayName("영화 제목으로 검색")
     void searchByTitle() throws Exception {
-        ResultActions result = mockMvc.perform(get("/api/movie/search/title?title=Inception"))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+        mockMvc.perform(get("/api/movie/search/title?title=Inception")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"));
     }
 
     @Test
     @DisplayName("영화 장르로 검색")
     void searchByGenre() throws Exception {
-        ResultActions result = mockMvc.perform(get("/api/movie/search/genre?genre=DRAMA"))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+        mockMvc.perform(get("/api/movie/search/genre?genre=DRAMA")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"));
     }
 
     @Test
     @DisplayName("영화 삭제")
     void deleteMovie() throws Exception {
-        ResultActions result = mockMvc.perform(delete("/api/movie/1"))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+        mockMvc.perform(delete("/api/movie/20030410")
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("204"));
     }
 
@@ -117,16 +119,16 @@ public class MovieContentsControllerTest {
     @DisplayName("영화 수정")
     void updateMovie() throws Exception {
         Movie movie = Movie.builder()
-                .movieId(1L)
+                .movieId(20030410L)
                 .title("Updated Title")
                 .build();
 
-        ResultActions result = mockMvc.perform(put("/api/movie/1")
+        mockMvc.perform(put("/api/movie/1")
+                        .header("Authorization", "Bearer " + accessToken)
                         .content(objectMapper.writeValueAsString(movie))
-                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
-                .andDo(print());
-
-        result.andExpect(status().isOk())
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andDo(print())
+                .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.title").value("Updated Title"));
     }
 }
