@@ -1,0 +1,38 @@
+package com.NBE4_5_SukChanHoSu.BE.domain.admin.controller;
+
+import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.StatusUpdateRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.UserDetailResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.admin.service.AdminService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@Tag(name = "관리자 기능", description = "사용자 관리 (정지/탈퇴/활성화)")
+@RestController
+@RequestMapping("/api/admin")
+@RequiredArgsConstructor
+public class AdminController {
+
+    private final AdminService adminService;
+
+    @Operation(summary = "사용자 상태 변경", description = "관리자가 사용자의 상태 (ACTIVE, SUSPENDED, DELETED)를 변경합니다.")
+    @PatchMapping("/users/{userId}/status")
+    public ResponseEntity<String> updateStatus(
+            @PathVariable Long userId,
+            @RequestBody StatusUpdateRequest request
+    ) {
+        adminService.updateUserStatus(userId, request.getStatus());
+        return ResponseEntity.ok("사용자 상태가 " + request.getStatus() + "로 변경되었습니다.");
+    }
+
+    @Operation(summary = "사용자 상세 조회", description = "관리자가 사용자 상세 정보를 조회합니다.")
+    @GetMapping("/users/{userId}")
+    public ResponseEntity<UserDetailResponse> getUserDetail(@PathVariable Long userId) {
+        UserDetailResponse response = adminService.getUserDetail(userId);
+        return ResponseEntity.ok(response);
+    }
+}

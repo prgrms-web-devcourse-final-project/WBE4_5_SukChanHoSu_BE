@@ -36,6 +36,9 @@ public class User {
     private String providerId;
     private boolean emailVerified = false;
 
+    @Enumerated(EnumType.STRING)
+    private UserStatus status = UserStatus.ACTIVE;
+
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"likes", "likedBy", "maleMatchings", "femaleMatchings","user"})
     private UserProfile userProfile;
