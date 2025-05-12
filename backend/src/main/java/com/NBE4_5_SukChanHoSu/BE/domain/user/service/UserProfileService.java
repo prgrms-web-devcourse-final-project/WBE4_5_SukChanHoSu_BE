@@ -1,12 +1,10 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
