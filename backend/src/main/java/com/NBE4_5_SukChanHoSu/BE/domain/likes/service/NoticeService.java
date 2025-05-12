@@ -24,6 +24,7 @@ import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -73,9 +74,16 @@ public class NoticeService {
                     lettuceConnectionFactory.start();
                 }
 
-                StreamReadOptions options = StreamReadOptions.empty().count(1);
-                // 마지막으로 읽은 Id 부터 읽음
+//                StreamReadOptions options = StreamReadOptions.empty().count(1);
+//                // 마지막으로 읽은 Id 부터 읽음
+//                StreamOffset<String> offset = StreamOffset.create(LIKE_STREAM, ReadOffset.from(lastLikeId));
+//                List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(options, offset);
+
+                // 블로킹 읽기 옵션 설정 (10초 대기)
+                StreamReadOptions options = StreamReadOptions.empty().block(Duration.ofSeconds(10)).count(1);
+                // 마지막으로 읽은 ID부터 읽기
                 StreamOffset<String> offset = StreamOffset.create(LIKE_STREAM, ReadOffset.from(lastLikeId));
+                // Redis Stream에서 데이터 읽기
                 List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(options, offset);
 
                 if (!records.isEmpty()) {
@@ -104,7 +112,6 @@ public class NoticeService {
                         }
                     }
                 }
-                Thread.sleep(1000); // 1초 대기 -> CPU 사용률 감소
             } catch (Exception e) {
                 logger.error("Like Stream 처리 중 오류 발생: ", e);
             }
@@ -119,8 +126,11 @@ public class NoticeService {
                     lettuceConnectionFactory.start(); // 재시작
                 }
 
-                StreamReadOptions options = StreamReadOptions.empty().count(1);
+                // 블로킹 읽기 옵션 설정 (10초 대기)
+                StreamReadOptions options = StreamReadOptions.empty().block(Duration.ofSeconds(10)).count(1);
+                // 마지막으로 읽은 ID부터 읽기
                 StreamOffset<String> offset = StreamOffset.create(MATCHING_STREAM, ReadOffset.from(lastMatchId));
+                // Redis Stream에서 데이터 읽기
                 List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(options, offset);
 
                 if (!records.isEmpty()) {
@@ -158,7 +168,6 @@ public class NoticeService {
                         }
                     }
                 }
-                Thread.sleep(1000); // 1초 대기 -> CPU 사용률 감소
             } catch (Exception e) {
                 logger.error("Match Stream 처리 중 오류 발생: ", e);
             }
