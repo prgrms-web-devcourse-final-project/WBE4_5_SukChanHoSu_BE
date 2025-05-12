@@ -50,16 +50,12 @@ public class UserLikeService {
 
         // like 이벤트 발행 (메시지와 시간 분리)
         Map<String, String> likeEvent = new HashMap<>();
-        likeEvent.put("fromUserId", fromUser.getUserId().toString()); // 좋아요를 보낸 사용자 ID
-        likeEvent.put("toUserId", toUser.getUserId().toString()); // 좋아요를 받은 사용자 ID
-        likeEvent.put("fromUserNickname", fromUser.getNickName()); // 좋아요를 보낸 사용자 닉네임
-        likeEvent.put("message", fromUser.getNickName() + "님이 like를 전송하였습니다!"); // 메시지
-        likeEvent.put("time", like.getLikeTime().toString()); // 시간
+        likeEvent.put("toUserId", toUser.getUserId().toString());
+        likeEvent.put("message", fromUser.getNickName() + "님이 like를 전송하였습니다!");
+        likeEvent.put("time", like.getLikeTime().toString());
 
         try {
-            String jsonEvent = objectMapper.writeValueAsString(likeEvent); // Map을 JSON 문자열로 직렬화
-
-            // Redis Stream에 JSON 문자열로 저장
+            String jsonEvent = objectMapper.writeValueAsString(likeEvent); // Map -> JSON 직렬화
             redisTemplate.opsForStream().add(LIKE_STREAM, Collections.singletonMap("data", jsonEvent));
         } catch (Exception e) {
             throw new RedisSerializationException("500", "JSON 직렬화 실패");
