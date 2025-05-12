@@ -1,6 +1,5 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.service;
 
-import com.NBE4_5_SukChanHoSu.BE.global.exception.redis.RedisSerializationException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -14,7 +13,6 @@ import org.springframework.data.redis.connection.stream.StreamOffset;
 import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -25,13 +23,13 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Service
 @RequiredArgsConstructor
-public class AlarmService {
+public class NoticeService {
 
     private final RedisTemplate<String, Object> redisTemplate;
     private final SimpMessagingTemplate messagingTemplate;
     private final ObjectMapper objectMapper;
     private final LettuceConnectionFactory lettuceConnectionFactory; // LettuceConnectionFactory 주입
-    private static final Logger logger = LoggerFactory.getLogger(AlarmService.class);
+    private static final Logger logger = LoggerFactory.getLogger(NoticeService.class);
 
     private static final String LIKE_STREAM = "like";
     private static final String MATCHING_STREAM = "matching";
