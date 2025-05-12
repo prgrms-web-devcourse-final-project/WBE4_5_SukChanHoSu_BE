@@ -2,6 +2,7 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -40,6 +41,7 @@ public class MovieContentsService {
         return movieRepository.findByGenresRawContainingIgnoreCase(genreKeyword);
     }
 
+    @Transactional
     public Movie update(Long movieId, Movie updatedMovie) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("Movie not found: " + movieId));
