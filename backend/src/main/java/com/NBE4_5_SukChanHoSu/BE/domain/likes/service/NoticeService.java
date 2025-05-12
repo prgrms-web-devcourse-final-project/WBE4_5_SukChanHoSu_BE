@@ -105,7 +105,7 @@ public class NoticeService {
                         }
                     }
                 }
-                Thread.sleep(1000); // 1초 대기
+                Thread.sleep(1000); // 1초 대기 -> CPU 사용률 감소
             } catch (Exception e) {
                 logger.error("Like Stream 처리 중 오류 발생: ", e);
             }
@@ -159,14 +159,14 @@ public class NoticeService {
                         }
                     }
                 }
-                Thread.sleep(1000); // 1초 대기
+                Thread.sleep(1000); // 1초 대기 -> CPU 사용률 감소
             } catch (Exception e) {
                 logger.error("Match Stream 처리 중 오류 발생: ", e);
             }
         }
     }
 
-    // WebSocket을 통해 알림 전송
+    // WebSocket을 통해 알림 전송(경로: /sub/notifications/{userId})
     private void sendNotification(Long userId, Map<String, String> notification) {
         messagingTemplate.convertAndSend("/sub/notifications/" + userId, notification);
         logger.info("메시지: {} - 시간: {}", notification.get("message"), notification.get("time"));
