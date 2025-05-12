@@ -63,7 +63,7 @@ public class MovieContentsController {
         return new RsData<>("200", "제목 검색 결과", result);
     }
 
-    @Operation(summary = "영화 장르 검색", description = "지정한 장르가 포함된 영화를 검색합니다.")
+    @Operation(summary = "단일 영화 장르 검색", description = "지정한 장르(문자열 검색)가 포함된 영화를 검색합니다. 한개의 장르 검색만 바랍니다.")
     @GetMapping("/search/genre")
     public RsData<List<Movie>> searchByGenre(@RequestParam String genre) {
         List<Movie> result = movieContentsService.findByGenre(genre);
