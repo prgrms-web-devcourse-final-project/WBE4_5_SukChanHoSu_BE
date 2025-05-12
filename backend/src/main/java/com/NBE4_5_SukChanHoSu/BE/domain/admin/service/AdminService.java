@@ -1,6 +1,5 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.admin.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.AdminStatisticsResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.UserDetailResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserStatus;
@@ -8,9 +7,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.RecommendUserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -41,15 +37,14 @@ public class AdminService {
                 .build();
     }
 
-    public AdminStatisticsResponse getStatistics() {
-        LocalDate today = LocalDate.now();
-        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-        // 내일의 시작 시간 (00:00:00) (하루 범위)
-        LocalDateTime endOfDay = startOfDay.plusDays(1);
-
-        int dailyMatches = recommendUserRepository.countDailyMatches(startOfDay, endOfDay);
-        int totalUsers = userRepository.countAllUsers();
-
-        return new AdminStatisticsResponse(dailyMatches, totalUsers);
-    }
+//    public AdminStatisticsResponse getStatistics() {
+//        LocalDate today = LocalDate.now();
+//        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
+//        // 내일의 시작 시간 (00:00:00) (하루 범위)
+//        LocalDateTime endOfDay = startOfDay.plusDays(1);
+//
+//        int dailyMatches = recommendUserRepository.countDailyMatches(startOfDay, endOfDay);
+//        int totalUsers = userRepository.countAllUsers();
+//
+//        return new AdminStatisticsResponse(dailyMatches, totalUsers);
 }
