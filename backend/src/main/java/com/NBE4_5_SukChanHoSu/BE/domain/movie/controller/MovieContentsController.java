@@ -5,6 +5,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieContentsService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name = "영화", description = "영화 정보 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/movie")
@@ -52,6 +54,20 @@ public class MovieContentsController {
         return movieContentsService.findById(id)
                 .map(movie -> new RsData<>("200", "영화 조회 완료", movie))
                 .orElseGet(() -> new RsData<>("404", "해당 ID의 영화가 존재하지 않습니다.", null));
+    }
+
+    @Operation(summary = "영화 이름 검색", description = "영화 제목을 기준으로 영화를 검색합니다.")
+    @GetMapping("/search/title")
+    public RsData<List<Movie>> searchByTitle(@RequestParam String title) {
+        List<Movie> result = movieContentsService.findByTitle(title);
+        return new RsData<>("200", "제목 검색 결과", result);
+    }
+
+    @Operation(summary = "영화 장르 검색", description = "지정한 장르가 포함된 영화를 검색합니다.")
+    @GetMapping("/search/genre")
+    public RsData<List<Movie>> searchByGenre(@RequestParam String genre) {
+        List<Movie> result = movieContentsService.findByGenre(genre);
+        return new RsData<>("200", "장르 검색 결과", result);
     }
 
     @Operation(summary = "영화 수정", description = "영화 ID에 해당하는 영화를 수정합니다.")

@@ -32,6 +32,14 @@ public class MovieContentsService {
         return movieRepository.findAll(pageable);
     }
 
+    public List<Movie> findByTitle(String title) {
+        return movieRepository.findByTitleContainingIgnoreCase(title);
+    }
+
+    public List<Movie> findByGenre(String genreKeyword) {
+        return movieRepository.findByGenresRawContainingIgnoreCase(genreKeyword);
+    }
+
     public Movie update(Long movieId, Movie updatedMovie) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new IllegalArgumentException("Movie not found: " + movieId));
