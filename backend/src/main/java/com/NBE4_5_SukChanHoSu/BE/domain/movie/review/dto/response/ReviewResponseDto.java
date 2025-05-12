@@ -2,8 +2,10 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@NoArgsConstructor
 public class ReviewResponseDto {
     private Long id;
     // todo 영화 객체로 변경 예정
