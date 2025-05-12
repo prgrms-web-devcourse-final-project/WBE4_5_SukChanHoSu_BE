@@ -5,6 +5,7 @@ import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 
@@ -17,7 +18,7 @@ public class NoticeController {
 
     // 알림 목록 조회
     @GetMapping
-    public List<Map<String, String>>  getNotifications() {
+    public List<Map<String, String>>  getNotifications() throws ParseException {
         Long userId = SecurityUtil.getCurrentUser().getId();
         return noticeService.getNotifications(userId);
     }

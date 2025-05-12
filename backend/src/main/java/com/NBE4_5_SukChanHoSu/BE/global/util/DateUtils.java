@@ -1,8 +1,10 @@
 package com.NBE4_5_SukChanHoSu.BE.global.util;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Locale;
 import java.util.concurrent.TimeUnit;
 
 public class DateUtils {
@@ -36,5 +38,10 @@ public class DateUtils {
             long weeks = days / 7; // 주 단위 차이
             return weeks + "주일 전";
         }
+    }
+
+    public static Date parseDate(String dateString) throws ParseException {
+        SimpleDateFormat format = new SimpleDateFormat("EEE MMM dd HH:mm:ss zzz yyyy", Locale.ENGLISH);
+        return format.parse(dateString);
     }
 }

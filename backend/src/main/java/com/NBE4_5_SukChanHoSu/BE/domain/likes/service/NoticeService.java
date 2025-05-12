@@ -7,6 +7,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.redis.RedisSerializationException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
+import com.NBE4_5_SukChanHoSu.BE.global.util.DateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -22,10 +23,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Service
@@ -168,8 +167,8 @@ public class NoticeService {
 
     // WebSocket을 통해 알림 전송(경로: /sub/notifications/{userId})
     private void sendNotification(Long userId, Map<String, String> notification) {
-        messagingTemplate.convertAndSend("/sub/notifications/" + userId, notification);
-        logger.info("메시지: {} - 시간: {}", notification.get("message"), notification.get("time"));
+        messagingTemplate.convertAndSend("/sub/notifications/" + userId, notification.get("message"));
+        logger.info("메시지: {}", notification.get("message"));
     }
 
     // 알림 내역 저장
@@ -177,9 +176,25 @@ public class NoticeService {
         notifications.computeIfAbsent(userId, k -> new ArrayList<>()).add(notification);
     }
 
-    // 알림 목록 조회
-    public List<Map<String, String>> getNotifications(Long userId) {
-        return notifications.getOrDefault(userId, new ArrayList<>());
+    // 알림 목록 조회, 시간 변환
+    public List<Map<String, String>> getNotifications(Long userId) throws ParseException {
+        List<Map<String, String>> updateNotifications = notifications.getOrDefault(userId, new ArrayList<>());
+        List<Map<String, String>> result = new ArrayList<>();
+
+        for (Map<String, String> notification : updateNotifications) {
+            Map<String, String> updated = new HashMap<>();
+            try {
+                Date time = DateUtils.parseDate(notification.get("time")); // 날짜 문자열을 Date로 변환
+                updated.put("message", notification.get("message"));
+                updated.put("timeAgo", DateUtils.getTimeAgo(time)); // time -> timeAgo 로 변환
+                result.add(updated);
+            } catch (ParseException e) {
+                // 날짜 파싱 실패 시 로그 출력
+                System.err.println("날짜 파싱 실패: " + notification.get("time"));
+            }
+        }
+
+        return result;
     }
 
     // 알림 읽음 처리
