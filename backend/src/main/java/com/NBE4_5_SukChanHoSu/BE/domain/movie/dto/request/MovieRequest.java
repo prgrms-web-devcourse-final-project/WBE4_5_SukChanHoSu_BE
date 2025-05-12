@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.request;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.global.util.GenreStringToListConverter;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
@@ -29,4 +30,17 @@ public class MovieRequest {
     private String description;
     private String rating;
     private String director;
+
+    public Movie toEntity() {
+        return Movie.builder()
+                .movieId(this.movieId)
+                .genres(this.genres != null && !this.genres.isEmpty() ? this.genres.get(0) : Genre.UNKNOWN)
+                .title(this.title)
+                .releaseDate(this.releaseDate)
+                .posterImage(this.posterImage)
+                .description(this.description)
+                .rating(this.rating)
+                .director(this.director)
+                .build();
+    }
 }
