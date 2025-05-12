@@ -9,8 +9,6 @@ import java.time.LocalDateTime;
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByEmail(String email);
 
-    @Query("SELECT COUNT(u) FROM User u")
-    int countAllUsers();
-
-    long countByCreatedAtAfter(LocalDateTime dateTime);
+    @Query("SELECT COUNT(u) FROM User u WHERE u.createdDate > :dateTime")
+    long countByCreatedDateAfter(LocalDateTime dateTime);
 }

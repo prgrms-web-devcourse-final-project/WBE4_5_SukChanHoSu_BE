@@ -22,6 +22,6 @@ public class UserMetricsService {
 
     public long getTodaySignupCount() {
         // ✔ createdAt 컬럼이 LocalDateTime 형태라고 가정
-        return userRepository.countByCreatedAtAfter(LocalDate.now().atStartOfDay());
+        return userRepository.countByCreatedDateAfter(LocalDate.now().atStartOfDay());
     }
 }

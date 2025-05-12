@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 
+import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.CascadeType;
@@ -16,6 +17,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Data
@@ -35,6 +38,8 @@ public class User {
     private String provider;
     private String providerId;
     private boolean emailVerified = false;
+
+    private LocalDateTime createdDate; // or another date type like LocalDate
 
     @Enumerated(EnumType.STRING)
     private UserStatus status = UserStatus.ACTIVE;

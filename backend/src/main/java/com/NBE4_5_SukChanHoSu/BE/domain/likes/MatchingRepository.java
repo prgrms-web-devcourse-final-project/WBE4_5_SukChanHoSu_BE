@@ -2,6 +2,7 @@ package com.NBE4_5_SukChanHoSu.BE.domain.likes;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
@@ -20,5 +21,6 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
 
     void deleteByMaleUserAndFemaleUser(UserProfile maleUser, UserProfile femaleUser);
 
+    @Query("SELECT COUNT(m) FROM Matching m WHERE m.matchingTime > :dateTime")
     long countByMatchedAtAfter(LocalDateTime localDateTime);
 }
