@@ -32,6 +32,7 @@ public class Review extends BaseTime {
     // todo 영화 객체로 변경
     private String title;
     private String content;
+    private int likeCount;
     private Double rating;
 
     @JoinColumn(name = "user_id")

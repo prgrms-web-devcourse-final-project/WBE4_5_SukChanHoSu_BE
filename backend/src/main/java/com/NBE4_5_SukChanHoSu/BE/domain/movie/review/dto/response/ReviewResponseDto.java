@@ -12,6 +12,7 @@ public class ReviewResponseDto {
     private String title;
     private String content;
     private String userName;
+    private int likeCount;
     private Double rating;
 
     public ReviewResponseDto(Review review) {
@@ -19,6 +20,7 @@ public class ReviewResponseDto {
         this.title = review.getTitle();
         this.content = review.getContent();
         this.userName = review.getUser().getUserProfile().getNickName();
+        this.likeCount = review.getLikeCount();
         this.rating = review.getRating();
     }
 }
