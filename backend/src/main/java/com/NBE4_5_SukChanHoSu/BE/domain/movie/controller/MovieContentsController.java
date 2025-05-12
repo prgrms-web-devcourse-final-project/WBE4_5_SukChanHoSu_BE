@@ -1,7 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.request.MovieRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.response.MovieResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieContentsService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
@@ -10,7 +9,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequiredArgsConstructor
@@ -28,19 +26,16 @@ public class MovieContentsController {
 
     @Operation(summary = "영화 전체 조회", description = "저장된 모든 영화를 조회합니다.")
     @GetMapping
-    public RsData<List<MovieResponse>> getAllMovies() {
+    public RsData<List<Movie>> getAllMovies() {
         List<Movie> movies = movieContentsService.findAll();
-        List<MovieResponse> responses = movies.stream()
-                .map(this::convertToResponse)
-                .collect(Collectors.toList());
-        return new RsData<>("200", "영화 목록 조회", responses);
+        return new RsData<>("200", "영화 목록 조회", movies);
     }
 
     @Operation(summary = "영화 단건 조회", description = "영화 ID로 상세 정보를 조회합니다.")
     @GetMapping("/{id}")
-    public RsData<MovieResponse> getMovieById(@PathVariable Long id) {
+    public RsData<Movie> getMovieById(@PathVariable Long id) {
         return movieContentsService.findById(id)
-                .map(movie -> new RsData<>("200", "영화 조회 완료", convertToResponse(movie)))
+                .map(movie -> new RsData<>("200", "영화 조회 완료", movie))
                 .orElseGet(() -> new RsData<>("404", "해당 ID의 영화가 존재하지 않습니다.", null));
     }
 
