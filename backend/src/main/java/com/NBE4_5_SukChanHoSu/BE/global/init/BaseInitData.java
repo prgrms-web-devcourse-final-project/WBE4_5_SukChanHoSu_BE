@@ -50,8 +50,8 @@ public class BaseInitData {
             "스파이더맨", "라라랜드", "기생충", "듄", "조커"
     );
 
-    private static final String LIKE_STREAM = "likes";
-    private static final String MATCH_STREAM = "matches";
+    private static final String LIKE_STREAM = "like";
+    private static final String MATCH_STREAM = "matching";
 
     @Bean
     @Order(1)

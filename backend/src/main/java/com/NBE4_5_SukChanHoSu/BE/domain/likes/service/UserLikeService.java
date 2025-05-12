@@ -33,9 +33,10 @@ public class UserLikeService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTTL ttl;
     private final RecommendService matchingService;
+    private final ObjectMapper objectMapper;
 
-    private static final String LIKE_STREAM = "likes";
-    private static final String MATCH_STREAM = "matches";
+    private static final String LIKE_STREAM = "like";
+    private static final String MATCHING_STREAM = "matching";
 
     @Transactional
     public UserLikes likeUser(UserProfile fromUser, UserProfile toUser) {
@@ -45,23 +46,31 @@ public class UserLikeService {
 
         // Redis에 저장
         String key = "likes:" + fromUser.getUserId() + ":" + toUser.getUserId();
-        redisTemplate.opsForValue().set(key, like,ttl.getLikes(), TimeUnit.SECONDS); // TTL 설정
+        redisTemplate.opsForValue().set(key, like, ttl.getLikes(), TimeUnit.SECONDS); // TTL 설정
 
-        // like 이벤트 발행
+        // like 이벤트 발행 (메시지와 시간 분리)
         Map<String, String> likeEvent = new HashMap<>();
         likeEvent.put("fromUserId", fromUser.getUserId().toString()); // 좋아요를 보낸 사용자 ID
         likeEvent.put("toUserId", toUser.getUserId().toString()); // 좋아요를 받은 사용자 ID
         likeEvent.put("fromUserNickname", fromUser.getNickName()); // 좋아요를 보낸 사용자 닉네임
-        likeEvent.put("message", fromUser.getNickName() + "님이 like를 전송하였습니다!");
-        likeEvent.put("time", like.getLikeTime().toString());
-        redisTemplate.opsForStream().add(LIKE_STREAM, likeEvent);
+        likeEvent.put("message", fromUser.getNickName() + "님이 like를 전송하였습니다!"); // 메시지
+        likeEvent.put("time", like.getLikeTime().toString()); // 시간
+
+        try {
+            String jsonEvent = objectMapper.writeValueAsString(likeEvent); // Map을 JSON 문자열로 직렬화
+
+            // Redis Stream에 JSON 문자열로 저장
+            redisTemplate.opsForStream().add(LIKE_STREAM, Collections.singletonMap("data", jsonEvent));
+        } catch (Exception e) {
+            throw new RedisSerializationException("500", "JSON 직렬화 실패");
+        }
 
         // like 상태 업데이트
-        String key2 ="user:" + fromUser.getUserId();
+        String key2 = "user:" + fromUser.getUserId();
         // value값(movieCd) 보존 , 기본값: ""
         String existingValue = Optional.ofNullable((String) redisTemplate.opsForValue().get(key2)).orElse("");
         // like 전송시 레디스에 유저 정보 업데이트
-        redisTemplate.opsForValue().set(key2,existingValue, ttl.getData(), TimeUnit.SECONDS);
+        redisTemplate.opsForValue().set(key2, existingValue, ttl.getData(), TimeUnit.SECONDS);
         return like;
     }
 
@@ -86,31 +95,35 @@ public class UserLikeService {
         Matching matching;
         String key;
         // fromUser가 남자인 경우
-        if(isMale(fromUser)){
+        if (isMale(fromUser)) {
             matching = new Matching(fromUser, toUser);
-            key = generateMatchingKey(fromUser.getUserId(),toUser.getUserId());
+            key = generateMatchingKey(fromUser.getUserId(), toUser.getUserId());
         }
         // fromUser가 여자인 경우(toUser가 남자인 경우)
         else {
             matching = new Matching(toUser, fromUser);
-            key = generateMatchingKey(toUser.getUserId(),fromUser.getUserId());
+            key = generateMatchingKey(toUser.getUserId(), fromUser.getUserId());
         }
         // DB 저장
         matchingRepository.save(matching);
         // Redis 저장
-        redisTemplate.opsForValue().set(key, matching,ttl.getMatching(), TimeUnit.SECONDS); // TTL 설정
+        redisTemplate.opsForValue().set(key, matching, ttl.getMatching(), TimeUnit.SECONDS); // TTL 설정
 
         // 매칭 이벤트 발행
         Map<String, String> matchingEvent = new HashMap<>();
+
         matchingEvent.put("maleUserId", matching.getMaleUser().getUserId().toString()); // 남자 사용자 ID
         matchingEvent.put("femaleUserId", matching.getFemaleUser().getUserId().toString()); // 여자 사용자 ID
-        matchingEvent.put("maleUserNickname", matching.getMaleUser().getNickName()); // 남자 사용자 닉네임
-        matchingEvent.put("femaleUserNickname", matching.getFemaleUser().getNickName()); // 여자 사용자 닉네임
-
         matchingEvent.put("messageMale", matching.getFemaleUser().getNickName() + "님과 매칭되었습니다!"); // 남자에게 보낼 메시지
         matchingEvent.put("messageFemale", matching.getMaleUser().getNickName() + "님과 매칭되었습니다!"); // 여자에게 보낼 메시지
         matchingEvent.put("time", matching.getMatchingTime().toString());
-        redisTemplate.opsForStream().add(MATCH_STREAM, matchingEvent);
+
+        try {
+            String jsonEvent = objectMapper.writeValueAsString(matchingEvent);
+            redisTemplate.opsForStream().add(MATCHING_STREAM, Collections.singletonMap("data", jsonEvent));
+        } catch (Exception e) {
+            throw new RedisSerializationException("500", "JSON 직렬화 실패");
+        }
 
         // 좋아요 관계 삭제
         cancelLikes(fromUser, toUser);
@@ -118,7 +131,7 @@ public class UserLikeService {
 
         // 응답 생성
         int distance = matchingService.calDistance(fromUser, toUser);
-        return new MatchingResponse(matching,distance);
+        return new MatchingResponse(matching, distance);
     }
 
     // like 목록 조회
