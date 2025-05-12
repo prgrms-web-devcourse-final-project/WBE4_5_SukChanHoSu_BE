@@ -76,6 +76,9 @@ jwt:
   cookie-domain: ${JWT.COOKIE_DOMAIN} # 도메인
   cookie-path: ${JWT.COOKIE_PATH}
 
+redisson:
+  address: ${REDISSON.ADDRESS}
+
 movie:
   api:
     kofic_key: ${MOVIE.API.KEY}

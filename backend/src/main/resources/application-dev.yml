@@ -53,6 +53,9 @@ spring:
               - email
             redirect-uri: https://api.app.mm.ts0608.life/login/oauth2/code/google
 
+redisson:
+  address: ${REDISSON.ADDRESS}
+
 jwt:
   secret: ${JWT.SECRET}
   expiration:

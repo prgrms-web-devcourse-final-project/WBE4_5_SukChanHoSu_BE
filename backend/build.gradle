@@ -36,6 +36,9 @@ dependencies {
     implementation 'org.webjars:bootstrap:4.3.1'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    
+    // redisson
+    implementation 'org.redisson:redisson-spring-boot-starter:3.16.3'
 
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
