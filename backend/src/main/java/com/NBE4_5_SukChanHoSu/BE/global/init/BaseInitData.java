@@ -10,6 +10,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
+import jakarta.annotation.PostConstruct;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,9 @@ public class BaseInitData {
             "인셉션", "인터스텔라", "타이타닉", "아바타", "어벤져스",
             "스파이더맨", "라라랜드", "기생충", "듄", "조커"
     );
+
+    private static final String LIKE_STREAM = "likes";
+    private static final String MATCH_STREAM = "matches";
 
     @Bean
     @Order(1)
@@ -134,6 +138,16 @@ public class BaseInitData {
 
                 reviewService.initCreateReviewPost(reviewDto, user);
             }
+        }
+    }
+
+    @PostConstruct
+    public void init() {
+        if (!redisTemplate.hasKey(LIKE_STREAM)) {
+            redisTemplate.opsForStream().createGroup(LIKE_STREAM, "like-group");
+        }
+        if (!redisTemplate.hasKey(MATCH_STREAM)) {
+            redisTemplate.opsForStream().createGroup(MATCH_STREAM, "match-group");
         }
     }
 }

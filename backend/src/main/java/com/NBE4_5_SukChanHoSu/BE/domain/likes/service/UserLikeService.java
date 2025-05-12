@@ -34,6 +34,9 @@ public class UserLikeService {
     private final RedisTTL ttl;
     private final RecommendService matchingService;
 
+    private static final String LIKE_STREAM = "likes";
+    private static final String MATCH_STREAM = "matches";
+
     @Transactional
     public UserLikes likeUser(UserProfile fromUser, UserProfile toUser) {
         // 좋아요 관계 생성
@@ -43,6 +46,15 @@ public class UserLikeService {
         // Redis에 저장
         String key = "likes:" + fromUser.getUserId() + ":" + toUser.getUserId();
         redisTemplate.opsForValue().set(key, like,ttl.getLikes(), TimeUnit.SECONDS); // TTL 설정
+
+        // like 이벤트 발행
+        Map<String, String> likeEvent = new HashMap<>();
+        likeEvent.put("fromUserId", fromUser.getUserId().toString()); // 좋아요를 보낸 사용자 ID
+        likeEvent.put("toUserId", toUser.getUserId().toString()); // 좋아요를 받은 사용자 ID
+        likeEvent.put("fromUserNickname", fromUser.getNickName()); // 좋아요를 보낸 사용자 닉네임
+        likeEvent.put("message", fromUser.getNickName() + "님이 like를 전송하였습니다!");
+        likeEvent.put("time", like.getLikeTime().toString());
+        redisTemplate.opsForStream().add(LIKE_STREAM, likeEvent);
 
         // like 상태 업데이트
         String key2 ="user:" + fromUser.getUserId();
@@ -87,6 +99,18 @@ public class UserLikeService {
         matchingRepository.save(matching);
         // Redis 저장
         redisTemplate.opsForValue().set(key, matching,ttl.getMatching(), TimeUnit.SECONDS); // TTL 설정
+
+        // 매칭 이벤트 발행
+        Map<String, String> matchingEvent = new HashMap<>();
+        matchingEvent.put("maleUserId", matching.getMaleUser().getUserId().toString()); // 남자 사용자 ID
+        matchingEvent.put("femaleUserId", matching.getFemaleUser().getUserId().toString()); // 여자 사용자 ID
+        matchingEvent.put("maleUserNickname", matching.getMaleUser().getNickName()); // 남자 사용자 닉네임
+        matchingEvent.put("femaleUserNickname", matching.getFemaleUser().getNickName()); // 여자 사용자 닉네임
+
+        matchingEvent.put("messageMale", matching.getFemaleUser().getNickName() + "님과 매칭되었습니다!"); // 남자에게 보낼 메시지
+        matchingEvent.put("messageFemale", matching.getMaleUser().getNickName() + "님과 매칭되었습니다!"); // 여자에게 보낼 메시지
+        matchingEvent.put("time", matching.getMatchingTime().toString());
+        redisTemplate.opsForStream().add(MATCH_STREAM, matchingEvent);
 
         // 좋아요 관계 삭제
         cancelLikes(fromUser, toUser);
