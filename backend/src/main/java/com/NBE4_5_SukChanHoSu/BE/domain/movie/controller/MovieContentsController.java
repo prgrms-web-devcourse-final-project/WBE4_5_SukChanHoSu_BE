@@ -4,6 +4,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.request.MovieRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieContentsService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -53,7 +54,7 @@ public class MovieContentsController {
     public RsData<Movie> getMovieById(@PathVariable Long id) {
         return movieContentsService.findById(id)
                 .map(movie -> new RsData<>("200", "영화 조회 완료", movie))
-                .orElseGet(() -> new RsData<>("404", "해당 ID의 영화가 존재하지 않습니다.", null));
+                .orElseThrow(() -> new ServiceException("404", "해당 ID의 영화가 존재하지 않습니다."));
     }
 
     @Operation(summary = "영화 이름 검색", description = "영화 제목을 기준으로 영화를 검색합니다.")
@@ -73,14 +74,22 @@ public class MovieContentsController {
     @Operation(summary = "영화 수정", description = "영화 ID에 해당하는 영화를 수정합니다.")
     @PutMapping("/{id}")
     public RsData<Movie> updateMovie(@PathVariable Long id, @RequestBody Movie movie) {
-        Movie updated = movieContentsService.update(id, movie);
-        return new RsData<>("200", "영화 수정 완료", updated);
+        try {
+            Movie updated = movieContentsService.update(id, movie);
+            return new RsData<>("200", "영화 수정 완료", updated);
+        } catch (IllegalArgumentException e) {
+            throw new ServiceException("404", "해당 ID의 영화가 존재하지 않습니다.");
+        }
     }
 
     @Operation(summary = "영화 삭제", description = "영화 ID로 영화를 삭제합니다.")
     @DeleteMapping("/{id}")
     public RsData<Void> deleteMovie(@PathVariable Long id) {
-        movieContentsService.delete(id);
-        return new RsData<>("204", "영화 삭제 완료", null);
+        try {
+            movieContentsService.delete(id);
+            return new RsData<>("204", "영화 삭제 완료", null);
+        } catch (Exception e) {
+            throw new ServiceException("404", "해당 ID의 영화가 존재하지 않습니다.");
+        }
     }
 }
