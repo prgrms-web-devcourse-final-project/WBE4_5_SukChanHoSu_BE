@@ -1,10 +1,10 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.movie.service;
+package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieContentsService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
