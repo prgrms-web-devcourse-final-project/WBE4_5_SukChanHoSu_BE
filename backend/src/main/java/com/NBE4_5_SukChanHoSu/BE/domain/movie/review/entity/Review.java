@@ -1,8 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.persistence.Column;
+import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -12,22 +11,20 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDateTime;
-
 @Entity
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
-public class Review {
+public class Review extends BaseTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -36,15 +33,6 @@ public class Review {
     private String title;
     private String content;
     private Double rating;
-
-    @CreatedDate
-    @Column(updatable = false)
-    @JsonProperty("createdAt")
-    private LocalDateTime createdDate;
-
-    @LastModifiedDate
-    @JsonProperty("modifiedAt")
-    private LocalDateTime modifiedDate;
 
     @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.EAGER)

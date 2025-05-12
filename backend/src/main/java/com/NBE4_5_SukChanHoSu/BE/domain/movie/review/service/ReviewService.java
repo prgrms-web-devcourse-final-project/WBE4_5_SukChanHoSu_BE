@@ -1,11 +1,13 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant.ReviewErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewRequestDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.AllReviewDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.ReviewResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.repository.ReviewRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +56,11 @@ public class ReviewService {
 
     public ReviewResponseDto getOneReview(Long reviewId) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("null"));
+                .orElseThrow(() -> new ServiceException(
+                                ReviewErrorCode.REVIEW_NOT_FOUND.getCode(),
+                                ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
+                        )
+                );
         return new ReviewResponseDto(review);
     }
 
@@ -80,7 +86,11 @@ public class ReviewService {
     @Transactional
     public void updateReview(Long reviewId, ReviewRequestDto requestDto) {
         Review review = reviewRepository.findById(reviewId)
-                .orElseThrow(() -> new RuntimeException("null"));
+                .orElseThrow(() -> new ServiceException(
+                                ReviewErrorCode.REVIEW_NOT_FOUND.getCode(),
+                                ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
+                        )
+                );
 
         if (requestDto.getContent() != null) {
             review.setContent(requestDto.getContent());

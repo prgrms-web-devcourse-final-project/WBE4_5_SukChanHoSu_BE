@@ -16,7 +16,7 @@ public class ReviewResponseDto {
         this.id = review.getId();
         this.title = review.getTitle();
         this.content = review.getContent();
-        this.userName = review.getUser().getName();
+        this.userName = review.getUser().getUserProfile().getNickName();
         this.rating = review.getRating();
     }
 }
