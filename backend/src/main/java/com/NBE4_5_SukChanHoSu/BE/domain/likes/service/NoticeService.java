@@ -1,6 +1,12 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.service;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.redis.RedisSerializationException;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
@@ -31,6 +37,8 @@ public class NoticeService {
     private final ObjectMapper objectMapper;
     private final LettuceConnectionFactory lettuceConnectionFactory; // Redis 연결 관리
     private final UserLikeService userLikeService;
+    private final UserProfileRepository userProfileRepository;
+    private final UserRepository userRepository;
 
     private static final Logger logger = LoggerFactory.getLogger(NoticeService.class);
     private static final String LIKE_STREAM = "like";
@@ -219,25 +227,53 @@ public class NoticeService {
         StreamOffset<String> offset = StreamOffset.create(MATCHING_STREAM, ReadOffset.from("0-0")); // 처음부터
         List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(options, offset);
         if (!records.isEmpty()) {
-            for (MapRecord<String, Object, Object> record : records) { // record = ID:Content
-                Map<Object, Object> value = record.getValue();  // value = Content
-                String jsonEvent = (String) value.get("data"); // Content에서 data(Json 문자열) 추출
+            // 남자
+            if(isMale(userId)) {
+                for (MapRecord<String, Object, Object> record : records) { // record = ID:Content
+                    Map<Object, Object> value = record.getValue();  // value = Content
+                    String jsonEvent = (String) value.get("data"); // Content에서 data(Json 문자열) 추출
 
-                try {
-                    Map<String, String> event = objectMapper.readValue(jsonEvent, Map.class);
-                    Long maleUserId = Long.valueOf(event.get("maleUserId"));
-                    Long femaleUserId = Long.valueOf(event.get("femaleUserId"));
+                    try {
+                        Map<String, String> event = objectMapper.readValue(jsonEvent, Map.class);
+                        Long maleUserId = Long.valueOf(event.get("maleUserId"));
 
-                    if(userId.equals(maleUserId) || userId.equals(femaleUserId)) {
-                        // redisStream에서 삭제
-                        redisTemplate.opsForStream().delete(MATCHING_STREAM,record.getId().getValue());
+                        if(userId.equals(maleUserId)) {
+                            // redisStream에서 삭제
+                            redisTemplate.opsForStream().delete(MATCHING_STREAM,record.getId().getValue());
+                        }
+                    } catch (Exception e) {
+                        throw new RedisSerializationException("500", "JSON 역 직렬화 실패");
                     }
-                } catch (Exception e) {
-                    throw new RedisSerializationException("500", "JSON 역 직렬화 실패");
-                }
 
+                }
+            } else{
+                // 여자
+                for (MapRecord<String, Object, Object> record : records) { // record = ID:Content
+                    Map<Object, Object> value = record.getValue();  // value = Content
+                    String jsonEvent = (String) value.get("data"); // Content에서 data(Json 문자열) 추출
+
+                    try {
+                        Map<String, String> event = objectMapper.readValue(jsonEvent, Map.class);
+                        Long femaleUserId = Long.valueOf(event.get("femaleUserId"));
+
+                        if(userId.equals(femaleUserId)) {
+                            // redisStream에서 삭제
+                            redisTemplate.opsForStream().delete(MATCHING_STREAM,record.getId().getValue());
+                        }
+                    } catch (Exception e) {
+                        throw new RedisSerializationException("500", "JSON 역 직렬화 실패");
+                    }
+                }
             }
         }
+    }
+
+    boolean isMale(Long userId) {
+        UserProfile profile = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("404","존재하지 않는 유저"))
+                .getUserProfile();
+
+        return profile.getGender().equals(Gender.Male);
     }
 
 }
