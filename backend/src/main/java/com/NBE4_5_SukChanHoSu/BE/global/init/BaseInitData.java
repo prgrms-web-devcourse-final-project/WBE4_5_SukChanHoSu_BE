@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.global.init;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.repository.ReviewRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
@@ -43,6 +44,8 @@ public class BaseInitData {
     private RedisTemplate<String, String> redisTemplate;
     @Autowired
     private ReviewService reviewService;
+    @Autowired
+    private ReviewRepository reviewRepository;
     private final Random random = new Random();
     private final List<String> movieTitles = List.of(
             "인셉션", "인터스텔라", "타이타닉", "아바타", "어벤져스",
@@ -120,6 +123,10 @@ public class BaseInitData {
 
     @Transactional
     public void reviewInit() {
+        if (reviewRepository.count() > 0) {
+            System.out.println("⚠️ 리뷰가 이미 존재하여 reviewInit() 스킵됨.");
+            return;
+        }
         List<User> users = userRepository.findAll();
         for (User user : users) {
             for (int j = 1; j <= 3; j++) {
