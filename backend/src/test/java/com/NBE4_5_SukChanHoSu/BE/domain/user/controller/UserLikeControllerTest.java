@@ -66,6 +66,8 @@ public class UserLikeControllerTest {
         redisTemplate.delete(keys); // 모든 키 삭제
         Set<String> keys2 = redisTemplate.keys("likes:*"); // "likes:*" 패턴의 모든 키 조회
         redisTemplate.delete(keys2); // 모든 키 삭제
+        Set<String> keys3 = redisTemplate.keys("matching:*");
+        redisTemplate.delete(keys3); // 모든 키 삭제
     }
 
 
@@ -190,6 +192,7 @@ public class UserLikeControllerTest {
     @DisplayName("매칭된 상태에서는 사용자의 liked 목록에 안나오는걸 확인")
     void getUserLikedMatchingStatus() throws Exception {
         //given
+        clearRedisData();
         setUpLike(2L);
 
         login2();
@@ -212,7 +215,7 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
-                .andExpect(jsonPath("$.data[*].user.userId").value(1));
+                .andExpect(jsonPath("$.data.userMatchingResponses[*].user.userId").value(1));
         // liked 목록에서는 조회 불가능
         getLiked
                 .andExpect(status().isOk())
@@ -224,6 +227,7 @@ public class UserLikeControllerTest {
     @DisplayName("매칭된 상태에서는 사용자의 likes 목록에 안나오는걸 확인")
     void getUserLikesMatchingStatus() throws Exception {
         //given
+        clearRedisData();
         setUpLike(2L);
 
         login2();
@@ -246,7 +250,7 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
-                .andExpect(jsonPath("$.data[*].user.userId").value(1));
+                .andExpect(jsonPath("$.data.userMatchingResponses[*].user.userId").value(1));
 
         // likes 목록에서는 조회 불가능
         getLikes
@@ -260,6 +264,7 @@ public class UserLikeControllerTest {
     @DisplayName("사용자의 matching 목록 가져오기")
     void getUserMatch() throws Exception {
         //given
+        clearRedisData();
         setUpLike(2L);
 
         login2();
@@ -285,7 +290,7 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
-                .andExpect(jsonPath("$.data[*].user.userId").value(1));
+                .andExpect(jsonPath("$.data.userMatchingResponses[*].user.userId").value(1));
     }
 
     @Test
@@ -316,8 +321,6 @@ public class UserLikeControllerTest {
 
         login2();
         setUpLike(1L);
-
-
 
         // when
         ResultActions action = mvc.perform(post("/api/users/like")
