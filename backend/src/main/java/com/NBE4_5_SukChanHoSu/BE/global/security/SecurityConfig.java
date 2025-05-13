@@ -85,6 +85,7 @@ public class SecurityConfig {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
         configuration.setAllowedOrigins(List.of(
+                "http://localhost:8080",
                 "https://www.app4.qwas.shop",
                 "https://login.aleph.kr",
                 "https://api.app.mm.ts0608.life",
