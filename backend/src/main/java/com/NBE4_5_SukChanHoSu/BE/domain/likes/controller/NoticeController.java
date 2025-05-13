@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.service.NoticeService;
+import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,22 +21,25 @@ public class NoticeController {
 
     // 알림 목록 조회
     @GetMapping
-    public List<Map<String, String>>  getNotifications(){
+    public RsData<List<Map<String, String>>>  getNotifications(){
         Long userId = SecurityUtil.getCurrentUser().getId();
-        return noticeService.getNotifications(userId);
+        List<Map<String, String>> responses = noticeService.getNotifications(userId);
+        return new RsData<>("200","알림 목록 조회", responses);
     }
 
     // 알림 확인 처리
     @PostMapping("/read")
-    public void markAsRead() {
+    public RsData<String> markAsRead() {
         Long userId = SecurityUtil.getCurrentUser().getId();
         noticeService.markAsRead(userId);
+        return new RsData<>("200","완료");
     }
 
     // 미확인 알림 개수 조회
     @GetMapping("/count")
-    public int getUnreadNotificationCount() {
+    public RsData<Integer> getUnreadNotificationCount() {
         Long userId = SecurityUtil.getCurrentUser().getId();
-        return noticeService.getUnreadNotificationCount(userId);
+        int count = noticeService.getUnreadNotificationCount(userId);
+        return new RsData<>("200","미확인 알림 갯수", count);
     }
 }
