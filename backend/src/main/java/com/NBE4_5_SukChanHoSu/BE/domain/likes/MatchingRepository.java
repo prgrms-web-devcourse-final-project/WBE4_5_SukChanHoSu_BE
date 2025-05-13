@@ -21,6 +21,4 @@ public interface MatchingRepository extends JpaRepository<Matching, Long> {
 
     void deleteByMaleUserAndFemaleUser(UserProfile maleUser, UserProfile femaleUser);
 
-    @Query("SELECT COUNT(m) FROM Matching m WHERE m.matchingTime > :dateTime")
-    long countByMatchedAtAfter(LocalDateTime localDateTime);
 }

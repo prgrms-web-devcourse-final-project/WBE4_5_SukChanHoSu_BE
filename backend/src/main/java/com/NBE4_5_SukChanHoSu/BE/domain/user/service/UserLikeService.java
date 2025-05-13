@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.admin.service.AdminMonitoringService;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.Matching;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.MatchingRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
@@ -33,6 +34,7 @@ public class UserLikeService {
     private final RedisTTL ttl;
     private UserProfileService userProfileService;
     private final UserMatchingService matchingService;
+    private final AdminMonitoringService adminMonitoringService;
 
     @Transactional
     public UserLikes likeUser(UserProfile fromUser, UserProfile toUser) {
@@ -88,6 +90,8 @@ public class UserLikeService {
         // Redis 저장
         redisTemplate.opsForValue().set(key, matching,ttl.getMatching(), TimeUnit.SECONDS); // TTL 설정
 
+        // 일일 매칭 수 증가
+        adminMonitoringService.incrementDailyMatches();
         // 좋아요 관계 삭제
         cancelLikes(fromUser, toUser);
         cancelLikes(toUser, fromUser);

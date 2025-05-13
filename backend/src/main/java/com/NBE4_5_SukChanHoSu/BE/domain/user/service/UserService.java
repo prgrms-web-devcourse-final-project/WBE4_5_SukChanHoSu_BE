@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.admin.service.AdminMonitoringService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
@@ -30,7 +31,7 @@ public class UserService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private static final String EMAIL_VERIFY = "emailVerify:";
     private static final String TRUE = "true";
-
+    private final AdminMonitoringService adminMonitoringService;
 
     public User join(UserSignUpRequest requestDto) {
         String verified = redisTemplate.opsForValue().get(EMAIL_VERIFY + requestDto.getEmail());
@@ -62,7 +63,8 @@ public class UserService {
                 .role(Role.USER)
                 .emailVerified(true)
                 .build();
-
+        // 사용자 가입 성공 후 총 가입자 수 증가
+        adminMonitoringService.incrementTotalUsers();
         return userRepository.save(user);
     }
 

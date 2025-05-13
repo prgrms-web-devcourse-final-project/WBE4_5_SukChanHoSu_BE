@@ -36,15 +36,4 @@ public class AdminService {
                 .status(user.getStatus())
                 .build();
     }
-
-//    public AdminStatisticsResponse getStatistics() {
-//        LocalDate today = LocalDate.now();
-//        LocalDateTime startOfDay = LocalDate.now().atStartOfDay();
-//        // 내일의 시작 시간 (00:00:00) (하루 범위)
-//        LocalDateTime endOfDay = startOfDay.plusDays(1);
-//
-//        int dailyMatches = recommendUserRepository.countDailyMatches(startOfDay, endOfDay);
-//        int totalUsers = userRepository.countAllUsers();
-//
-//        return new AdminStatisticsResponse(dailyMatches, totalUsers);
 }

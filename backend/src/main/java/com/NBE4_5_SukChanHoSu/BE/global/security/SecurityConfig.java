@@ -24,7 +24,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-//@EnableMethodSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     private final TokenService tokenService;
     private final CustomOAuth2UserDetailService customOAuth2UserDetailService;
@@ -37,7 +37,14 @@ public class SecurityConfig {
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                                .requestMatchers("/oauth2/**", "/api/auth/login", "/api/auth/join", "/api/auth/google/url", "/api/email/**").permitAll()
+                                .requestMatchers(HttpMethod.GET, "/api/movie/review/**").permitAll()
+                                .requestMatchers(
+                                        "/oauth2/**",
+                                        "/api/auth/login",
+                                        "/api/auth/join",
+                                        "/api/auth/google/url",
+                                        "/api/email/**"
+                                ).permitAll()
                                 // Swagger
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 // Actuator
@@ -45,15 +52,16 @@ public class SecurityConfig {
                                 .requestMatchers("/.well-known/**").permitAll()
 
                                 // 채팅 정적 리소스 허용
-                                .requestMatchers("/chat.html", "/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws-stomp/**", "/ws-stomp").permitAll()
-                                // 관리자 권한 필요
-//                                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/users/{userId}/status")).hasRole("ADMIN")
-//                                .requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/users/{userId}")).hasRole("ADMIN")
+                                .requestMatchers("/chat_rooms.html", "/chat_room.html","/chat.html", "/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws-stomp/**", "/ws-stomp", "/chat/rooms", "/chat/rooms/**").permitAll()
+
                                 // Public endpoints
                                 .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/h2-console/**").permitAll()
+                                .requestMatchers("/api/admin/users/{userId}/status").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
+
+
                 .headers(headers -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 )
