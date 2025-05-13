@@ -38,5 +38,6 @@ out/
 .vscode/
 /src/main/resources/application-secret.yml
 /src/main/resources/application-secret-dev.yml
+/src/main/resources/application-secret-test.yml
 /src/main/resources/application-server.yml
 .env
