@@ -54,7 +54,6 @@
         }
 
         stompClient.send("/pub/chat/message", {}, JSON.stringify({
-            sender: sender,
             message: message,
             roomId: roomId
         }));
