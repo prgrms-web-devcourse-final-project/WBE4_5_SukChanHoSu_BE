@@ -80,4 +80,9 @@ public class SseController {
         }
     }
 
+    public Map<Long, SseEmitter> getEmitters() {
+        return emitters;
+    }
+
+
 }
