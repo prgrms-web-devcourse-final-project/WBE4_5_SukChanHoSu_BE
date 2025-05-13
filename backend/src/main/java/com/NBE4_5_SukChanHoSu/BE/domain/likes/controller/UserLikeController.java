@@ -1,10 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.*;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.LikeResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserLikeResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.service.UserLikeService;
@@ -122,15 +119,28 @@ public class UserLikeController {
 
     @GetMapping("/matching")
     @Operation(summary = "match 테이블 조회", description = "사용자의 match 테이블 조회")
-    public RsData<?> getUserMatch() {
+    public RsData<?> getUserMatch(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "4") int pageSize) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
-
         UserProfile profile = matchingService.findUser(profileId);
-        List<UserMatchingResponse> response = userLikeService.getUserMatches(profile);
-        if(response.isEmpty()){
+        List<UserMatchingResponse> matchingResponses = userLikeService.getUserMatches(profile);
+
+        int totalSize = matchingResponses.size();
+        int totalPages = (int) Math.ceil((double) totalSize / pageSize);
+
+        List<UserMatchingResponse> pagedResponses = matchingResponses.stream()
+                .skip(page * pageSize)
+                .limit(pageSize)
+                .toList();
+
+        PagedMatchingResponse response = new PagedMatchingResponse(pagedResponses,totalPages);
+
+        if(response.getUserMatchingResponses().isEmpty()){
             return new RsData<>("404", "매칭된 사용자가 없습니다.",new Empty());
         }
-        return new RsData<>("200","매칭된 사용자 목록 조회("+response.size()+")",response);
+
+        return new RsData<>("200","매칭된 사용자 목록 조회("+matchingResponses.size()+")",response);
     }
 
     @DeleteMapping("/like")
