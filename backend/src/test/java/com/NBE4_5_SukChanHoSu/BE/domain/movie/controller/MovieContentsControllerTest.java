@@ -90,7 +90,7 @@ public class MovieContentsControllerTest {
     }
 
     @Test
-    @DisplayName("영화 제목으로 검색")
+    @DisplayName("영화 제목 검색")
     void searchByTitle() throws Exception {
         mockMvc.perform(get("/api/movie/search/title?title=Inception")
                         .header("Authorization", "Bearer " + accessToken))
