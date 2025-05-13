@@ -1,11 +1,11 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.Matching;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.MatchingRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.Matching;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.MatchingRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
@@ -33,6 +33,10 @@ public class UserLikeService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final RedisTTL ttl;
     private final RecommendService matchingService;
+    private final ObjectMapper objectMapper;
+
+    private static final String LIKE_STREAM = "like";
+    private static final String MATCHING_STREAM = "matching";
 
     @Transactional
     public UserLikes likeUser(UserProfile fromUser, UserProfile toUser) {
@@ -42,7 +46,20 @@ public class UserLikeService {
 
         // Redis에 저장
         String key = "likes:" + fromUser.getUserId() + ":" + toUser.getUserId();
-        redisTemplate.opsForValue().set(key, like,ttl.getLikes(), TimeUnit.SECONDS); // TTL 설정
+        redisTemplate.opsForValue().set(key, like,ttl.getLikes(), TimeUnit.SECONDS);
+
+        // like 이벤트 발행 (메시지와 시간 분리)
+        Map<String, String> likeEvent = new HashMap<>();
+        likeEvent.put("toUserId", toUser.getUserId().toString());
+        likeEvent.put("message", fromUser.getNickName() + "님이 like를 전송하였습니다!");
+        likeEvent.put("time", like.getLikeTime().toString());
+
+        try {
+            String jsonEvent = objectMapper.writeValueAsString(likeEvent); // Map -> JSON 직렬화
+            redisTemplate.opsForStream().add(LIKE_STREAM, Collections.singletonMap("data", jsonEvent));
+        } catch (Exception e) {
+            throw new RedisSerializationException("500", "JSON 직렬화 실패");
+        }
 
         // like 상태 업데이트
         String key2 ="user:" + fromUser.getUserId();
@@ -74,7 +91,7 @@ public class UserLikeService {
         Matching matching;
         String key;
         // fromUser가 남자인 경우
-        if(isMale(fromUser)){
+        if (isMale(fromUser)) {
             matching = new Matching(fromUser, toUser);
             key = generateMatchingKey(fromUser.getUserId(),toUser.getUserId());
         }
@@ -87,6 +104,22 @@ public class UserLikeService {
         matchingRepository.save(matching);
         // Redis 저장
         redisTemplate.opsForValue().set(key, matching,ttl.getMatching(), TimeUnit.SECONDS); // TTL 설정
+
+        // 매칭 이벤트 발행
+        Map<String, String> matchingEvent = new HashMap<>();
+
+        matchingEvent.put("maleUserId", matching.getMaleUser().getUserId().toString()); // 남자 사용자 ID
+        matchingEvent.put("femaleUserId", matching.getFemaleUser().getUserId().toString()); // 여자 사용자 ID
+        matchingEvent.put("messageMale", matching.getFemaleUser().getNickName() + "님과 매칭되었습니다!"); // 남자에게 보낼 메시지
+        matchingEvent.put("messageFemale", matching.getMaleUser().getNickName() + "님과 매칭되었습니다!"); // 여자에게 보낼 메시지
+        matchingEvent.put("time", matching.getMatchingTime().toString());
+
+        try {
+            String jsonEvent = objectMapper.writeValueAsString(matchingEvent);
+            redisTemplate.opsForStream().add(MATCHING_STREAM, Collections.singletonMap("data", jsonEvent));
+        } catch (Exception e) {
+            throw new RedisSerializationException("500", "JSON 직렬화 실패");
+        }
 
         // 좋아요 관계 삭제
         cancelLikes(fromUser, toUser);
