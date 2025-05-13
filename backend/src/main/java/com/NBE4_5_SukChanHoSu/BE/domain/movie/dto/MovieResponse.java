@@ -2,23 +2,25 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.dto;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.MovieGenre;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 public class MovieResponse {
     private String movieNm; // 영화명
     private String openDt; // 개봉일
     private String showTm;  // 상영 시간
     private String director;
-//    private Long audiAcc; // 관객수
+    //    private Long audiAcc; // 관객수
     private String actors; // 배우
     private List<MovieGenre> genres; // 장르
     private String watchGradeNm; // 연령제한
     private String posterUrl; // 포스터 URL
     private String overview;    // 줄거리
 
-    public MovieResponse(String movieNm, String openDt,String showTm, String director, List<MovieGenre> genres, String actors, String watchGradeNm, String posterUrl, String overview) {
+    public MovieResponse(String movieNm, String openDt, String showTm, String director, List<MovieGenre> genres, String actors, String watchGradeNm, String posterUrl, String overview) {
         this.movieNm = movieNm;
         this.openDt = openDt;
         this.showTm = showTm;

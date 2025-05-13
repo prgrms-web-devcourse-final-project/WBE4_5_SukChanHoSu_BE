@@ -18,6 +18,6 @@ public interface UserLikesRepository extends JpaRepository<UserLikes, Long> {
     void deleteByFromUserAndToUser(UserProfile toUser, UserProfile fromUser);
 
     // 특정 사용자가 마지막으로 좋아요를 보낸 시간 조회
-    @Query("SELECT MAX(ul.likeTime) FROM UserLikes ul WHERE ul.fromUser.userId = :userId")
+    @Query("SELECT MAX(ul.createdAt) FROM UserLikes ul WHERE ul.fromUser.userId = :userId")
     LocalDateTime findLastLikeTimeByUserId(@Param("userId") Long userId);
 }
