@@ -4,22 +4,25 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.service.UserLikeService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
+
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -44,11 +47,27 @@ public class UserLikeControllerTest {
     private static String accessToken;
     private static String refreshToken;
 
+    @Autowired
+    private RedisTemplate<String, Object> redisTemplate;
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
         login();
     }
+
+    @AfterAll
+    void tearDown() {
+        clearRedisData(); // 레디스 데이터 초기화
+    }
+
+    private void clearRedisData() {
+        Set<String> keys = redisTemplate.keys("user:*"); // "user:*" 패턴의 모든 키 조회
+        redisTemplate.delete(keys); // 모든 키 삭제
+        Set<String> keys2 = redisTemplate.keys("likes:*"); // "likes:*" 패턴의 모든 키 조회
+        redisTemplate.delete(keys2); // 모든 키 삭제
+    }
+
 
     @DisplayName("로그인")
     void login() {
@@ -104,6 +123,26 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("에게 좋아요를 보냈습니다")));
+    }
+
+    @Test
+    @DisplayName("like 전송 후 레디스에 저장 확인")
+    void createRedisData() throws Exception {
+        // Given
+        setUpLike(2L);
+        Long profileId = 1L;
+        // When
+        String key = "likes:" + profileId+":"+2L;   // likes:1:2
+        String key2 = "user:"+profileId;            // user:1
+        Object redisValue = redisTemplate.opsForValue().get(key);
+        Object redisValue2 = redisTemplate.opsForValue().get(key2);
+        // TTL 조회
+        Long ttl = redisTemplate.getExpire(key2, TimeUnit.SECONDS);
+
+        // Then
+        assertNotNull(redisValue);
+        assertNotNull(redisValue2);
+        assertTrue(ttl > 604700);   // 10초 오차 감안해서 갱신된 TTL인지 확인
     }
 
     @Test

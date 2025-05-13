@@ -19,6 +19,7 @@ public class UserProfileResponse {
     private String introduce;
     private double latitude;
     private double longitude;
+    private int searchRadius;
     private String distance;
 
     public UserProfileResponse (UserProfile userProfile, int distance) {
@@ -31,6 +32,7 @@ public class UserProfileResponse {
         this.introduce = userProfile.getIntroduce();
         this.latitude = userProfile.getLatitude();
         this.longitude = userProfile.getLongitude();
+        this.searchRadius = userProfile.getSearchRadius();
         this.distance = "약 "+distance+"km";
     }
 

@@ -1,14 +1,14 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
+package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.LikeResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserLikeResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserLikeService;
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.service.UserLikeService;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.Empty;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
@@ -24,22 +24,21 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/users")
 @AllArgsConstructor
-@Tag(name = "User API", description = "사용자 관련 API")
+@Tag(name = "Like API", description = "LIKE 관련 API")
 public class UserLikeController {
 
     private final UserLikeService userLikeService;
     private final UserProfileService userProfileService;
+    private final RecommendService matchingService;
 
     @PostMapping("/like")
     @Operation(summary = "like 전송", description = "toUser에게 like 전송")
-    // todo: 인증 구현시 파라미터에서 인증정보로 변경
     public RsData<?> likeUser(@RequestParam Long toUserId) {
-        User user = SecurityUtil.getCurrentUser();
-        Long fromUserId = user.getUserProfile().getUserId();
+        Long fromUserId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         // 유저 탐색
-        UserProfile fromUser = userProfileService.findUser(fromUserId);
-        UserProfile toUser = userProfileService.findUser(toUserId);
+        UserProfile fromUser = matchingService.findUser(fromUserId);
+        UserProfile toUser = matchingService.findUser(toUserId);
 
         if(userLikeService.isSameGender(fromUser,toUser)){
             return new RsData<>("403","이성간 매칭만 허용합니다.");
@@ -63,7 +62,7 @@ public class UserLikeController {
             return new RsData<>("200", fromUser.getNickName()+"과(와)"+toUser.getNickName()+"이 매칭 되었습니다.", response);
         }
 
-        int radius = userProfileService.calDistance(fromUser,toUser);
+        int radius = matchingService.calDistance(fromUser,toUser);
         LikeResponse likeResponse = new LikeResponse(like,toUser,radius);
         return new RsData<>("200", fromUser.getNickName()+ " 가 "+toUser.getNickName()+ "님 에게 좋아요를 보냈습니다", likeResponse);
     }
@@ -71,27 +70,25 @@ public class UserLikeController {
     @GetMapping("/like")
     @Operation(summary = "like 테이블 조회", description = "사용자의 like 테이블 조회")
     public RsData<UserLikeResponse> getUserLikes() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
-        UserProfile userProfile = userProfileService.findUser(profileId);
-        List<UserProfileResponse> userProfileResponses = userLikeService.getUserLikes(userProfile);
+        UserProfile profile = matchingService.findUser(profileId);
+        List<UserProfileResponse> userProfileResponses = userLikeService.getUserLikes(profile);
         UserLikeResponse response = new UserLikeResponse(userProfileResponses);
 
         if(response.getUserLikes().isEmpty()){
             return new RsData<>("404", "like 한 사용자가 없습니다.");
         }
 
-        return new RsData<>("200",userProfile.getNickName()+"가 좋아요한 유저 목록 반환",response);
+        return new RsData<>("200",profile.getNickName()+"가 좋아요한 유저 목록 반환",response);
     }
 
     @GetMapping("/liked")
     @Operation(summary = "liked 테이블 조회", description = "사용자의 liked 테이블 조회")
     public RsData<UserLikeResponse> getUserLiked() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
-        UserProfile profile = userProfileService.findUser(profileId);
+        UserProfile profile = matchingService.findUser(profileId);
         List<UserProfileResponse> userProfileResponses = userLikeService.getUserLiked(profile);
         UserLikeResponse response = new UserLikeResponse(userProfileResponses);
 
@@ -105,10 +102,9 @@ public class UserLikeController {
     @GetMapping("/matching")
     @Operation(summary = "match 테이블 조회", description = "사용자의 match 테이블 조회")
     public RsData<?> getUserMatch() {
-        User user = SecurityUtil.getCurrentUser();
-        Long profileId = user.getUserProfile().getUserId();
+        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
-        UserProfile profile = userProfileService.findUser(profileId);
+        UserProfile profile = matchingService.findUser(profileId);
         List<UserMatchingResponse> response = userLikeService.getUserMatches(profile);
         if(response.isEmpty()){
             return new RsData<>("404", "매칭된 사용자가 없습니다.",new Empty());
@@ -118,14 +114,12 @@ public class UserLikeController {
 
     @DeleteMapping("/like")
     @Operation(summary = "like/matching 취소", description = "like/matching 취소")
-    // todo: 인증 구현시 파라미터에서 인증정보로 변경
     public RsData<?> cancelLikeUser(@RequestParam Long toUserId){
-        User user = SecurityUtil.getCurrentUser();
-        Long fromUserId = user.getUserProfile().getUserId();
+        Long fromUserId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         // 유저 탐색
-        UserProfile fromUser = userProfileService.findUser(fromUserId);
-        UserProfile toUser = userProfileService.findUser(toUserId);
+        UserProfile fromUser = matchingService.findUser(fromUserId);
+        UserProfile toUser = matchingService.findUser(toUserId);
 
         // 매칭 된 사용자인지 검증
         if(userLikeService.isAlreadyMatched(fromUser,toUser)){

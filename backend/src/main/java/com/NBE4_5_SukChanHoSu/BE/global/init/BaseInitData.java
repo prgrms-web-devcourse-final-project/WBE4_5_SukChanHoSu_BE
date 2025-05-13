@@ -1,5 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.global.init;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
@@ -39,12 +41,20 @@ public class BaseInitData {
     private UserRepository userRepository;
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private ReviewService reviewService;
+    private final Random random = new Random();
+    private final List<String> movieTitles = List.of(
+            "인셉션", "인터스텔라", "타이타닉", "아바타", "어벤져스",
+            "스파이더맨", "라라랜드", "기생충", "듄", "조커"
+    );
 
     @Bean
     @Order(1)
     public ApplicationRunner applicationRunner1() {
         return args -> {
             self.profileInit();
+            self.reviewInit(); // 분리된 리뷰 초기화
         };
     }
 
@@ -58,7 +68,7 @@ public class BaseInitData {
 
         Random random = new Random();
 
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 30; i++) {
             String newEmail = "initUser" + i + "@example.com";
             redisTemplate.opsForValue().set("emailVerify:" + newEmail, "true", 5, TimeUnit.MINUTES);
             UserSignUpRequest signUpDto = UserSignUpRequest.builder()
@@ -84,8 +94,8 @@ public class BaseInitData {
                     .profileImage("https://example.com/profile" + i + ".jpg")
                     .favoriteGenres(genres) // 장르 리스트 설정
                     .introduce("안녕하세요! 임시 유저 " + i + "입니다.")
-                    .latitude(37.5665 + (i * 0.03)) // 임의의 위도 값
-                    .longitude(126.9780 + (i * 0.03)) // 임의의 경도 값
+                    .latitude(37.5665 + (i * 0.02)) // 임의의 위도 값
+                    .longitude(126.9780 + (i * 0.02)) // 임의의 경도 값
                     .searchRadius(20)
                     .user(user) // 유저와 매핑
                     .build();
@@ -108,4 +118,22 @@ public class BaseInitData {
         }
     }
 
+    @Transactional
+    public void reviewInit() {
+        List<User> users = userRepository.findAll();
+        for (User user : users) {
+            for (int j = 1; j <= 3; j++) {
+                String title = movieTitles.get(random.nextInt(movieTitles.size()));
+                double rating = 2.5 + random.nextDouble() * 2.5;
+                String content = "이 영화 정말 재미있었어요! (" + title + "에 대한 리뷰입니다)";
+
+                ReviewRequestDto reviewDto = new ReviewRequestDto();
+                reviewDto.setTitle(title);
+                reviewDto.setContent(content);
+                reviewDto.setRating(rating);
+
+                reviewService.initCreateReviewPost(reviewDto, user);
+            }
+        }
+    }
 }
