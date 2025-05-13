@@ -2,7 +2,6 @@ package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.NotificationEvent;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +23,6 @@ public class SseController {
     private static final Logger logger = LoggerFactory.getLogger(SseController.class);
 
     // 애플리케이션 종료시 SSE 연결 해제
-    @PreDestroy
     public void destroy() {
         emitters.forEach((userId, emitter) -> {
             emitter.complete();

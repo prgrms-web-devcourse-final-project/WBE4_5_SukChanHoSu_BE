@@ -3,9 +3,11 @@ package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.service.NoticeService;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.text.ParseException;
 import java.util.List;
 import java.util.Map;
 

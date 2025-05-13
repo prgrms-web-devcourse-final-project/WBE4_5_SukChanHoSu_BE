@@ -8,8 +8,6 @@ import com.NBE4_5_SukChanHoSu.BE.global.exception.redis.RedisSerializationExcept
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import com.NBE4_5_SukChanHoSu.BE.global.util.DateUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.annotation.PostConstruct;
-import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,16 +45,8 @@ public class NoticeService {
     private String lastLikeId = "0-0"; // 초기값
     private String lastMatchId = "0-0"; // 초기값
 
-    // 앱 시작시
-    @PostConstruct
-    public void init() {
-        new Thread(this::startLikeStreamListener).start();
-        new Thread(this::startMatchStreamListener).start();
-    }
-
-    // 앱 종료시
-    @PreDestroy
-    public void destroy() {
+    // 스트림 중지 메서드
+    public void stop() {
         running = false; // 스레드 종료 플래그
     }
 
