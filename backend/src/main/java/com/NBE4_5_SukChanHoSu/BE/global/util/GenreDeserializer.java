@@ -27,10 +27,15 @@ public class GenreDeserializer extends JsonDeserializer<List<Genre>> {
         if (node.isArray()) {
             List<Genre> result = new ArrayList<>();
             for (JsonNode element : node) {
-                String label = element.asText();
-                Genre genre = Genre.fromLabel(label);
-                System.out.println("🎯 GenreDeserializer element: " + label + " -> " + genre);
-                result.add(genre);
+                String name = element.asText();
+                try {
+                    Genre genre = Genre.valueOf(name);  // ← enum name 그대로 매핑
+                    System.out.println("🎯 GenreDeserializer element: " + name + " -> " + genre);
+                    result.add(genre);
+                } catch (IllegalArgumentException e) {
+                    System.out.println("⚠️ Unknown genre name: " + name + ", defaulting to UNKNOWN");
+                    result.add(Genre.UNKNOWN);
+                }
             }
             return result;
         } else {

@@ -87,11 +87,13 @@ public class MovieContentsController {
 
     @Operation(summary = "영화 삭제", description = "영화 ID로 영화를 삭제합니다.")
     @DeleteMapping("/{movieId}")
-    public RsData<Void> deleteMovie(@PathVariable Long movieId) {
+    public RsData<Object> deleteMovie(@PathVariable Long movieId) {
         try {
             movieContentsService.delete(movieId);
             return new RsData<>("204", "영화 삭제 완료", null);
         } catch (Exception e) {
+            System.out.println("❗ 삭제 실패 예외 발생: " + e.getClass().getName());
+            System.out.println("❗ 메시지: " + e.getMessage());
             throw new ServiceException("404", "해당 ID의 영화가 존재하지 않습니다.");
         }
     }

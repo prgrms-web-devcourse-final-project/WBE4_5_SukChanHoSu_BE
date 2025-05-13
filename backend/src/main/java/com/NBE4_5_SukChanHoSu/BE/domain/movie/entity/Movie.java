@@ -54,6 +54,7 @@ public class Movie {
                     .map(String::trim)
                     .map(Genre::fromLabel)
                     .collect(Collectors.toList());
+            System.out.println("🎯 genres: " + this.genres);
         } else {
             this.genres = new ArrayList<>();
         }

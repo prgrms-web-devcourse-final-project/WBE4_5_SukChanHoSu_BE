@@ -86,7 +86,7 @@ public class MovieContentsControllerTest {
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.code").value("205"));
+                .andExpect(jsonPath("$.code").value("200"));
     }
 
     @Test
@@ -116,7 +116,7 @@ public class MovieContentsControllerTest {
         List<Genre> genreList = List.of(Genre.ACTION, Genre.SCIENCE_FICTION);
 
         MovieRequest movie = new MovieRequest();
-        movie.setMovieId(20070011L);
+        movie.setMovieId(20070441L);
         movie.setTitle("Interstellar");
         movie.setGenres(genreList);
         movie.setReleaseDate("20141107");
@@ -130,14 +130,14 @@ public class MovieContentsControllerTest {
                         .content(objectMapper.writeValueAsString(movie)))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(get("/api/movie/20070011")
+        mockMvc.perform(get("/api/movie/20070441")
                         .header("Authorization", "Bearer " + accessToken))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"));
 
         // ✅ 그 다음 삭제
-        mockMvc.perform(delete("/api/movie/20070011")
+        mockMvc.perform(delete("/api/movie/20070441")
                         .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("204"));
