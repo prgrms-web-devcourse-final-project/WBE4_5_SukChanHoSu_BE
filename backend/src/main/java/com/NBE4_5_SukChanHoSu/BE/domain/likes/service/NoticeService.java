@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.service;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.NotificationEvent;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
@@ -14,6 +15,7 @@ import jakarta.annotation.PreDestroy;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.redis.connection.lettuce.LettuceConnectionFactory;
 import org.springframework.data.redis.connection.stream.MapRecord;
 import org.springframework.data.redis.connection.stream.ReadOffset;
@@ -23,6 +25,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
+import javax.management.Notification;
 import java.text.ParseException;
 import java.time.Duration;
 import java.util.*;
@@ -39,6 +42,7 @@ public class NoticeService {
     private final UserLikeService userLikeService;
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
+    private final ApplicationEventPublisher eventPublisher; // 이벤트 발행
 
     private static final Logger logger = LoggerFactory.getLogger(NoticeService.class);
     private static final String LIKE_STREAM = "like";
@@ -102,7 +106,8 @@ public class NoticeService {
                             Map<String, String> notification = new HashMap<>();
                             notification.put("message", message);
                             notification.put("time", time);
-                            sendNotification(toUserId, notification);   // webSocket을 통해 알림 전송
+//                            sendNotification(toUserId, notification);   // webSocket을 통해 알림 전송
+                            eventPublisher.publishEvent(new NotificationEvent(toUserId,message));   // 이벤트 발행 - 리스너가 탐지
                             saveNotification(toUserId, notification);   // 저장
 
                             // 마지막으로 읽은 ID 업데이트
@@ -151,14 +156,16 @@ public class NoticeService {
                             Map<String, String> notificationMale = new HashMap<>();
                             notificationMale.put("message", messageMale);
                             notificationMale.put("time", time);
-                            sendNotification(maleUserId, notificationMale);
+//                            sendNotification(maleUserId, notificationMale);
+                            eventPublisher.publishEvent(new NotificationEvent(maleUserId,messageMale));
                             saveNotification(maleUserId, notificationMale);
 
                             // 여자 유저에게 보낼 알림
                             Map<String, String> notificationFemale = new HashMap<>();
                             notificationFemale.put("message", messageFemale);
                             notificationFemale.put("time", time);
-                            sendNotification(femaleUserId, notificationFemale);
+//                            sendNotification(femaleUserId, notificationFemale);
+                            eventPublisher.publishEvent(new NotificationEvent(femaleUserId,messageFemale));
                             saveNotification(femaleUserId, notificationFemale);
 
                             // 마지막으로 읽은 ID 업데이트
@@ -173,12 +180,12 @@ public class NoticeService {
             }
         }
     }
-
-    // WebSocket을 통해 알림 전송(경로: /sub/notifications/{userId})
-    private void sendNotification(Long userId, Map<String, String> notification) {
-        messagingTemplate.convertAndSend("/sub/notifications/" + userId, notification.get("message"));
-        logger.info("메시지: {}", notification.get("message"));
-    }
+//
+//    // WebSocket을 통해 알림 전송(경로: /sub/notifications/{userId})
+//    private void sendNotification(Long userId, Map<String, String> notification) {
+//        messagingTemplate.convertAndSend("/sub/notifications/" + userId, notification.get("message"));
+//        logger.info("메시지: {}", notification.get("message"));
+//    }
 
     // 알림 내역 저장
     private void saveNotification(Long userId, Map<String, String> notification) {
@@ -202,7 +209,6 @@ public class NoticeService {
                 System.err.println("날짜 파싱 실패: " + notification.get("time"));
             }
         }
-
         return result;
     }
 
