@@ -29,7 +29,7 @@ spring:
         detail: 86400 # 1일
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/moviematch
+    url: ${DATABASE.URL}
     username: ${DATABASE.USERNAME}
     password: ${DATABASE.PASSWORD}
   jpa:
