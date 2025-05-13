@@ -19,7 +19,6 @@ spring:
     redis:
       host: ${REDIS.HOST}
       port: ${REDIS.PORT}
-      password: ${REDIS.PASSWORD}
       time_to_live:
         likes: 86400 # 24h
         liked: 86400 # 24h
@@ -34,7 +33,7 @@ spring:
     password: ${DATABASE.PASSWORD}
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     properties:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
