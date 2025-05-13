@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
+package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
