@@ -33,8 +33,8 @@ public class SseController {
         emitters.clear();
     }
 
-    // 이벤트 구독
-    @EventListener
+
+    @EventListener  // 이벤트 발행시 탐지
     public void handleNotification(NotificationEvent event) {
         Long userId = event.getUserId();
         String message = event.getMessage();
@@ -44,11 +44,12 @@ public class SseController {
         sendNotification(userId, message);
     }
 
-    // 연결 생성
+    // SSE 연결 생성
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter createConnection() {
         Long userId = SecurityUtil.getCurrentUser().getId();
 
+        // todo: 리소스 낭비가 심한거같은데 개선방안 고민
         SseEmitter emitter = new SseEmitter(-1L);
         emitters.put(userId, emitter);
         logger.info("SSE 연결 생성 - userId: {}", userId);

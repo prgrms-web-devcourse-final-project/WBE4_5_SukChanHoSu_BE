@@ -18,7 +18,7 @@ public class NoticeController {
 
     // 알림 목록 조회
     @GetMapping
-    public List<Map<String, String>>  getNotifications() throws ParseException {
+    public List<Map<String, String>>  getNotifications(){
         Long userId = SecurityUtil.getCurrentUser().getId();
         return noticeService.getNotifications(userId);
     }
