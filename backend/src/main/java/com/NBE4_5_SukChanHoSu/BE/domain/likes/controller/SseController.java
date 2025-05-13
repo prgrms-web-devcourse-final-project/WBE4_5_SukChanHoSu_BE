@@ -2,6 +2,8 @@ package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.NotificationEvent;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -17,6 +19,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @RestController
 @RequestMapping("/api/sse")
+@Tag(name = "SSE", description = "이벤트 전송")
 public class SseController {
 
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
@@ -44,6 +47,7 @@ public class SseController {
 
     // SSE 연결 생성
     @GetMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "SSE 연결 생성", description = "타임 아웃 x")
     public SseEmitter createConnection() {
         Long userId = SecurityUtil.getCurrentUser().getId();
 
