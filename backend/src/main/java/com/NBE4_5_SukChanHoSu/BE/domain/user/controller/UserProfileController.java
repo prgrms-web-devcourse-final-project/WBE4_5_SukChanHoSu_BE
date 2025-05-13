@@ -1,9 +1,11 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserMatchingService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,9 +19,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,23 +30,20 @@ import java.util.List;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
-    private final RecommendService matchingService;
+    private final UserMatchingService matchingService;
 
     @Operation(summary = "프로필 등록", description = "회원가입 후 최초 프로필 등록")
-    @PostMapping(consumes = "multipart/form-data")
+    @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public RsData<ProfileResponse> createProfile(@ModelAttribute  ProfileRequest dto,
-                                                 @RequestPart(value = "profileImage", required = false) MultipartFile profileImageFile) throws IOException {
-
-        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto,profileImageFile);
+    public RsData<ProfileResponse> createProfile(@Valid @RequestBody ProfileRequest dto) {
+        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto);
         return new RsData<>("201", "프로필 등록 완료", response);
     }
 
     @Operation(summary = "프로필 수정", description = "닉네임, 성별, 위치 등 프로필 정보 수정")
-    @PutMapping(consumes = "multipart/form-data")
-    public RsData<ProfileResponse> updateProfile(@ModelAttribute ProfileUpdateRequest dto,
-                                                 @RequestPart(value = "profileImage", required = false) MultipartFile profileImageFile) throws IOException {
-        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto,profileImageFile);
+    @PutMapping
+    public RsData<ProfileResponse> updateProfile(@Valid @RequestBody ProfileUpdateRequest dto) {
+        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto);
         return new RsData<>("200", "프로필 수정 완료", response);
     }
 
@@ -67,8 +64,8 @@ public class UserProfileController {
     @Operation(summary = "프로필로 유저 객체 조회", description = "프로필 엔티티를 이용하여 유저 정보 가져오는지 확인")
     @GetMapping("/user")
     public RsData<User> getUser() {
-        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
-
+        User user = SecurityUtil.getCurrentUser();
+        Long profileId = user.getUserProfile().getUserId();
         UserProfile profile = matchingService.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", profile.getUser());
     }
@@ -77,21 +74,22 @@ public class UserProfileController {
     @GetMapping("/profile/me")
     //todo 임시, 이후 삭제
     public RsData<UserProfile> getMyProfile1() {
-        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
-
-        UserProfile profile = matchingService.findUser(profileId);
-        return new RsData<>("200", "프로필 조회 성공", profile);
+        User user = SecurityUtil.getCurrentUser();
+        Long profileId = user.getUserProfile().getUserId();
+        UserProfile userProfile = matchingService.findUser(profileId);
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
 
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
     @PutMapping("/radius")
     public RsData<?> setRadius(@RequestParam Integer radius) {
-        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
+        User user = SecurityUtil.getCurrentUser();
+        Long profileId = user.getUserProfile().getUserId();
 
-        UserProfile profile = matchingService.findUser(profileId);
-        userProfileService.setRadius(profile, radius);
+        UserProfile userProfile = matchingService.findUser(profileId);
+        userProfileService.setRadius(userProfile, radius);
 
-        return new RsData<>("200", "프로필 조회 성공", profile);
+        return new RsData<>("200", "프로필 조회 성공", userProfile);
     }
 
 }

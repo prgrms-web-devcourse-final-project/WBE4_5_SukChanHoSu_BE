@@ -1,7 +1,6 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response;
+package com.NBE4_5_SukChanHoSu.BE.domain.likes.dto;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.Matching;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,10 +15,10 @@ import java.util.Date;
 public class UserMatchingResponse {
     private Long matchingId;
     private Date matchingTime;
-    private UserProfileResponse user;
+    private UserProfile user;
 
-    public UserMatchingResponse(UserProfile user, Matching matching,int distance) {
-        this.user = new UserProfileResponse(user,distance);
+    public UserMatchingResponse(UserProfile user, Matching matching) {
+        this.user = user;
         this.matchingId = matching.getMatchingId();
         this.matchingTime = matching.getMatchingTime();
     }

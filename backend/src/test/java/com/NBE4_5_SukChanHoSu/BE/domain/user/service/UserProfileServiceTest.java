@@ -8,7 +8,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
-import com.NBE4_5_SukChanHoSu.BE.global.util.S3Util;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -16,9 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Optional;
 
@@ -33,9 +30,6 @@ class UserProfileServiceTest {
     @Mock
     private UserRepository userRepository;
 
-    @Mock
-    private S3Util s3Util;
-
     @InjectMocks
     private UserProfileService userProfileService;
 
@@ -47,7 +41,7 @@ class UserProfileServiceTest {
     @Nested
     @DisplayName("createProfile 테스트")
     class CreateProfileTest {
-        void createProfile_success() throws IOException {
+        void createProfile_success() {
             Long userId = 1L;
 
             User user = User.builder()
@@ -56,22 +50,25 @@ class UserProfileServiceTest {
                     .name("Test User")
                     .build();
 
-            UserProfile savedUserProfile = UserProfile.builder()
+            UserProfile userProfile = UserProfile.builder()
                     .userId(userId)
-                    .nickName("testuser")
+                    .nickName(null)
                     .gender(Gender.Male)
-                    .profileImage("s3://profile.jpg")
-                    .latitude(37.5665)
-                    .longitude(126.9780)
-                    .birthdate(LocalDate.of(2000, 1, 1))
-                    .introduce("소개입니다.")
-                    .searchRadius(10)
-                    .lifeMovie("인생영화")
-                    .favoriteGenres(null)
-                    .watchedMovies(null)
-                    .preferredTheaters(null)
-                    .user(user)
+                    .profileImage("default.jpg")
+                    .latitude(0.0)
+                    .longitude(0.0)
                     .build();
+
+//            userProfile.setUserId(userId);
+//            userProfile.setNickName(null);
+//            userProfile.setGender(Gender.Male);
+//            userProfile.setProfileImage("default.jpg");
+//            userProfile.setLatitude(0.0);
+//            userProfile.setLongitude(0.0);
+
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+            when(userProfileRepository.findById(userId)).thenReturn(Optional.of(userProfile));
+            when(userProfileRepository.save(any(UserProfile.class))).thenReturn(userProfile);
 
             ProfileRequest dto = ProfileRequest.builder()
                     .nickname("testuser")
@@ -79,31 +76,18 @@ class UserProfileServiceTest {
                     .latitude(37.5665)
                     .longitude(126.9780)
                     .birthdate(LocalDate.of(2000, 1, 1))
-                    .introduce("소개입니다.")
-                    .searchRadius(10)
-                    .lifeMovie("인생영화")
-                    .favoriteGenres(null)
-                    .watchedMovies(null)
-                    .preferredTheaters(null)
+                    .profileImage("profile.jpg")
                     .build();
 
-            MultipartFile mockFile = mock(MultipartFile.class);
-            when(mockFile.isEmpty()).thenReturn(false);
-            when(s3Util.uploadFile(mockFile)).thenReturn("s3://profile.jpg");
-            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-            when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.empty());
-            when(userProfileRepository.save(any(UserProfile.class))).thenReturn(savedUserProfile);
+            userProfileService.createProfile(userId, dto);
 
-            ProfileResponse response = userProfileService.createProfile(userId, dto, null); // 이미지 URL 직접 전달
-
-            assertThat(response.getNickname()).isEqualTo(dto.getNickname());
-            assertThat(response.getProfileImage()).isEqualTo("s3://profile.jpg");
+            assertThat(userProfile.getNickName()).isEqualTo(dto.getNickname());
             verify(userProfileRepository, times(1)).save(any(UserProfile.class));
-            verify(s3Util, never()).uploadFile(any(MultipartFile.class)); // createProfile 시에는 컨트롤러에서 업로드하므로 여기서는 호출 안됨
         }
+
         @Test
         @DisplayName("이미 프로필이 등록된 경우 예외를 던진다.")
-        void createProfile_alreadyExists() throws IOException {
+        void createProfile_alreadyExists() {
             // given
             Long userId = 1L;
 
@@ -113,38 +97,35 @@ class UserProfileServiceTest {
                     .email("test@example.com")
                     .name("Test User")
                     .build();
-            UserProfile existingProfile = UserProfile.builder()
-                    .userId(userId)
-                    .nickName("alreadySet")
-                    .user(user)
-                    .build();
+            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
+
+            UserProfile userProfile = new UserProfile();
+            userProfile.setNickName("alreadySet");
             ProfileRequest dto = ProfileRequest.builder()
                     .nickname("testuser")
                     .build();
 
-            when(userRepository.findById(userId)).thenReturn(Optional.of(user));
-            when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(existingProfile));
+            when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(userProfile));
 
             // when & then
-            assertThatThrownBy(() -> userProfileService.createProfile(userId, dto, null)) // 이미지 URL null로 전달
+            assertThatThrownBy(() -> userProfileService.createProfile(userId, dto))
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("이미 프로필이 등록된 사용자입니다.");
 
+            // save 메서드가 호출되지 않았는지 확인 (테스트의 의도에 따라 추가)
             verify(userProfileRepository, never()).save(any(UserProfile.class));
-            verify(s3Util, never()).uploadFile(any(MultipartFile.class));
         }
-    }
 
         @Nested
         @DisplayName("updateProfile 테스트")
         class UpdateProfileTest {
 
             @Test
-            @DisplayName("정상적으로 프로필을 수정하고 S3 URL을 업데이트한다.")
-            void updateProfile_success_withNewImage() throws IOException {
+            @DisplayName("정상적으로 프로필을 수정한다.")
+            void updateProfile_success() {
                 // given
                 Long userId = 1L;
-                User user = User.builder().id(userId).email("test@example.com").build();
+
                 UserProfile existingUserProfile = UserProfile.builder()
                         .userId(userId)
                         .nickName("oldNickname")
@@ -154,47 +135,48 @@ class UserProfileServiceTest {
                         .latitude(37.0)
                         .longitude(127.0)
                         .birthdate(LocalDate.of(1990, 1, 1))
-                        .user(user)
+                        .user(User.builder().id(userId).email("test@example.com").build())
                         .build();
+
                 ProfileUpdateRequest dto = ProfileUpdateRequest.builder()
                         .nickname("newnickname")
                         .introduce("새로운 소개")
+                        .profileImage("new.jpg")
                         .latitude(38.0)
                         .longitude(128.0)
                         .build();
+
                 UserProfile updatedUserProfile = UserProfile.builder()
                         .userId(userId)
-                        .nickName("newnickname")
+                        .nickName("newnickname") // 업데이트된 닉네임
                         .introduce("새로운 소개")
-                        .gender(Gender.Male)
-                        .profileImage("s3://new.jpg") // 업데이트된 S3 URL
+                        .gender(Gender.Male) // 기존 값 유지 (DTO에 없음)
+                        .profileImage("new.jpg")
                         .latitude(38.0)
                         .longitude(128.0)
                         .birthdate(LocalDate.of(1990, 1, 1))
-                        .user(user)
+                        .user(User.builder().id(userId).email("test@example.com").build())
                         .build();
 
-                MultipartFile mockFile = mock(MultipartFile.class);
-                when(mockFile.isEmpty()).thenReturn(false);
-                when(s3Util.uploadFile(mockFile)).thenReturn("s3://new.jpg");
+                // mock 동작 정의
                 when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.of(existingUserProfile));
-                when(userProfileRepository.save(any(UserProfile.class))).thenReturn(updatedUserProfile);
+                when(userProfileRepository.save(any(UserProfile.class))).thenReturn(updatedUserProfile); // 업데이트된 객체 반환
 
                 // when
-                ProfileResponse responseDto = userProfileService.updateProfile(userId, dto, null);
+                ProfileResponse responseDto = userProfileService.updateProfile(userId, dto);
 
                 // then
                 assertThat(responseDto.getNickname()).isEqualTo(dto.getNickname());
                 assertThat(responseDto.getIntroduce()).isEqualTo(dto.getIntroduce());
-                assertThat(responseDto.getProfileImage()).isEqualTo("s3://new.jpg");
+                assertThat(responseDto.getProfileImage()).isEqualTo(dto.getProfileImage());
                 assertThat(responseDto.getLatitude()).isEqualTo(dto.getLatitude());
                 assertThat(responseDto.getLongitude()).isEqualTo(dto.getLongitude());
                 assertThat(responseDto.getEmail()).isEqualTo("test@example.com");
 
                 verify(userProfileRepository, times(1)).findByUserId(userId);
                 verify(userProfileRepository, times(1)).save(any(UserProfile.class));
-                verify(s3Util, never()).uploadFile(any(MultipartFile.class)); // updateProfile 시에는 컨트롤러에서 업로드하므로 여기서는 호출 안됨
             }
+        }
 
 
         @Nested

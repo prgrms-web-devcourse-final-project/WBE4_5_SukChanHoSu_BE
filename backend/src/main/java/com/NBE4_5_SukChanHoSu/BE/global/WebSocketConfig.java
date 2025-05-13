@@ -20,8 +20,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     @Override
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry.addEndpoint("/ws-stomp") // 엔드포인트 설정
-                .setAllowedOriginPatterns("*")
-             //   .setAllowedOrigins("http://localhost:8080","http://localhost:3000")
+                .setAllowedOrigins("http://localhost:8080","http://localhost:3000")
                 .withSockJS(); // SockJS 사용
     }
 }
