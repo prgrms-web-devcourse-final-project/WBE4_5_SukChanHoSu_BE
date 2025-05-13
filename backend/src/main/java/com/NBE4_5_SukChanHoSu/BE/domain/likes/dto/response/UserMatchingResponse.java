@@ -18,7 +18,7 @@ public class UserMatchingResponse {
     private UserProfileResponse user;
 
     public UserMatchingResponse(UserProfile user, Matching matching,int distance) {
-        this.user = new UserProfileResponse(user,distance);
+        this.user = new UserProfileResponse(user,distance,matching.getMatchingTime());
         this.matchingId = matching.getMatchingId();
         this.matchingTime = matching.getMatchingTime();
     }

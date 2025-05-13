@@ -20,7 +20,7 @@ public class LikeResponse {
 
     public LikeResponse(UserLikes userLikes, UserProfile userProfile,int radius) {
         this.userLikeId = userLikes.getUserLikeId();
-        this.toUser = new UserProfileResponse(userProfile,radius);
+        this.toUser = new UserProfileResponse(userProfile,radius,likeTime);
         this.likeTime = userLikes.getLikeTime();
     }
 

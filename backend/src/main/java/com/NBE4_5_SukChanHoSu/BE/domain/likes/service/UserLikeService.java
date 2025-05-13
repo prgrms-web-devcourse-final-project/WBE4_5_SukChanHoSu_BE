@@ -114,7 +114,7 @@ public class UserLikeService {
                     try{
                         UserLikes like = mapper.convertValue(map, UserLikes.class); // Map -> UserLikes 클래스로 변환
                         int radius = matchingService.calDistance(like.getFromUser(), like.getToUser());  // 거리 계산
-                        likesUsers.add(new UserProfileResponse(like.getToUser(), radius));  // 메모리에 추가
+                        likesUsers.add(new UserProfileResponse(like.getToUser(), radius, like.getLikeTime()));  // 메모리에 추가
                     }catch (IllegalArgumentException e){
                         throw new RedisSerializationException("500","JSON 역직렬화 실패");
                     }
@@ -126,13 +126,18 @@ public class UserLikeService {
                 if(likedUser != null) {
                     // 내가 좋아요 한 사용자 리스트에 추가
                     int radius = matchingService.calDistance(like.getFromUser(), like.getToUser());  // 거리 계산
-                    likesUsers.add(new UserProfileResponse(likedUser, radius));  // 메모리에 추가
+                    likesUsers.add(new UserProfileResponse(likedUser, radius, like.getLikeTime()));  // 메모리에 추가
                     // 캐싱
                     String key = "likes:" + user.getUserId() + ":" + likedUser.getUserId();
                     redisTemplate.opsForValue().set(key, like,ttl.getLikes(), TimeUnit.SECONDS);
                 }
             }
         }
+
+        // 정렬
+        System.out.println("정렬 전: " + likesUsers);
+        likesUsers.sort((r1,r2) -> r1.getTime().compareTo(r2.getTime()));
+        System.out.println("정렬 후: " + likesUsers);
         return likesUsers;
     }
 
@@ -154,7 +159,7 @@ public class UserLikeService {
                     try{
                         UserLikes like = mapper.convertValue(map, UserLikes.class);
                         int distance = matchingService.calDistance(like.getFromUser(), like.getToUser());    // 거리 계산
-                        likedUsers.add(new UserProfileResponse(like.getFromUser(), distance));
+                        likedUsers.add(new UserProfileResponse(like.getFromUser(), distance,like.getLikeTime()));
                     }catch (IllegalArgumentException e){
                         throw new RedisSerializationException("500","JSON 역직렬화 실패");
                     }
@@ -166,7 +171,7 @@ public class UserLikeService {
                 if(likesUser != null) {
                     // 나를 좋아요한 사용자 리스트에 추가
                     int distance = matchingService.calDistance(user, likesUser);    // 거리 계산
-                    likedUsers.add(new UserProfileResponse(likesUser, distance));
+                    likedUsers.add(new UserProfileResponse(likesUser, distance,like.getLikeTime()));
 
                     // 캐싱
                     String key = "likes:" + likesUser.getUserId() + ":" + user.getUserId();
@@ -174,6 +179,9 @@ public class UserLikeService {
                 }
             }
         }
+
+        // 정렬
+        likedUsers.sort((r1,r2) -> r1.getTime().compareTo(r2.getTime()));
         return likedUsers;
     }
 
@@ -256,6 +264,8 @@ public class UserLikeService {
                 }
             }
         }
+
+        responses.sort((r1,r2) -> r1.getMatchingTime().compareTo(r2.getMatchingTime()));
         return responses;
     }
 

@@ -15,8 +15,8 @@ public class MatchingResponse {
 
     public MatchingResponse(Matching matching, int distance) {
         this.matchingId = matching.getMatchingId();
-        this.maleUser = new UserProfileResponse(matching.getMaleUser(), distance);
-        this.femaleUser = new UserProfileResponse(matching.getFemaleUser(), distance);
+        this.maleUser = new UserProfileResponse(matching.getMaleUser(), distance, matchingTime);
+        this.femaleUser = new UserProfileResponse(matching.getFemaleUser(), distance, matchingTime);
         this.matchingTime = matching.getMatchingTime();
     }
 }
