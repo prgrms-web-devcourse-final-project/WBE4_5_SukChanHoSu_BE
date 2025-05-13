@@ -10,6 +10,9 @@ on:
 
 env:
   DOCKER_IMAGE_NAME: schs
+  REDIS_HOST: ${{ secrets.REDIS_HOST }}
+  REDIS_PORT: ${{ secrets.REDIS_PORT }}
+  REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
 
 jobs:
   backend-ci:
@@ -18,7 +21,7 @@ jobs:
       test-result: ${{ steps.upload-test-report.outputs.artifact }}
     services:
       redis:
-        image: redis:latest
+        image: redis:6.2.14
         ports:
           - 6379:6379
         options: >-
@@ -42,6 +45,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4.2.2
+
+      - name: Generate application-test.yml
+        env:
+          APPLICATION_SECRET: ${{ secrets.APPLICATION_TEST_YML }}
+        run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application-test.yml
 
       - name: Generate application-secret.yml
         env:
