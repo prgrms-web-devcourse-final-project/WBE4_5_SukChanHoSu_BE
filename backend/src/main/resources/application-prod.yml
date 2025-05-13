@@ -98,3 +98,7 @@ movie:
     detail-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json"
     tmdb-search-url: "https://api.themoviedb.org/3/search/movie"
 
+management:
+  metrics:
+    tags:
+      application: NBE4_5_SukChanHoSu
