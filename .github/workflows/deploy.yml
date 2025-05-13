@@ -45,8 +45,8 @@ jobs:
 
       - name: Generate application-test.yml
         env:
-          APPLICATION_SECRET: ${{ secrets.APPLICATION_TEST_YML }}
-        run: echo "$ENCODED_YML" | base64 -d > backend/src/main/resources/application-test.yml
+          $APPLICATION_TEST: ${{ secrets.APPLICATION_TEST_YML }}
+        run: echo "$APPLICATION_TEST" | base64 -d > backend/src/main/resources/application-test.yml
 
       - name: Generate application-secret.yml
         env:
