@@ -44,9 +44,8 @@ jobs:
         uses: actions/checkout@v4.2.2
 
       - name: Generate application-secret.yml
-        env:
-          APPLICATION_SECRET: ${{ secrets.APPLICATION_SECRET_DEV_YML }}
-        run: echo "$APPLICATION_SECRET" > backend/src/main/resources/application-secret.yml
+        run: |
+          echo "${{ secrets.APPLICATION_SECRET_DEV_YML }}" > backend/src/main/resources/application-secret.yml
 
       - name: Set up JDK 21
         uses: actions/setup-java@v4.7.0
@@ -59,7 +58,7 @@ jobs:
         working-directory: backend/
 
       - name: Build with Gradle with test profile
-        run: ./gradlew build -Dspring.profiles.active=dev
+        run: ./gradlew build
         working-directory: backend/
 
       - name: Upload test report if it exists
