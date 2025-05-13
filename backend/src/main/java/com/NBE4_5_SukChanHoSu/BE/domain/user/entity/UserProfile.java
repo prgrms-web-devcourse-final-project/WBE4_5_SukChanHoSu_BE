@@ -28,7 +28,7 @@ public class UserProfile extends BaseTime {
     @Setter
     @NotBlank
     @Pattern(regexp = "^[가-힣a-zA-Z0-9]{2,30}$", message = "닉네임은 한글, 영어 또는 숫자 2~30자만 가능합니다.")
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String nickName;
 
     @NotNull
