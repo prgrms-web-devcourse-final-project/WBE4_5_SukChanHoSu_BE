@@ -3,7 +3,6 @@ package com.NBE4_5_SukChanHoSu.BE.domain.admin.service;
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.UserDetailResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserStatus;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.RecommendUserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -13,7 +12,6 @@ import org.springframework.stereotype.Service;
 public class AdminService {
 
     private final UserRepository userRepository;
-    private final RecommendUserRepository recommendUserRepository;
 
     public void updateUserStatus(Long userId, UserStatus status) {
         User user = userRepository.findById(userId)

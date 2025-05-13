@@ -1,10 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.service.AdminMonitoringService;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.Matching;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.MatchingRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikes;
-import com.NBE4_5_SukChanHoSu.BE.domain.likes.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.MatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.UserMatchingResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.Matching;
@@ -42,8 +38,6 @@ public class UserLikeService {
 
     private static final String LIKE_STREAM = "like";
     private static final String MATCHING_STREAM = "matching";
-    private UserProfileService userProfileService;
-    private final UserMatchingService matchingService;
     private final AdminMonitoringService adminMonitoringService;
 
     @Transactional
