@@ -146,17 +146,29 @@ public class MovieContentsControllerTest {
     @Test
     @DisplayName("영화 수정")
     void updateMovie() throws Exception {
-        Movie movie = Movie.builder()
-                .movieId(20030410L)
-                .title("Updated Title")
-                .build();
+        List<Genre> genreList = List.of(Genre.ACTION, Genre.SCIENCE_FICTION);
 
-        mockMvc.perform(put("/api/movie/1")
+        MovieRequest movie = new MovieRequest();
+        movie.setMovieId(20070555L);
+        movie.setTitle("Interstellar");
+        movie.setGenres(genreList);
+        movie.setReleaseDate("20141107");
+        movie.setPosterImage("https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg");
+        movie.setDescription("우주의 끝에서 미래를 찾다");
+        movie.setRating("PG-13");
+        movie.setDirector("Christopher Nolan");
+        mockMvc.perform(post("/api/movie")
+                        .header("Authorization", "Bearer " + accessToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(movie)))
+                .andExpect(status().isOk());
+
+        mockMvc.perform(put("/api/movie/20070555")
                         .header("Authorization", "Bearer " + accessToken)
                         .content(objectMapper.writeValueAsString(movie))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.data.title").value("Updated Title"));
+                .andExpect(jsonPath("$.data.title").value("Interstellar"));
     }
 }

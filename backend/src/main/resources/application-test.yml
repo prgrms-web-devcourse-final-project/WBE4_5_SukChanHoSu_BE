@@ -17,9 +17,8 @@ spring:
       auth-code-expiration-millis: 300000  # 5 * 60 * 1000(밀리초) == 5분
   data:
     redis:
-      host: ${REDIS.HOST}
-      port: ${REDIS.PORT}
-      password: ${REDIS.PASSWORD}
+      host: localhost
+      port: 6379
       time_to_live:
         likes: 86400 # 24h
         liked: 86400 # 24h
@@ -27,17 +26,24 @@ spring:
         data: 604800 # 1주일
         rank: 604800 # 1주일
         detail: 86400 # 1일
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: ${DATABASE.URL}
-    username: ${DATABASE.USERNAME}
-    password: ${DATABASE.PASSWORD}
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MYSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      auto-commit: false
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
+    show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
         highlight_sql: true
         use_sql_comments: true
@@ -52,7 +58,6 @@ spring:
               - profile
               - email
             redirect-uri: https://api.app.mm.ts0608.life/login/oauth2/code/google
-
   cloud: # AWS 클라우드 설정
     aws:
       s3:
@@ -61,25 +66,29 @@ spring:
         access-key: ${AWS.ACCESS_KEY}  # 환경 변수로 AWS 접근 키 설정
         secret-key: ${AWS.SECRET_KEY}
       region:
-        static: ap-northeast-1 # AWS 리전 설정 (서울 리전)
+        static: ap-northeast-2  # AWS 리전 설정 (서울 리전)
       stack:
         auto: false  # 자동 스택 생성 여부 설정
+
+logging:
+  level:
+    root: INFO
+    org.springframework: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "[TEST PROFILE] %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
 jwt:
   secret: ${JWT.SECRET}
   expiration:
     access-token: ${JWT.EXPIRATION.ACCESS_TOKEN}
     refresh-token: ${JWT.EXPIRATION.REFRESH_TOKEN}
-  cookie-domain: ${JWT.COOKIE_DOMAIN}
+  cookie-domain: ${JWT.COOKIE_DOMAIN} # 도메인
   cookie-path: ${JWT.COOKIE_PATH}
 
-
-logging:
-  level:
-    org.hibernate.sql: debug
-    org.hibernate.orm.jdbc.bind: trace
-    orh.hibernate.orm.jdbc.extract: trace
-    org.springframework.transaction.interceptor: trace
+redisson:
+  address: ${REDISSON.ADDRESS}
 
 movie:
   api:
