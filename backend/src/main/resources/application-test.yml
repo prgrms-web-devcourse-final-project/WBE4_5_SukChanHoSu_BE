@@ -1,0 +1,96 @@
+spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL.SENDER}
+    password: ${MAIL.PASSWORD}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+      auth-code-expiration-millis: 300000  # 5 * 60 * 1000(밀리초) == 5분
+  data:
+    redis:
+      host: redis
+      port: 6379
+      time_to_live:
+        likes: 86400 # 24h
+        liked: 86400 # 24h
+        matching: 3600 # 1h
+        data: 604800 # 1주일
+        rank: 604800 # 1주일
+        detail: 86400 # 1일
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=MYSQL
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+    hikari:
+      auto-commit: false
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        format_sql: true
+        highlight_sql: true
+        use_sql_comments: true
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE.CLIENT_ID}
+            client-secret: ${GOOGLE.SECURITY_PASSWORD}
+            scope:
+              - profile
+              - email
+            redirect-uri: https://api.app.mm.ts0608.life/login/oauth2/code/google
+  cloud: # AWS 클라우드 설정
+    aws:
+      s3:
+        bucket: team06-moviematch-bucket # S3 버킷 이름 설정
+      credentials:
+        access-key: ${AWS.ACCESS_KEY}  # 환경 변수로 AWS 접근 키 설정
+        secret-key: ${AWS.SECRET_KEY}
+      region:
+        static: ap-northeast-2  # AWS 리전 설정 (서울 리전)
+      stack:
+        auto: false  # 자동 스택 생성 여부 설정
+
+logging:
+  level:
+    root: INFO
+    org.springframework: DEBUG
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+  pattern:
+    console: "[TEST PROFILE] %d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+jwt:
+  secret: ${JWT.SECRET}
+  expiration:
+    access-token: ${JWT.EXPIRATION.ACCESS_TOKEN}
+    refresh-token: ${JWT.EXPIRATION.REFRESH_TOKEN}
+  cookie-domain: ${JWT.COOKIE_DOMAIN} # 도메인
+  cookie-path: ${JWT.COOKIE_PATH}
+
+movie:
+  api:
+    kofic_key: ${MOVIE.API.KEY}
+    tmdb_key: ${MOVIE.API.KEY2}
+    rank-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchWeeklyBoxOfficeList.json"
+    detail-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json"
+    tmdb-search-url: "https://api.themoviedb.org/3/search/movie"
