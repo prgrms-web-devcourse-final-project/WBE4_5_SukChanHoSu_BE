@@ -69,12 +69,23 @@ public class UserLikeController {
 
     @GetMapping("/like")
     @Operation(summary = "like 테이블 조회", description = "사용자의 like 테이블 조회")
-    public RsData<UserLikeResponse> getUserLikes() {
+    public RsData<UserLikeResponse> getUserLikes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "4") int pageSize) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
         List<UserProfileResponse> userProfileResponses = userLikeService.getUserLikes(profile);
-        UserLikeResponse response = new UserLikeResponse(userProfileResponses);
+
+        int totalSize = userProfileResponses.size();
+        int totalPages = (int) Math.ceil((double) totalSize / pageSize);
+
+        List<UserProfileResponse> pagedResponses = userProfileResponses.stream()
+                .skip(page * pageSize)
+                .limit(pageSize)
+                .toList();
+
+        UserLikeResponse response = new UserLikeResponse(pagedResponses,totalPages);
 
         if(response.getUserLikes().isEmpty()){
             return new RsData<>("404", "like 한 사용자가 없습니다.");
@@ -85,12 +96,22 @@ public class UserLikeController {
 
     @GetMapping("/liked")
     @Operation(summary = "liked 테이블 조회", description = "사용자의 liked 테이블 조회")
-    public RsData<UserLikeResponse> getUserLiked() {
+    public RsData<UserLikeResponse> getUserLiked(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "4") int pageSize) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
-
         UserProfile profile = matchingService.findUser(profileId);
         List<UserProfileResponse> userProfileResponses = userLikeService.getUserLiked(profile);
-        UserLikeResponse response = new UserLikeResponse(userProfileResponses);
+
+        int totalSize = userProfileResponses.size();
+        int totalPages = (int) Math.ceil((double) totalSize / pageSize);
+
+        List<UserProfileResponse> pagedResponses = userProfileResponses.stream()
+                .skip(page * pageSize)
+                .limit(pageSize)
+                .toList();
+
+        UserLikeResponse response = new UserLikeResponse(pagedResponses,totalPages);
 
         if(response.getUserLikes().isEmpty()){
             return new RsData<>("404", "나를 like 하는 사용자가 없습니다.");

@@ -9,9 +9,11 @@ import java.util.List;
 public class UserLikeResponse {
     private int size;
     private List<UserProfileResponse> userLikes;
+    int totalPages;
 
-    public UserLikeResponse(List<UserProfileResponse> userProfileResponses) {
-        this.size = userProfileResponses.size();
+    public UserLikeResponse(List<UserProfileResponse> userProfileResponses,int totalPages) {
         this.userLikes = userProfileResponses;
+        this.totalPages = totalPages;
     }
 }
+
