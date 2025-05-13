@@ -6,6 +6,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,14 +18,15 @@ import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
 import java.util.Set;
 
-import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -133,23 +135,77 @@ class NoticeControllerTest {
     void getNotifications() throws Exception {
         // Given
         setUpLike(2L);  // 1->2
+        login2();
 
         // When
-        mvc.perform(post("/api/notice")
+        ResultActions action = mvc.perform(get("/api/notice")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print());
+
+        // Then
+        action.andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("알림")))
+                .andExpect(jsonPath("$.data[*].timeAgo", everyItem(containsString("전"))))
+                .andExpect(jsonPath("$.data[*].message",hasItem(containsString("TempUser1"))));
+    }
+
+    @Test
+    void markAsRead() throws Exception {
+        // Given
+        setUpLike(2L);  // 좋아요
+        login2();   // 2번 계정으로 로그인
+        mvc.perform(get("/api/notice/count")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+            .andExpect(jsonPath("$.code").value("200"))
+            .andExpect(jsonPath("$.message",containsString("미확인 알림 갯수")))
+            .andExpect(jsonPath("$.data").value(greaterThan(0)));   // 0보다 큼
+
+        // When
+        // 읽음 처리
+        mvc.perform(post("/api/notice/read")
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + accessToken))
                 .andExpect(status().isOk());
-//                .andExpect(jsonPath("$.code").value("200"))
-//                .andExpect(jsonPath("$.message",containsString("에게 좋아요를 보냈습니다")));
 
-
+        // Then
+        mvc.perform(get("/api/notice/count")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("미확인 알림 갯수")))
+                .andExpect(jsonPath("$.data").value(0));   // 0으로 초기화
     }
 
     @Test
-    void markAsRead() {
-    }
+    @DisplayName("미확인 알림 갯수")
+    void getUnreadNotificationCount() throws Exception {
+        // When
+        ResultActions action1 = mvc.perform(get("/api/notice/count")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .header("Authorization", "Bearer " + accessToken))
+                .andDo(print());
+        // 응답 파싱
+        String responseBody1 = action1.andReturn().getResponse().getContentAsString();
+        JSONObject jsonResponse1 = new JSONObject(responseBody1);
+        int prevData = jsonResponse1.getInt("data");    // 응답 갯수
 
-    @Test
-    void getUnreadNotificationCount() {
+        login2();   // 2번 계정으로 로그인 후
+        setUpLike(1L);  // 좋아요
+        login();    // 다시 1번 계정으로 로그인
+
+        // Then
+        mvc.perform(get("/api/notice/count")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .header("Authorization", "Bearer " + accessToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.code").value("200"))
+                .andExpect(jsonPath("$.message",containsString("미확인 알림 갯수")))
+                .andExpect(jsonPath("$.data").value(prevData+1));   // 이전 값보다 1큼
+
     }
 }
