@@ -19,7 +19,7 @@ public class GenreListDeserializer extends JsonDeserializer<List<Genre>> {
             try {
                 genres.add(Genre.valueOf(s.toUpperCase()));
             } catch (IllegalArgumentException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("직렬화 실패");
             }
         }
         return genres;
