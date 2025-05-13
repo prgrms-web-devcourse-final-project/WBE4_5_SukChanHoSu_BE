@@ -12,11 +12,16 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.connection.stream.MapRecord;
+import org.springframework.data.redis.connection.stream.ReadOffset;
+import org.springframework.data.redis.connection.stream.StreamOffset;
+import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -50,6 +55,9 @@ public class UserLikeControllerTest {
     @Autowired
     private RedisTemplate<String, Object> redisTemplate;
 
+    private static final String LIKE_STREAM = "like";
+    private static final String MATCHING_STREAM = "matching";
+
     @BeforeEach
     void setUp() {
         objectMapper = new ObjectMapper();
@@ -59,6 +67,24 @@ public class UserLikeControllerTest {
     @AfterAll
     void tearDown() {
         clearRedisData(); // 레디스 데이터 초기화
+        ClearStream(LIKE_STREAM);   // 스트림 초기화
+        ClearStream(MATCHING_STREAM);
+    }
+
+    private void ClearStream(String streamName) {
+        // Stream의 모든 레코드 조회
+        StreamReadOptions options = StreamReadOptions.empty().count(100); // 한 번에 100개씩 조회
+        StreamOffset<String> offset = StreamOffset.create(streamName, ReadOffset.from("0-0")); // 처음부터 조회
+        List<MapRecord<String, Object, Object>> records;
+        do {
+            records = redisTemplate.opsForStream().read(options, offset);
+            if (!records.isEmpty()) {
+                // 각 레코드 삭제
+                for (MapRecord<String, Object, Object> record : records) {
+                    redisTemplate.opsForStream().delete(streamName, record.getId().getValue());
+                }
+            }
+        } while (!records.isEmpty()); // 더 이상 레코드가 없을 때까지 반복
     }
 
     private void clearRedisData() {
