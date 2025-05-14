@@ -30,9 +30,7 @@ import java.util.stream.Stream;
 @ActiveProfiles("test")
 @RequiredArgsConstructor
 public class TestInitData {
-    @Autowired
-    private RedisTemplate<String, String> redisTemplate;
-
+    private final RedisTemplate<String, String> redisTemplate;
     private final UserProfileRepository userProfileRepository;
     private final UserService userService;
     private final UserRepository userRepository;
