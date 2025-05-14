@@ -91,17 +91,17 @@ public class NoticeService {
     }
 
     private void processStream(String streamName,String lastId, Consumer<MapRecord<String,Object,Object>> processEvent) {
-//        StreamReadOptions options = StreamReadOptions.empty().count(1);
-//        // 마지막으로 읽은 Id 부터 읽음
-//        StreamOffset<String> offset = StreamOffset.create(LIKE_STREAM, ReadOffset.from(lastLikeId));
-//        List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(options, offset);
-
-        // 블로킹 읽기 옵션 설정 (10초 대기)
-        StreamReadOptions options = StreamReadOptions.empty().block(Duration.ofSeconds(10)).count(1);
-        // 마지막으로 읽은 ID부터 읽기
-        StreamOffset<String> offset = StreamOffset.create(streamName, ReadOffset.from(lastId));
-        // Redis Stream에서 데이터 읽기
+        StreamReadOptions options = StreamReadOptions.empty().count(1);
+        // 마지막으로 읽은 Id 부터 읽음
+        StreamOffset<String> offset = StreamOffset.create(LIKE_STREAM, ReadOffset.from(lastLikeId));
         List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(options, offset);
+
+//        // 블로킹 읽기 옵션 설정 (10초 대기)
+//        StreamReadOptions options = StreamReadOptions.empty().block(Duration.ofSeconds(10)).count(1);
+//        // 마지막으로 읽은 ID부터 읽기
+//        StreamOffset<String> offset = StreamOffset.create(streamName, ReadOffset.from(lastId));
+//        // Redis Stream에서 데이터 읽기
+//        List<MapRecord<String, Object, Object>> records = redisTemplate.opsForStream().read(options, offset);
 
         if (!records.isEmpty()) {
             for (MapRecord<String, Object, Object> record : records) { // record = ID:Content
