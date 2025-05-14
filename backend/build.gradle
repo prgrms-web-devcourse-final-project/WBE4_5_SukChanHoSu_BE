@@ -36,9 +36,13 @@ dependencies {
     implementation 'org.webjars:bootstrap:4.3.1'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    
+    // redisson
+    implementation 'org.redisson:redisson-spring-boot-starter:3.16.3'
 
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'mysql:mysql-connector-java:8.0.29'
     testImplementation 'com.h2database:h2'

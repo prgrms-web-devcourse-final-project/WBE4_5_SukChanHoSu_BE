@@ -64,6 +64,8 @@ spring:
         static: ap-northeast-1 # AWS 리전 설정 (서울 리전)
       stack:
         auto: false  # 자동 스택 생성 여부 설정
+redisson:
+  address: ${REDISSON.ADDRESS}
 
 jwt:
   secret: ${JWT.SECRET}
