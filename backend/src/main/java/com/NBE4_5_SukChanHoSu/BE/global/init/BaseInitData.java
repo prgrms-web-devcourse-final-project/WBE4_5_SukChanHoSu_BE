@@ -101,7 +101,7 @@ public class BaseInitData {
                     .user(user) // 유저와 매핑
                     .build();
 
-            user.setRole(Role.ADMIN);
+            user.setRole(Role.USER);
             // 데이터베이스에 저장
             userProfileRepository.save(userProfile);
 

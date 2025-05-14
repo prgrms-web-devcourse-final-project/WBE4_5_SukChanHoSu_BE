@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
 import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -12,6 +13,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -19,6 +21,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -47,4 +51,7 @@ public class User {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonIgnoreProperties({"likes", "likedBy", "maleMatchings", "femaleMatchings","user"})
     private UserProfile userProfile;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Review> reviews = new ArrayList<>();
 }

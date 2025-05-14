@@ -3,6 +3,7 @@ package com.NBE4_5_SukChanHoSu.BE.domain.admin.controller;
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.StatusUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.UserDetailResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.service.AdminService;
+import com.NBE4_5_SukChanHoSu.BE.domain.admin.service.AdminMonitoringService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,10 +17,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/admin")
 @RequiredArgsConstructor
 @PreAuthorize("hasRole('ADMIN')")
-// TODO: role 이 admin 인 유저 만 접근가능하게 변경
 public class AdminController {
 
     private final AdminService adminService;
+    private final AdminMonitoringService adminMonitoringService;
+
     @Operation(summary = "사용자 상태 변경", description = "관리자가 사용자의 상태 (ACTIVE, SUSPENDED, DELETED)를 변경합니다.")
     @PatchMapping("/users/{userId}/status")
     public RsData<String> updateStatus(
@@ -35,6 +37,14 @@ public class AdminController {
     public RsData<UserDetailResponse> getUserDetail(@PathVariable Long userId) {
         UserDetailResponse response = adminService.getUserDetail(userId);
         return new RsData<>("200-OK", "사용자 상세 정보 조회 성공", response);
+    }
+
+    @PreAuthorize("permitAll()")
+    @Operation(summary = "일일 매칭 수 조회", description = "오늘 일어난 매칭 수를 조회합니다.")
+    @GetMapping("/daily-matches")
+    public RsData<Long> getDailyMatches() {
+        long count = adminMonitoringService.getTodayDailyMatches();
+        return new RsData<>("200-OK", "오늘 일어난 매칭 수 조회 성공", count);
     }
 
 }

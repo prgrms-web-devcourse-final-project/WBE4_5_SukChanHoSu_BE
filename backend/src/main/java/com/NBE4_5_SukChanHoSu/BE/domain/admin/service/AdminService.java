@@ -1,10 +1,12 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.admin.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.UserDetailResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserStatus;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -12,12 +14,13 @@ import org.springframework.stereotype.Service;
 public class AdminService {
 
     private final UserRepository userRepository;
-
+    private final ReviewService reviewService;
     public void updateUserStatus(Long userId, UserStatus status) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저입니다."));
         // 상태가 'DELETED'이면 유저 삭제
         if (status == UserStatus.DELETED) {
+
             userRepository.deleteById(userId);  // 유저 삭제
         } else {
             user.setStatus(status);

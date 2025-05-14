@@ -5,6 +5,7 @@ import com.NBE4_5_SukChanHoSu.BE.global.jwt.service.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
@@ -29,9 +30,11 @@ public class SecurityConfig {
     private final TokenService tokenService;
     private final CustomOAuth2UserDetailService customOAuth2UserDetailService;
     private final OAuth2AuthenticationSuccessHandler successHandler;
-
+    private final Environment env;
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        boolean isTestProfile = List.of(env.getActiveProfiles()).contains("test");
+
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((authorizeHttpRequests) ->
@@ -58,9 +61,14 @@ public class SecurityConfig {
                                 .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/h2-console/**").permitAll()
                                 .requestMatchers("/api/admin/users/{userId}/status").hasRole("ADMIN")
+                                .requestMatchers("/api/admin/daily-matches").permitAll()
                                 .anyRequest().authenticated()
                 )
-
+                .csrf(csrf -> {
+                    if (isTestProfile) {
+                        csrf.disable();
+                    }
+                })
 
                 .headers(headers -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
