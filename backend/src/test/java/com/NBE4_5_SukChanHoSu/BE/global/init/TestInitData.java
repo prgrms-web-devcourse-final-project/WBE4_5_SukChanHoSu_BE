@@ -1,5 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.global.init;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
@@ -28,7 +30,7 @@ public class TestInitData {
     private RedisTemplate<String, String> redisTemplate;
 
     @Bean
-    public ApplicationRunner initData(UserProfileRepository userProfileRepository, UserService userService, UserRepository userRepository) {
+    public ApplicationRunner initData(UserProfileRepository userProfileRepository, UserService userService, UserRepository userRepository, MovieRepository movieRepository) {
         Random random = new Random();
         return args -> {
             if (userRepository.count() > 0) {
@@ -69,6 +71,67 @@ public class TestInitData {
 
                 userProfileRepository.save(userProfile);
             }
+
+            // 🎬 영화 5개 삽입
+            List<Movie> movies = List.of(
+                    Movie.builder()
+                            .movieId(20070001L)
+                            .title("Inception")
+                            .genresRaw("Action, Science Fiction")
+                            .releaseDate("20100716")
+                            .posterImage("https://image.tmdb.org/t/p/w500/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg")
+                            .description("꿈속의 꿈으로 들어가는 액션 블록버스터")
+                            .director("Christopher Nolan")
+                            .rating("PG-13")
+                            .build(),
+
+                    Movie.builder()
+                            .movieId(20070002L)
+                            .title("The Matrix")
+                            .genresRaw("Action, Science Fiction")
+                            .releaseDate("19990331")
+                            .posterImage("https://image.tmdb.org/t/p/w500/aZiK1mzNHRn7kvVxU3lK1ElGNRk.jpg")
+                            .description("가상현실과 인간의 전쟁")
+                            .director("Lana Wachowski, Lilly Wachowski")
+                            .rating("R")
+                            .build(),
+
+                    Movie.builder()
+                            .movieId(20070003L)
+                            .title("La La Land")
+                            .genresRaw("Romance, Music, Drama")
+                            .releaseDate("20161209")
+                            .posterImage("https://image.tmdb.org/t/p/w500/uDO8zWDhfWwoFdKS4fzkUJt0Rf0.jpg")
+                            .description("꿈과 사랑 사이에서 갈등하는 예술가들")
+                            .director("Damien Chazelle")
+                            .rating("PG-13")
+                            .build(),
+
+                    Movie.builder()
+                            .movieId(20070004L)
+                            .title("Parasite")
+                            .genresRaw("Drama, Thriller")
+                            .releaseDate("20190530")
+                            .posterImage("https://image.tmdb.org/t/p/w500/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg")
+                            .description("기생과 공생의 이면")
+                            .director("Bong Joon-ho")
+                            .rating("R")
+                            .build(),
+
+                    Movie.builder()
+                            .movieId(20070005L)
+                            .title("Interstellar")
+                            .genresRaw("Adventure, Drama, Science Fiction")
+                            .releaseDate("20141107")
+                            .posterImage("https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg")
+                            .description("우주의 끝에서 미래를 찾다")
+                            .director("Christopher Nolan")
+                            .rating("PG-13")
+                            .build()
+            );
+
+            movieRepository.saveAll(movies);
+            System.out.println("🎬 테스트용 영화 5개 삽입 완료");
         };
     }
 }
