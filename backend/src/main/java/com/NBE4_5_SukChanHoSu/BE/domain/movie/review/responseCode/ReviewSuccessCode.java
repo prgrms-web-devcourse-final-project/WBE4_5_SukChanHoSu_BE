@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant;
+package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.responseCode;
 
 import lombok.Getter;
 

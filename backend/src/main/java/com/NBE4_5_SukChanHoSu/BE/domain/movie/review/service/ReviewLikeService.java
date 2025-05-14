@@ -1,6 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant.ReviewErrorCode;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.responseCode.ReviewErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.ReviewLikeResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.ReviewLike;

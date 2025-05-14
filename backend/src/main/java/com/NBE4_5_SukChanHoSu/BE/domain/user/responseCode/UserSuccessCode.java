@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
+package com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode;
 
 import lombok.Getter;
 

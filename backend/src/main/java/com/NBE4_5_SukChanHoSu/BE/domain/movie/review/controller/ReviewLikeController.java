@@ -1,6 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant.ReviewSuccessCode;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.responseCode.ReviewSuccessCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.ReviewLikeResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewLikeService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
