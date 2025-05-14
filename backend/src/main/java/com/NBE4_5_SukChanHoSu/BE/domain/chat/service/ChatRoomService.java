@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.chat.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.chat.dto.ChatRoom;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.HashOperations;
@@ -17,6 +18,9 @@ import java.util.stream.Collectors;
 public class ChatRoomService {
 
     private static final String CHAT_ROOMS = "CHAT_ROOM";
+
+    private final RedisTemplate<String, Object> redisTemplate;
+    private final ObjectMapper objectMapper;
 
     @Resource(name = "redisTemplate")
     private HashOperations<String, String, ChatRoom> hashOps;
@@ -42,11 +46,14 @@ public class ChatRoomService {
 
     // 채팅방 조회
     public ChatRoom findRoomById(String roomId) {
-        return hashOps.get(CHAT_ROOMS, roomId);
+        Object raw = hashOps.get(CHAT_ROOMS, roomId);
+        return objectMapper.convertValue(raw, ChatRoom.class);
     }
 
     // 모든 채팅방 목록 조회
     public List<ChatRoom> findAllRooms() {
-        return new ArrayList<>(hashOps.entries(CHAT_ROOMS).values());
+        return hashOps.entries(CHAT_ROOMS).values().stream()
+                .map(obj -> objectMapper.convertValue(obj, ChatRoom.class))
+                .collect(Collectors.toList());
     }
 }
