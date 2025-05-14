@@ -45,8 +45,8 @@ spring:
             redirect-uri: https://api.app.mm.ts0608.life/login/oauth2/code/google
   data:
     redis:
-      host: ${REDIS.HOST}
-      port: ${REDIS.PORT}   # 기본값 6379
+      host: redis
+      port: 6379   # 기본값 6379
       time_to_live:
         likes: 86400 # 24h
         liked: 86400 # 24h
