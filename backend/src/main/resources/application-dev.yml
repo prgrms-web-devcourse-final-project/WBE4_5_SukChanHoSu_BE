@@ -17,7 +17,7 @@ spring:
       auth-code-expiration-millis: 300000  # 5 * 60 * 1000(밀리초) == 5분
   data:
     redis:
-      host: redis
+      host: redis_1
       port: 6379
       time_to_live:
         likes: 86400 # 24h
