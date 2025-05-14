@@ -25,7 +25,6 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
-@EnableMethodSecurity
 public class SecurityConfig {
     private final TokenService tokenService;
     private final CustomOAuth2UserDetailService customOAuth2UserDetailService;
@@ -60,8 +59,6 @@ public class SecurityConfig {
                                 // Public endpoints
                                 .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/h2-console/**").permitAll()
-                                .requestMatchers("/api/admin/users/{userId}/status").hasRole("ADMIN")
-                                .requestMatchers("/api/admin/daily-matches").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .csrf(csrf -> {
