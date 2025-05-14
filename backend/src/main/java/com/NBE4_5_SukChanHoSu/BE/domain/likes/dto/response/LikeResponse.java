@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 
 @Data
@@ -16,12 +16,12 @@ import java.util.Date;
 public class LikeResponse {
     private Long userLikeId;
     private UserProfileResponse toUser;
-    private Date likeTime;
+    private LocalDateTime createdAt;
 
-    public LikeResponse(UserLikes userLikes, UserProfile userProfile,int radius) {
+    public LikeResponse(UserLikes userLikes, UserProfile userProfile, int radius) {
         this.userLikeId = userLikes.getUserLikeId();
-        this.toUser = new UserProfileResponse(userProfile,radius);
-        this.likeTime = userLikes.getLikeTime();
+        this.toUser = new UserProfileResponse(userProfile, radius);
+        this.createdAt = userLikes.getCreatedAt();
     }
 
 }

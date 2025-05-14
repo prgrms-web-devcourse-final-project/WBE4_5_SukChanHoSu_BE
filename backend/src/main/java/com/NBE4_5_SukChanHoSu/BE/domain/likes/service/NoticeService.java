@@ -22,6 +22,11 @@ import org.springframework.stereotype.Service;
 
 import java.text.ParseException;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
@@ -119,15 +124,20 @@ public class NoticeService {
         List<Map<String, String>> updateNotifications = notifications.getOrDefault(userId, new ArrayList<>());
         List<Map<String, String>> result = new ArrayList<>();
 
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME;
+
         for (Map<String, String> notification : updateNotifications) {
             Map<String, String> updated = new HashMap<>();
             try {
-                Date time = DateUtils.parseDate(notification.get("time")); // 날짜 문자열을 Date로 변환
+                String timeStr = notification.get("time");
+                LocalDateTime ldt = LocalDateTime.parse(timeStr, formatter);
+                Instant instant = ldt.atZone(ZoneId.systemDefault()).toInstant();
+                Date time = Date.from(instant);
+
                 updated.put("message", notification.get("message"));
-                updated.put("timeAgo", DateUtils.getTimeAgo(time)); // time -> timeAgo 로 변환
+                updated.put("timeAgo", DateUtils.getTimeAgo(time));  // 기존 로직 사용
                 result.add(updated);
-            } catch (ParseException e) {
-                // 날짜 파싱 실패 시 로그 출력
+            } catch (DateTimeParseException e) {
                 System.err.println("날짜 파싱 실패: " + notification.get("time"));
             }
         }

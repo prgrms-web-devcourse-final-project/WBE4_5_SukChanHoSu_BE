@@ -79,3 +79,6 @@ logging:
     org.hibernate.orm.jdbc.bind: trace
     orh.hibernate.orm.jdbc.extract: trace
     org.springframework.transaction.interceptor: trace
+
+redisson:
+  address: ${REDISSON.ADDRESS}
