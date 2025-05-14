@@ -19,13 +19,12 @@
     let stompClient = null;
 
     function connect() {
-        const socket = new SockJS('http://localhost:8080/ws-stomp');
+        const token = localStorage.getItem("accessToken");
+        const socket = new SockJS(`http://localhost:8080/ws-stomp?token=${token}`);
         stompClient = Stomp.over(socket);
 
-        const token = localStorage.getItem("accessToken");
-
         stompClient.connect(
-            { token: token },
+            {},
             () => {
                 stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
                     const msg = JSON.parse(message.body);
