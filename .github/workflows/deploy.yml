@@ -14,8 +14,6 @@ env:
 jobs:
   backend-ci:
     runs-on: ubuntu-latest
-    env:
-      REDIS_HOST: redis
     outputs:
       test-result: ${{ steps.upload-test-report.outputs.artifact }}
     services:
