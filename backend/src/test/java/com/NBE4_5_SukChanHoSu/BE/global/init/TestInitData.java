@@ -12,8 +12,10 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.test.context.ActiveProfiles;
 
@@ -30,6 +32,7 @@ public class TestInitData {
     private RedisTemplate<String, String> redisTemplate;
 
     @Bean
+    @EventListener(ApplicationReadyEvent.class)
     public ApplicationRunner initData(UserProfileRepository userProfileRepository, UserService userService, UserRepository userRepository, MovieRepository movieRepository) {
         Random random = new Random();
         return args -> {
