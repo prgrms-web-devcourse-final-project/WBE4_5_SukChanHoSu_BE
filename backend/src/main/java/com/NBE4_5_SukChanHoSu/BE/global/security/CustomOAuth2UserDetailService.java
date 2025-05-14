@@ -34,20 +34,20 @@ public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
         String email = oAuth2UserInfo.getProviderEmail();
         String name = oAuth2UserInfo.getProviderName();
 
-        User user = userRepository.findByEmail(email);
+        User user = userRepository.findByEmail(email)
+                .orElseGet(() -> {
+                    User newUser = User.builder()
+                            .password(UUID.randomUUID().toString())
+                            .email(email)
+                            .role(Role.USER)
+                            .name(name)
+                            .provider(provider)
+                            .providerId(providerId)
+                            .emailVerified(true)
+                            .build();
+                    return userRepository.save(newUser);
+                });
 
-        if (user == null) {
-            user = User.builder()
-                    .password(UUID.randomUUID().toString())
-                    .email(email)
-                    .role(Role.USER)
-                    .name(name)
-                    .provider(provider)
-                    .providerId(providerId)
-                    .emailVerified(true)
-                    .build();
-            userRepository.save(user);
-        }
 
         return new PrincipalDetails(user, oAuth2User.getAttributes());
     }

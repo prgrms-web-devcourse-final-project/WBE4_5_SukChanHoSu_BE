@@ -5,6 +5,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.BlacklistedTokenException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.InvalidRefreshTokenException;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.dto.TokenResponse;
@@ -32,6 +33,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -105,7 +107,15 @@ public class TokenService {
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
-        User user = userRepository.findByEmail(claims.getSubject());
+        Optional<User> optionalUser = userRepository.findByEmail(claims.getSubject());
+
+        User user = optionalUser.orElseThrow(() ->
+                new ServiceException(
+                        UserErrorCode.EMAIL_NOT_FOUND.getCode(),
+                        UserErrorCode.EMAIL_NOT_FOUND.getMessage()
+                )
+        );
+
         UserDetails principal = new PrincipalDetails(user);
 
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
