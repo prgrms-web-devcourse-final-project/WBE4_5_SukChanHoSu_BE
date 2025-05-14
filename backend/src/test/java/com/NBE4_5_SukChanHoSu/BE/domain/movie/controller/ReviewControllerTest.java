@@ -3,6 +3,7 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant.ReviewSuccessCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.controller.ReviewController;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.AllReviewDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.ReviewResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
@@ -12,6 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -135,4 +138,102 @@ public class ReviewControllerTest {
 
         verify(reviewService, times(1)).deleteReview(reviewId);
     }
+
+    @Test
+    @DisplayName("리뷰 목록 조회 - 최신순 정렬")
+    void getAllReviewsSortedByCreatedDateDesc() {
+        // given
+        String movieTitle = "아바타";
+        String sort = ""; // 최신순 정렬은 sort가 null 또는 빈 문자열일 때
+
+        ReviewResponseDto review1 = new ReviewResponseDto();
+        review1.setId(1L);
+        review1.setTitle(movieTitle);
+        review1.setContent("리뷰 1");
+        review1.setUserName("사용자1");
+        review1.setLikeCount(10);
+        review1.setRating(4.5);
+
+        ReviewResponseDto review2 = new ReviewResponseDto();
+        review2.setId(2L);
+        review2.setTitle(movieTitle);
+        review2.setContent("리뷰 2");
+        review2.setUserName("사용자2");
+        review2.setLikeCount(3);
+        review2.setRating(3.0);
+
+        List<ReviewResponseDto> reviewList = List.of(review1, review2);
+        Long totalReviews = 2L;
+        Double totalRating = 3.75;
+
+        AllReviewDto allReviewDto = new AllReviewDto(reviewList, totalReviews, totalRating);
+
+        when(reviewService.getAllReviewsByTitle(movieTitle, sort)).thenReturn(allReviewDto);
+
+        // when
+        RsData<AllReviewDto> response = reviewController.getAllReviews(movieTitle, sort);
+
+        // then
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertEquals(ReviewSuccessCode.REVIEW_LIST_FETCHED.getCode(), response.getCode()),
+                () -> assertEquals(ReviewSuccessCode.REVIEW_LIST_FETCHED.getMessage(), response.getMessage()),
+                () -> assertEquals(2, response.getData().getReviews().size()),
+                () -> assertEquals("리뷰 1", response.getData().getReviews().get(0).getContent()),
+                () -> assertEquals(3.8, response.getData().getTotalRating()) // 반올림 확인
+        );
+
+        verify(reviewService, times(1)).getAllReviewsByTitle(movieTitle, sort);
+    }
+
+    @Test
+    @DisplayName("리뷰 목록 조회 - 좋아요순 정렬")
+    void getReviewsSortedByLikeSuccess() {
+        // given
+        String movieTitle = "인셉션";
+        String sort = "like";
+
+        ReviewResponseDto review1 = new ReviewResponseDto();
+        review1.setId(1L);
+        review1.setTitle("인셉션");
+        review1.setContent("정말 좋았어요");
+        review1.setUserName("유저1");
+        review1.setLikeCount(10);
+        review1.setRating(4.5);
+
+        ReviewResponseDto review2 = new ReviewResponseDto();
+        review2.setId(2L);
+        review2.setTitle("인셉션");
+        review2.setContent("최고의 영화입니다");
+        review2.setUserName("유저2");
+        review2.setLikeCount(8);
+        review2.setRating(4.0);
+
+        List<ReviewResponseDto> sortedReviews = List.of(review1, review2);
+        Long totalReviews = 2L;
+        Double totalRating = 4.25;
+
+        AllReviewDto allReviewDto = new AllReviewDto(sortedReviews, totalReviews, totalRating);
+
+        when(reviewService.getAllReviewsByTitle(movieTitle, sort)).thenReturn(allReviewDto);
+
+        // when
+        RsData<AllReviewDto> response = reviewController.getAllReviews(movieTitle, sort);
+
+        // then
+        assertAll(
+                () -> assertNotNull(response),
+                () -> assertEquals(ReviewSuccessCode.REVIEW_LIST_FETCHED.getCode(), response.getCode()),
+                () -> assertEquals(ReviewSuccessCode.REVIEW_LIST_FETCHED.getMessage(), response.getMessage()),
+                () -> assertEquals(2, response.getData().getReviews().size()),
+                () -> assertEquals("정말 좋았어요", response.getData().getReviews().get(0).getContent()),
+                () -> assertEquals(10, response.getData().getReviews().get(0).getLikeCount()),
+                () -> assertEquals("최고의 영화입니다", response.getData().getReviews().get(1).getContent()),
+                () -> assertEquals(8, response.getData().getReviews().get(1).getLikeCount())
+        );
+
+        verify(reviewService, times(1)).getAllReviewsByTitle(movieTitle, sort);
+    }
+
+
 }
