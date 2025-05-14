@@ -36,7 +36,7 @@ public class TestInitData {
     @Autowired private UserRepository userRepository;
     @Autowired private MovieRepository movieRepository;
 
-    @Bean
+
     @EventListener(ApplicationReadyEvent.class)
     public ApplicationRunner initData() {
         Random random = new Random();
