@@ -3,7 +3,7 @@ package com.NBE4_5_SukChanHoSu.BE.global.jwt.service;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserErrorCode;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.BlacklistedTokenException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.InvalidRefreshTokenException;
