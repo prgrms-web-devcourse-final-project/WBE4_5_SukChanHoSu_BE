@@ -63,9 +63,10 @@ public class NoticeService {
                 if (!lettuceConnectionFactory.isRunning()) {
                     // 재연결
                     lettuceConnectionFactory.start();
+                }else{
+                    // 스트림 읽고 처리
+                    processStream(LIKE_STREAM,lastLikeId,this::processLikeEvent);
                 }
-                // 스트림 읽고 처리
-                processStream(LIKE_STREAM,lastLikeId,this::processLikeEvent);
             } catch (Exception e) {
                 logger.error("Like Stream 처리 중 오류 발생: ", e);
             }
@@ -79,8 +80,10 @@ public class NoticeService {
                 if (!lettuceConnectionFactory.isRunning()) {
                     lettuceConnectionFactory.start(); // 재시작
                 }
-                // 스트림 읽고 처리
-                processStream(MATCHING_STREAM,lastMatchId,this::processMatchingEvent);
+                else{
+                    // 스트림 읽고 처리
+                    processStream(MATCHING_STREAM,lastMatchId,this::processMatchingEvent);
+                }
             } catch (Exception e) {
                 logger.error("Match Stream 처리 중 오류 발생: ", e);
             }
