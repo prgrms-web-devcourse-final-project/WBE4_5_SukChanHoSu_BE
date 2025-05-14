@@ -6,6 +6,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -22,9 +23,9 @@ public class UserProfileResponse {
     private double longitude;
     private int searchRadius;
     private String distance;
-    private Date time;
+    private LocalDateTime time;
 
-    public UserProfileResponse (UserProfile userProfile, int distance, Date time) {
+    public UserProfileResponse (UserProfile userProfile, int distance, LocalDateTime time) {
         this.userId = userProfile.getUserId();
         this.nickName = userProfile.getNickName();
         this.gender = userProfile.getGender();
