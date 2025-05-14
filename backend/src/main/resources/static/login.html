@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>간단 로그인</title>
+</head>
+<body>
+<h2>로그인</h2>
+<input type="text" id="email" placeholder="이메일">
+<input type="password" id="password" placeholder="비밀번호">
+<button onclick="login()">로그인</button>
+
+<script>
+  function login() {
+    const email = document.getElementById("email").value;
+    const password = document.getElementById("password").value;
+
+    if (!email || !password) {
+      alert("이메일과 비밀번호를 입력해주세요.");
+      return;
+    }
+
+    fetch("http://localhost:8080/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ email, password })
+    })
+            .then(res => {
+              if (!res.ok) throw new Error("로그인 실패");
+              return res.json();
+            })
+            .then(data => {
+              const accessToken = data.data.accessToken;
+              const refreshToken = data.data.refreshToken;
+
+              localStorage.setItem("accessToken", `Bearer ${accessToken}`);
+              localStorage.setItem("refreshToken", refreshToken);
+
+              alert("로그인 성공! 채팅방으로 이동합니다.");
+
+              // ✅ 실제 사용 중인 roomId로 수정 필요!
+              const testRoomId = "75a82e06-3206-4509-b27d-c5324641e265";
+              window.location.href = `chat_room.html?roomId=${testRoomId}`;
+            })
+            .catch(err => {
+              console.error("로그인 에러:", err);
+              alert("로그인에 실패했습니다.");
+            });
+  }
+</script>
+</body>
+</html>
