@@ -14,13 +14,9 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserMatchingResponse {
-//    private Long matchingId;
-//    private LocalDateTime createdAt;
-//    private UserProfileResponse user;
-    private List<UserProfileResponse> matchings;
-    int totalPages;
     private int size;
-
+    int totalPages;
+    private List<UserProfileResponse> matchings;
 
     public UserMatchingResponse(List<UserProfileResponse> userProfileResponses,int totalPages) {
         this.matchings = userProfileResponses;

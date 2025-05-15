@@ -8,8 +8,8 @@ import java.util.List;
 @Data
 public class UserLikeResponse {
     private int size;
-    private List<UserProfileResponse> userLikes;
     int totalPages;
+    private List<UserProfileResponse> userLikes;
 
     public UserLikeResponse(List<UserProfileResponse> userProfileResponses,int totalPages) {
         this.userLikes = userProfileResponses;

@@ -13,6 +13,8 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.redis.RedisSerializationException;
 import com.NBE4_5_SukChanHoSu.BE.global.redis.config.RedisTTL;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import jakarta.persistence.EntityManager;
 import lombok.AllArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -124,7 +126,7 @@ public class UserLikeService {
             String jsonEvent = objectMapper.writeValueAsString(matchingEvent);
             redisTemplate.opsForStream().add(MATCHING_STREAM, Collections.singletonMap("data", jsonEvent));
         } catch (Exception e) {
-            throw new RedisSerializationException("500", "JSON 직렬화 실패");
+            throw new RedisSerializationException("500", "JSON 직렬화 실패: "+e.getMessage());
         }
 
         // 좋아요 관계 삭제
@@ -233,18 +235,17 @@ public class UserLikeService {
 
             // redis 검색
             if (!keys.isEmpty()) {
-                ObjectMapper mapper = new ObjectMapper();
                 for (String key : keys) {
                     Object value = redisTemplate.opsForValue().get(key);
                     if (value instanceof Map) {
                         Map<String, Object> map = (Map<String, Object>) value;
                         try {
-                            Matching matching = mapper.convertValue(map, Matching.class);
+                            Matching matching = objectMapper.convertValue(map, Matching.class);
                             System.out.println("추출한 유저: " + matching.getFemaleUser());
                             int distance = matchingService.calDistance(user, matching.getFemaleUser());
                             responses.add(new UserProfileResponse(matching.getFemaleUser(), distance, matching.getCreatedAt()));
                         } catch (IllegalArgumentException e) {
-                            throw new RedisSerializationException("500", "JSON 역직렬화 실패");
+                            throw new RedisSerializationException("500", "JSON 역직렬화 실패"+e.getMessage());
                         }
                     }
                 }

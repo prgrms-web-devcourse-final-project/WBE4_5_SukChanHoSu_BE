@@ -17,6 +17,6 @@ public class MatchingResponse {
         this.matchingId = matching.getMatchingId();
         this.maleUser = new UserProfileResponse(matching.getMaleUser(), distance);
         this.femaleUser = new UserProfileResponse(matching.getFemaleUser(), distance);
-        this.createdAt = matching.getCreatedAt();
+//        this.createdAt = matching.getCreatedAt();
     }
 }

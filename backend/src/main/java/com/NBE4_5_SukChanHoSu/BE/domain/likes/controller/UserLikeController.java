@@ -88,7 +88,7 @@ public class UserLikeController {
             return new RsData<>("404", "like 한 사용자가 없습니다.");
         }
 
-        return new RsData<>("200",profile.getNickName()+"가 좋아요한 유저 목록 반환",response);
+        return new RsData<>("200",profile.getNickName()+"가 좋아요한 유저 목록 반환: "+ userProfileResponses.size(),response);
     }
 
     @GetMapping("/liked")
@@ -114,7 +114,7 @@ public class UserLikeController {
             return new RsData<>("404", "나를 like 하는 사용자가 없습니다.");
         }
 
-        return new RsData<>("200",profile.getNickName()+"를 좋아요한 유저 목록 반환",response);
+        return new RsData<>("200",profile.getNickName()+"를 좋아요한 유저 목록 반환: "+ userProfileResponses.size(),response);
     }
 
     @GetMapping("/matching")
@@ -140,7 +140,7 @@ public class UserLikeController {
             return new RsData<>("404", "매칭된 사용자가 없습니다.",new Empty());
         }
 
-        return new RsData<>("200","매칭된 사용자 목록 조회("+userProfileResponses.size()+")",response);
+        return new RsData<>("200","매칭된 사용자 목록 조회: "+userProfileResponses.size(),response);
     }
 
     @DeleteMapping("/like")

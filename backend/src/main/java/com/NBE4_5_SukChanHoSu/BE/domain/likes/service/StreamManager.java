@@ -9,6 +9,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 
+import java.util.Set;
+
 @Component
 @DependsOn(value = {"noticeService", "sseController"})
 @RequiredArgsConstructor
