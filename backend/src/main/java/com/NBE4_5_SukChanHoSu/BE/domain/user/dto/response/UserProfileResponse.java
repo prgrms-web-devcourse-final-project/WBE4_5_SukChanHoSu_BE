@@ -36,4 +36,17 @@ public class UserProfileResponse {
         this.distance = "약 "+distance+"km";
     }
 
+    public UserProfileResponse (UserProfile userProfile) {
+        this.userId = userProfile.getUserId();
+        this.nickName = userProfile.getNickName();
+        this.gender = userProfile.getGender();
+        this.profileImage = userProfile.getProfileImage();
+        this.birthdate = userProfile.getBirthdate();
+        this.favoriteGenres = userProfile.getFavoriteGenres();
+        this.introduce = userProfile.getIntroduce();
+        this.latitude = userProfile.getLatitude();
+        this.longitude = userProfile.getLongitude();
+        this.searchRadius = userProfile.getSearchRadius();
+    }
+
 }

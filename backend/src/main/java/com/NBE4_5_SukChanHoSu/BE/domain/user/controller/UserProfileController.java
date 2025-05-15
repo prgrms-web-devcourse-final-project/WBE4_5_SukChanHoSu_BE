@@ -5,6 +5,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.NicknameCheckResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
@@ -81,11 +82,11 @@ public class UserProfileController {
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
     @GetMapping("/profile/me")
     //todo 임시, 이후 삭제
-    public RsData<UserProfile> getMyProfile1() {
+    public RsData<?> getMyProfile1() {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
-        return new RsData<>("200", "프로필 조회 성공", profile);
+        return new RsData<>("200", "프로필 조회 성공", new UserProfileResponse(profile));
     }
 
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
@@ -96,7 +97,7 @@ public class UserProfileController {
         UserProfile profile = matchingService.findUser(profileId);
         userProfileService.setRadius(profile, radius);
 
-        return new RsData<>("200", "프로필 조회 성공", profile);
+        return new RsData<>("200", "프로필 조회 성공", new UserProfileResponse(profile));
     }
 
 }
