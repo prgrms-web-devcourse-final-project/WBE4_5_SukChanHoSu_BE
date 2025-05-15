@@ -4,10 +4,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewRequestDt
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.repository.ReviewRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.*;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
@@ -107,6 +104,7 @@ public class BaseInitData {
                     .user(user) // 유저와 매핑
                     .build();
 
+            user.setRole(Role.ADMIN);
             // 데이터베이스에 저장
             userProfileRepository.save(userProfile);
 

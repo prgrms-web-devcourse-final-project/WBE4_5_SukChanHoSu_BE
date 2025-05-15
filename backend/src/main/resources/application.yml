@@ -49,3 +49,31 @@ cloud: # AWS 클라우드 설정
       static: ap-northeast-2  # AWS 리전 설정 (서울 리전)
     stack:
       auto: false  # 자동 스택 생성 여부 설정
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,metrics,prometheus  # Prometheus 메트릭을 수집
+  metrics:
+    web:
+      enabled: true  # Web 메트릭을 활성화
+  health:
+    indicators:
+      diskspace:
+        enabled: true  # 디스크 공간 모니터링
+      db:
+        enabled: true  # DB 모니터링
+      redis:
+        enabled: true  # Redis 모니터링
+  web:
+    description: "Backend Service Monitoring"  # 서비스 설명
+  prometheus:
+    metrics:
+      export:
+        enabled: true
+        step: 1m
+
+prometheus:
+  endpoint: /actuator/prometheus  # Prometheus 메트릭 노출 경로
+  scrape-interval: 10s  # Prometheus에서 메트릭을 얼마나 자주 가져올지 (10초마다)
