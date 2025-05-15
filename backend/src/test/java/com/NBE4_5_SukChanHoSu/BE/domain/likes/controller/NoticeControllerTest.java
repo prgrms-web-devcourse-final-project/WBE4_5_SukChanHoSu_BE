@@ -1,11 +1,14 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.likes.service.NoticeService;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserLoginRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
 import com.NBE4_5_SukChanHoSu.BE.global.config.BaseTestConfig;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.PreDestroy;
 import org.json.JSONObject;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,9 +53,36 @@ class NoticeControllerTest {
     @Autowired
     private MovieService movieService;
     private static String accessToken;
+    @Autowired
+    private NoticeService noticeService;
+    @Autowired
+    private SseController sseController;
 
     private static final String LIKE_STREAM = "like";
     private static final String MATCHING_STREAM = "matching";
+
+
+    private static boolean started = false; // 한번만 시작하게 제어하는 변수
+
+    // 앱 시작시
+    @BeforeAll
+    public void init() {
+        if (!started) {
+            new Thread(noticeService::startLikeStreamListener).start();
+            new Thread(noticeService::startMatchStreamListener).start();
+            started = true; // 다시 호출되지 않도록
+        }
+    }
+
+    // 앱 종료시
+    @AfterAll
+    public void destroy() {
+        if (started) {
+            noticeService.stop();
+            sseController.destroy();
+            started = false; // 재사용을 위해 초기화
+        }
+    }
 
     @BeforeEach
     void setUp() {

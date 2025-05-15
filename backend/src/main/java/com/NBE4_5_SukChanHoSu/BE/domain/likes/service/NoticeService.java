@@ -20,7 +20,6 @@ import org.springframework.data.redis.connection.stream.StreamReadOptions;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
-import java.text.ParseException;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -29,6 +28,9 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
 @Service
@@ -49,11 +51,13 @@ public class NoticeService {
 
     private String lastLikeId = "0-0"; // 초기값
     private String lastMatchId = "0-0"; // 초기값
+    private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     // 스트림 중지 메서드
     public void stop() {
-        running = false; // 스레드 종료 플래그
+        this.running = false; // running 플래그를 false로 설정
     }
+
 
     // Like Stream 리스너 시작
     public void startLikeStreamListener() {
@@ -65,11 +69,15 @@ public class NoticeService {
                     lettuceConnectionFactory.start();
                 }
                 // 스트림 읽고 처리
-                else{
-                    processStream(LIKE_STREAM,lastLikeId,this::processLikeEvent);
+                else {
+                    processStream(LIKE_STREAM, lastLikeId, this::processLikeEvent);
                 }
             } catch (Exception e) {
+                if (!running) {
+                    break; // running flag가 false면 스레드 종료
+                }
                 logger.error("Like Stream 처리 중 오류 발생: ", e);
+                break;
             }
         }
     }
@@ -86,7 +94,11 @@ public class NoticeService {
                     processStream(MATCHING_STREAM,lastMatchId,this::processMatchingEvent);
                 }
             } catch (Exception e) {
+                if (!running) {
+                    break; // running flag가 false면 스레드 종료
+                }
                 logger.error("Match Stream 처리 중 오류 발생: ", e);
+                break;
             }
         }
     }
@@ -182,7 +194,6 @@ public class NoticeService {
                 } catch (Exception e) {
                     throw new RedisSerializationException("500", "JSON 역 직렬화 실패");
                 }
-
             }
         }
     }
