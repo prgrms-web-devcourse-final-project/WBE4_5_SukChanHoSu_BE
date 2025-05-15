@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import jakarta.persistence.Entity;
@@ -25,15 +26,16 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 @SuperBuilder
 @EntityListeners(AuditingEntityListener.class)
 public class Review extends BaseTime {
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    // todo 영화 객체로 변경
-    private String title;
     private String content;
     private int likeCount;
     private Double rating;
+
+    @JoinColumn(name = "movie_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Movie movie;
 
     @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.EAGER)
