@@ -14,43 +14,28 @@ import java.util.List;
 public class UserProfileResponse {
     private Long userId;
     private String nickName;
-    private Gender gender;
     private String profileImage;
-    private LocalDate birthdate;
     private List<Genre> favoriteGenres;
     private String introduce;
-    private double latitude;
-    private double longitude;
-    private int searchRadius;
     private String distance;
-    private LocalDateTime time;
+    private LocalDateTime createdAt;
 
-    public UserProfileResponse (UserProfile userProfile, int distance, LocalDateTime time) {
+    public UserProfileResponse (UserProfile userProfile, int distance, LocalDateTime createdAt) {
         this.userId = userProfile.getUserId();
         this.nickName = userProfile.getNickName();
-        this.gender = userProfile.getGender();
         this.profileImage = userProfile.getProfileImage();
-        this.birthdate = userProfile.getBirthdate();
         this.favoriteGenres = userProfile.getFavoriteGenres();
         this.introduce = userProfile.getIntroduce();
-        this.latitude = userProfile.getLatitude();
-        this.longitude = userProfile.getLongitude();
-        this.searchRadius = userProfile.getSearchRadius();
-        this.time = time;
+        this.createdAt = createdAt;
         this.distance = "약 "+distance+"km";
     }
 
     public UserProfileResponse (UserProfile userProfile, int distance) {
         this.userId = userProfile.getUserId();
         this.nickName = userProfile.getNickName();
-        this.gender = userProfile.getGender();
         this.profileImage = userProfile.getProfileImage();
-        this.birthdate = userProfile.getBirthdate();
         this.favoriteGenres = userProfile.getFavoriteGenres();
         this.introduce = userProfile.getIntroduce();
-        this.latitude = userProfile.getLatitude();
-        this.longitude = userProfile.getLongitude();
-        this.searchRadius = userProfile.getSearchRadius();
         this.distance = "약 "+distance+"km";
     }
 

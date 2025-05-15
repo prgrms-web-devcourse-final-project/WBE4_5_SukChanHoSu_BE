@@ -124,23 +124,23 @@ public class UserLikeController {
             @RequestParam(defaultValue = "4") int pageSize) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
         UserProfile profile = matchingService.findUser(profileId);
-        List<UserMatchingResponse> matchingResponses = userLikeService.getUserMatches(profile);
+        List<UserProfileResponse> userProfileResponses = userLikeService.getUserMatches(profile);
 
-        int totalSize = matchingResponses.size();
+        int totalSize = userProfileResponses.size();
         int totalPages = (int) Math.ceil((double) totalSize / pageSize);
 
-        List<UserMatchingResponse> pagedResponses = matchingResponses.stream()
+        List<UserProfileResponse> pagedResponses = userProfileResponses.stream()
                 .skip(page * pageSize)
                 .limit(pageSize)
                 .toList();
 
-        PagedMatchingResponse response = new PagedMatchingResponse(pagedResponses,totalPages);
+        UserMatchingResponse response = new UserMatchingResponse(pagedResponses,totalPages);
 
-        if(response.getUserMatchingResponses().isEmpty()){
+        if(response.getMatchings().isEmpty()){
             return new RsData<>("404", "매칭된 사용자가 없습니다.",new Empty());
         }
 
-        return new RsData<>("200","매칭된 사용자 목록 조회("+matchingResponses.size()+")",response);
+        return new RsData<>("200","매칭된 사용자 목록 조회("+userProfileResponses.size()+")",response);
     }
 
     @DeleteMapping("/like")

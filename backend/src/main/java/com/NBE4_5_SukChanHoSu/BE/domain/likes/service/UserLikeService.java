@@ -173,7 +173,7 @@ public class UserLikeService {
         }
 
         // 정렬
-        likesUsers.sort((r1,r2) -> r1.getTime().compareTo(r2.getTime()));
+        likesUsers.sort((r1,r2) -> r1.getCreatedAt().compareTo(r2.getCreatedAt()));
         return likesUsers;
     }
 
@@ -216,13 +216,13 @@ public class UserLikeService {
         }
 
         // 정렬
-        likedUsers.sort((r1,r2) -> r1.getTime().compareTo(r2.getTime()));
+        likedUsers.sort((r1,r2) -> r1.getCreatedAt().compareTo(r2.getCreatedAt()));
         return likedUsers;
     }
 
     // match 목록 조회
-    public List<UserMatchingResponse> getUserMatches(UserProfile user) {
-        List<UserMatchingResponse> responses = new ArrayList<>();
+    public List<UserProfileResponse> getUserMatches(UserProfile user) {
+        List<UserProfileResponse> responses = new ArrayList<>();
         String pattern;
         Set<String> keys;
 
@@ -242,8 +242,7 @@ public class UserLikeService {
                             Matching matching = mapper.convertValue(map, Matching.class);
                             System.out.println("추출한 유저: " + matching.getFemaleUser());
                             int distance = matchingService.calDistance(user, matching.getFemaleUser());
-                            responses.add(new UserMatchingResponse(matching.getFemaleUser(), matching, distance));
-
+                            responses.add(new UserProfileResponse(matching.getFemaleUser(), distance, matching.getCreatedAt()));
                         } catch (IllegalArgumentException e) {
                             throw new RedisSerializationException("500", "JSON 역직렬화 실패");
                         }
@@ -255,7 +254,7 @@ public class UserLikeService {
                 for (Matching matching : matches) {
                     // 매칭된 여자 유저 리스트에 등록
                     int distance = matchingService.calDistance(user, matching.getFemaleUser());
-                    responses.add(new UserMatchingResponse(matching.getFemaleUser(), matching, distance));
+                    responses.add(new UserProfileResponse(matching.getFemaleUser(), distance, matching.getCreatedAt()));
 
                     // 캐싱
                     String key = "matching" + user.getUserId() + ":" + matching.getFemaleUser().getUserId();
@@ -277,7 +276,7 @@ public class UserLikeService {
                         try {
                             Matching matching = objectMapper.convertValue(map, Matching.class);
                             int distance = matchingService.calDistance(user, matching.getMaleUser());
-                            responses.add(new UserMatchingResponse(matching.getMaleUser(), matching, distance));
+                            responses.add(new UserProfileResponse(matching.getMaleUser(), distance, matching.getCreatedAt()));
                             System.out.println("추출한 유저: " + matching.getMaleUser());
                         } catch (IllegalArgumentException e) {
                             throw new RedisSerializationException("500", "JSON 역직렬화 실패");
@@ -290,7 +289,7 @@ public class UserLikeService {
                 for (Matching matching : matches) {
                     // 매칭된 남자 유저 리스트에 등록
                     int distance = matchingService.calDistance(user, matching.getMaleUser());
-                    responses.add(new UserMatchingResponse(matching.getMaleUser(), matching, distance));
+                    responses.add(new UserProfileResponse(matching.getMaleUser(), distance, matching.getCreatedAt()));
 
                     // 캐싱
                     String redisKey = "matching:" + matching.getMaleUser().getUserId() + ":" + user.getUserId();
