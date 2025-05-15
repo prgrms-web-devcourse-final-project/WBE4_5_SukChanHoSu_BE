@@ -139,7 +139,7 @@ class RecommendControllerTest {
         // then
         action.andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message",containsString("성공")))
+                .andExpect(jsonPath("$.message",containsString(String.valueOf(radius))))
                 .andExpect(jsonPath("$.data.searchRadius").value(radius));
 
         mvc.perform(get("/api/profile/profile/me")

@@ -241,7 +241,7 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
-                .andExpect(jsonPath("$.data.userMatchingResponses[*].user.userId").value(1));
+                .andExpect(jsonPath("$.data.matchings[*].userId").value(1));
         // liked 목록에서는 조회 불가능
         getLiked
                 .andExpect(status().isOk())
@@ -276,7 +276,7 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
-                .andExpect(jsonPath("$.data.userMatchingResponses[*].user.userId").value(1));
+                .andExpect(jsonPath("$.data.matchings[*].userId").value(1));
 
         // likes 목록에서는 조회 불가능
         getLikes
@@ -316,7 +316,7 @@ public class UserLikeControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
                 .andExpect(jsonPath("$.message",containsString("매칭된 사용자 목록 조회")))
-                .andExpect(jsonPath("$.data.userMatchingResponses[*].user.userId").value(1));
+                .andExpect(jsonPath("$.data.matchings[*].userId").value(1));
     }
 
     @Test

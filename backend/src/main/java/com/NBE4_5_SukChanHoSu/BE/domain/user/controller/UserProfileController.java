@@ -86,14 +86,14 @@ public class UserProfileController {
 
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
     @PutMapping("/radius")
-    public RsData<UserProfileResponse> setRadius(@RequestParam Integer radius) {
+    public RsData<ProfileResponse> setRadius(@RequestParam Integer radius) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
-        userProfileService.setRadius(profile, radius);
-        UserProfileResponse response = new UserProfileResponse(profile,0);
+        int updatedRadius = userProfileService.setRadius(profile, radius);
+        ProfileResponse response = new ProfileResponse(profile);
 
-        return new RsData<>("200", "탐색 범위 조절 성공", response);
+        return new RsData<>("200", "수정된 범위: "+ updatedRadius, response);
     }
 
 }
