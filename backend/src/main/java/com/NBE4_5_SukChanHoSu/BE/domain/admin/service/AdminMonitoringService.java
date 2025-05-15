@@ -39,11 +39,11 @@ public class AdminMonitoringService {
     public void incrementDailyMatches() {
         // 1. Micrometer Counter 증가 (모니터링용)
         dailyMatchesCounter.increment();
-        // 2. Redis 카운터 증가 (정확한 데이터 저장용)
+        // 2. Redis 카운터 증가
         String key = getTodayKey();
         redisTemplate.opsForValue().increment(key);
-        // Redis 키 TTL 2일로 설정 (데이터 누적 방지 및 자동 삭제)
-        redisTemplate.expire(key, 2, TimeUnit.DAYS);
+        // Redis 키 TTL 설정
+        redisTemplate.expire(key, 1, TimeUnit.DAYS);
     }
 
     // 오늘 일일 매칭 수 조회 (Redis 기준)
