@@ -75,10 +75,11 @@ public class TokenService {
     }
 
     public String createAccessToken(String email) {
+        User user = userRepository.findByEmail(email);
         return Jwts.builder()
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .claim(AUTHORITIES_KEY, Role.USER)
+                .claim(AUTHORITIES_KEY, user.getRole().getKey())
                 .setExpiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -117,7 +118,7 @@ public class TokenService {
 
         UserDetails principal = new PrincipalDetails(user);
 
-        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities());
     }
 
     // 토큰 정보를 검증하는 메서드

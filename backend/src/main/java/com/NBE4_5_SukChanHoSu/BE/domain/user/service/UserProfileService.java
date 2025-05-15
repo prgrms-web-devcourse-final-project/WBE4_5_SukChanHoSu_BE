@@ -121,7 +121,8 @@ public class UserProfileService {
     }
 
     @Transactional
-    public void setRadius(UserProfile userProfile, Integer radius) {
+    public int setRadius(UserProfile userProfile, Integer radius) {
         userProfile.setSearchRadius(radius);
+        return userProfile.getSearchRadius();
     }
 }

@@ -1,33 +1,28 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.NicknameCheckResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.NicknameCheckResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -82,22 +77,23 @@ public class UserProfileController {
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")
     @GetMapping("/profile/me")
     //todo 임시, 이후 삭제
-    public RsData<?> getMyProfile1() {
+    public RsData<UserProfile> getMyProfile1() {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
-        return new RsData<>("200", "프로필 조회 성공", new UserProfileResponse(profile));
+        return new RsData<>("200", "프로필 조회 성공", profile);
     }
 
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
     @PutMapping("/radius")
-    public RsData<?> setRadius(@RequestParam Integer radius) {
+    public RsData<ProfileResponse> setRadius(@RequestParam Integer radius) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
-        userProfileService.setRadius(profile, radius);
+        int updatedRadius = userProfileService.setRadius(profile, radius);
+        ProfileResponse response = new ProfileResponse(profile);
 
-        return new RsData<>("200", "프로필 조회 성공", new UserProfileResponse(profile));
+        return new RsData<>("200", "수정된 범위: "+ updatedRadius, response);
     }
 
 }
