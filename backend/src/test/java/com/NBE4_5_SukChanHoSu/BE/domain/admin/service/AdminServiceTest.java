@@ -4,90 +4,74 @@ import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.UserDetailResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserStatus;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @ActiveProfiles("test")
-@ExtendWith(MockitoExtension.class)
-class AdminServiceTest {
+public class AdminServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
-
-    @InjectMocks
+    @Autowired
     private AdminService adminService;
 
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-    }
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
     void testUpdateUserStatus_ValidUser_ChangeStatus() {
         // Given
-        User user = new User();
-        user.setId(1L);
-        user.setStatus(UserStatus.ACTIVE);
+        User user = userRepository.findByEmail("initUser1@example.com");
+        Long userId = user.getId();
+//        UserStatus initialStatus = user.getStatus();
+        UserStatus targetStatus = UserStatus.SUSPENDED;
 
         // When
-        adminService.updateUserStatus(1L, UserStatus.SUSPENDED);
+        adminService.updateUserStatus(userId, targetStatus);
 
         // Then
-        assertEquals(UserStatus.SUSPENDED, user.getStatus());
-        verify(userRepository).save(user);
+        User updatedUser = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("업데이트된 유저 없음"));
+        assertEquals(targetStatus, updatedUser.getStatus());
     }
 
     @Test
     void testUpdateUserStatus_UserDeleted() {
         // Given
-        User user = new User();
-        user.setId(2L);
-        user.setStatus(UserStatus.ACTIVE);
+        User user = userRepository.findByEmail("initUser2@example.com");
+        Long userId = user.getId();
 
         // When
-        adminService.updateUserStatus(2L, UserStatus.DELETED);
+        adminService.updateUserStatus(userId, UserStatus.DELETED);
 
         // Then
-        verify(userRepository).deleteById(2L);
+        assertFalse(userRepository.existsById(userId));
     }
 
     @Test
     void testGetUserDetail_ValidUser() {
         // Given
-        User user = new User();
-        user.setId(4L);
-        user.setEmail("initUser4@example.com");
-        user.setStatus(UserStatus.ACTIVE);
-        when(userRepository.findById(4L)).thenReturn(Optional.of(user));
+        User user = userRepository.findByEmail("initUser4@example.com");
+        Long userId = user.getId();
 
         // When
-        UserDetailResponse response = adminService.getUserDetail(4L);
+        UserDetailResponse response = adminService.getUserDetail(userId);
 
         // Then
-        assertEquals(4L, response.getId());
+        assertEquals(userId, response.getId());
         assertEquals("initUser4@example.com", response.getEmail());
         assertEquals(UserStatus.ACTIVE, response.getStatus());
     }
 
     @Test
     void testGetUserDetail_UserNotFound() {
+        // Given
+        Long nonExistingUserId = 999L;
 
         // When & Then
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
-            adminService.getUserDetail(5L);
+            adminService.getUserDetail(nonExistingUserId);
         });
         assertEquals("존재하지 않는 유저입니다.", exception.getMessage());
     }
