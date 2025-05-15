@@ -1,6 +1,5 @@
 package com.NBE4_5_SukChanHoSu.BE.global.jwt.service;
 
-import com.NBE4_5_SukChanHoSu.BE.global.util.CookieUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.ServletRequest;

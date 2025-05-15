@@ -1,18 +1,15 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.chat.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.chat.dto.ChatMessage;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserErrorCode;
+
+import com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.BadCredentialsException;
 import com.NBE4_5_SukChanHoSu.BE.global.security.PrincipalDetails;
-import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.server.reactive.HttpHandler;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
