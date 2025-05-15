@@ -18,9 +18,10 @@ import java.io.IOException;
 @Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends GenericFilterBean {
+    private final TokenService TokenService;
+
     private static final String AUTHORIZATION = "Authorization";
     private static final String BEARER_TYPE = "Bearer";
-    private final TokenService TokenService;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {

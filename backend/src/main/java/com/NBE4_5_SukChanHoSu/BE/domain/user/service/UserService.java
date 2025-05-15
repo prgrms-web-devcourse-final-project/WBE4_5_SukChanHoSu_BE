@@ -9,6 +9,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.service.TokenService;
+import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -29,12 +30,13 @@ public class UserService {
     private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
+
     private static final String EMAIL_VERIFY = "emailVerify:";
     private static final String TRUE = "true";
 
-
     public User join(UserSignUpRequest requestDto) {
         String verified = redisTemplate.opsForValue().get(EMAIL_VERIFY + requestDto.getEmail());
+
         if (!TRUE.equals(verified)) {
             throw new ServiceException(
                     UserErrorCode.EMAIL_NOT_VERIFY.getCode(),
@@ -48,6 +50,7 @@ public class UserService {
                     UserErrorCode.PASSWORDS_NOT_MATCH.getMessage()
             );
         }
+
         userRepository.findByEmail(requestDto.getEmail())
                 .ifPresent(user -> {
                     throw new ServiceException(
@@ -97,8 +100,9 @@ public class UserService {
         tokenService.addToBlacklist(refreshToken, expirationTime);
     }
 
-    // todo 삭제 예외처리
-    public void deleteUser(User user) {
+
+    public void deleteUser() {
+        User user = SecurityUtil.getCurrentUser();
         userRepository.delete(user);
     }
 }

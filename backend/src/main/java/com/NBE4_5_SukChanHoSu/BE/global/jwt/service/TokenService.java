@@ -44,14 +44,13 @@ public class TokenService {
     private final JwtUtil jwtUtil;
     private final UserRepository userRepository;
     private final RedisTemplate<String, String> redisTemplate;
+
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "Bearer";
     private static final String BLACKLIST_PREFIX = "blacklist:";
 
-
     @Value("${jwt.expiration.access-token}")
     private int accessTokenExpiration;
-
     @Value("${jwt.expiration.refresh-token}")
     private int refreshTokenExpiration;
 
