@@ -8,18 +8,18 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserMatchingResponse {
-    private Long matchingId;
-    private LocalDateTime createdAt;
-    private UserProfileResponse user;
+    private int size;
+    int totalPages;
+    private List<UserProfileResponse> matchings;
 
-    public UserMatchingResponse(UserProfile user, Matching matching, int distance) {
-        this.user = new UserProfileResponse(user, distance);
-        this.matchingId = matching.getMatchingId();
-        this.createdAt = matching.getCreatedAt();
+    public UserMatchingResponse(List<UserProfileResponse> userProfileResponses,int totalPages) {
+        this.matchings = userProfileResponses;
+        this.totalPages = totalPages;
     }
 }

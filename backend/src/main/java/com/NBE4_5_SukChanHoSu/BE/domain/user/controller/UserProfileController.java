@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
@@ -85,13 +86,14 @@ public class UserProfileController {
 
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
     @PutMapping("/radius")
-    public RsData<?> setRadius(@RequestParam Integer radius) {
+    public RsData<ProfileResponse> setRadius(@RequestParam Integer radius) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         UserProfile profile = matchingService.findUser(profileId);
-        userProfileService.setRadius(profile, radius);
+        int updatedRadius = userProfileService.setRadius(profile, radius);
+        ProfileResponse response = new ProfileResponse(profile);
 
-        return new RsData<>("200", "프로필 조회 성공", profile);
+        return new RsData<>("200", "수정된 범위: "+ updatedRadius, response);
     }
 
 }
