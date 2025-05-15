@@ -11,42 +11,47 @@
 <div id="chat-room-info"></div>
 <div id="chat-box" style="height: 200px; overflow-y: scroll; border: 1px solid #ccc; margin-top: 10px;"></div>
 
-<input type="text" id="sender" placeholder="보내는 사람 이름">
 <input type="text" id="message" placeholder="메시지 입력">
-<button onclick="sendMessage()">전송</button>
+<button id="send-btn">전송</button>
 
 <script>
     const roomId = new URLSearchParams(window.location.search).get('roomId');
     let stompClient = null;
 
     function connect() {
-        const socket = new SockJS('http://localhost:8080/ws-stomp');
+        const token = localStorage.getItem("accessToken");
+        const socket = new SockJS(`http://localhost:8080/ws-stomp?token=${token}`);
         stompClient = Stomp.over(socket);
-        stompClient.connect({}, () => {
-            stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
-                const msg = JSON.parse(message.body);
-                showMessage(`${msg.sender}: ${msg.message}`);
-            });
-        });
+
+        stompClient.connect(
+            {},
+            () => {
+                stompClient.subscribe(`/sub/chat/room/${roomId}`, (message) => {
+                    const msg = JSON.parse(message.body);
+                    showMessage(`${msg.sender}: ${msg.message}`);
+                });
+            },
+            (error) => {
+                console.error("STOMP 연결 실패", error);
+            }
+        );
     }
 
-    window.sendMessage = function () {
-        const sender = document.getElementById('sender').value;
+    function sendMessage() {
         const message = document.getElementById('message').value;
 
-        if (!sender || !message) {
-            alert("이름과 메시지를 입력하세요");
+        if (!message) {
+            alert("메시지를 입력하세요");
             return;
         }
 
         stompClient.send("/pub/chat/message", {}, JSON.stringify({
             roomId: roomId,
-            sender: sender,
             message: message
         }));
 
         document.getElementById('message').value = '';
-    };
+    }
 
     function showMessage(text) {
         const chatBox = document.getElementById('chat-box');
@@ -56,7 +61,7 @@
         chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    // 채팅방 정보 표시 및 연결
+    // 채팅방 정보 불러오기 + 연결
     fetch(`http://localhost:8080/chat/rooms/${roomId}`)
         .then(res => res.json())
         .then(room => {
@@ -66,6 +71,9 @@
             connect();
         })
         .catch(err => console.error("채팅방 정보 불러오기 실패", err));
+
+    // 버튼 이벤트 등록
+    document.getElementById("send-btn").addEventListener("click", sendMessage);
 </script>
 </body>
 </html>

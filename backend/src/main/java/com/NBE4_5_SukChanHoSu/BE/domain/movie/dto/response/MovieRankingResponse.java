@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.movie.dto;
+package com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.response;
 
 import lombok.Data;
 

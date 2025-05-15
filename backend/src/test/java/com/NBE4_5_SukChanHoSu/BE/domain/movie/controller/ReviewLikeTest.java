@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("test")
 class ReviewLikeTest {
 
     private ReviewLikeService reviewLikeService;

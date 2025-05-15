@@ -8,13 +8,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 
+import java.security.Principal;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
 @Slf4j
 @Getter
-public class PrincipalDetails implements UserDetails, OAuth2User {
+public class PrincipalDetails implements UserDetails, OAuth2User, Principal {
     private final User user;
     private Map<String, Object> attributes;
 
