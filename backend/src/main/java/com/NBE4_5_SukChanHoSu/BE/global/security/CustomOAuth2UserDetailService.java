@@ -1,7 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.global.security;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
-    private static final String GOOGLE_PREFIX  = "google";
+    private static final String GOOGLE_PREFIX = "google";
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
@@ -34,19 +34,20 @@ public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
         String email = oAuth2UserInfo.getProviderEmail();
         String name = oAuth2UserInfo.getProviderName();
 
-        User user = userRepository.findByEmail(email)
-                .orElseGet(() -> {
-                    User newUser = User.builder()
-                            .password(UUID.randomUUID().toString())
-                            .email(email)
-                            .role(Role.USER)
-                            .name(name)
-                            .provider(provider)
-                            .providerId(providerId)
-                            .emailVerified(true)
-                            .build();
-                    return userRepository.save(newUser);
-                });
+        User user = userRepository.findByEmail(email);
+
+        if (user == null) {
+            user = User.builder()
+                    .password(UUID.randomUUID().toString())
+                    .email(email)
+                    .role(Role.USER)
+                    .name(name)
+                    .provider(provider)
+                    .providerId(providerId)
+                    .emailVerified(true)
+                    .build();
+            userRepository.save(user);
+        }
 
 
         return new PrincipalDetails(user, oAuth2User.getAttributes());

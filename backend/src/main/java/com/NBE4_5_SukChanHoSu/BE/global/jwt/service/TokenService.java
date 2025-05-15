@@ -105,17 +105,9 @@ public class TokenService {
         // 클레임에서 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                 .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+                .toList();
 
-        Optional<User> optionalUser = userRepository.findByEmail(claims.getSubject());
-
-        User user = optionalUser.orElseThrow(() ->
-                new ServiceException(
-                        UserErrorCode.EMAIL_NOT_FOUND.getCode(),
-                        UserErrorCode.EMAIL_NOT_FOUND.getMessage()
-                )
-        );
-
+        User user = userRepository.findByEmail(claims.getSubject());
         UserDetails principal = new PrincipalDetails(user);
 
         return new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities());
