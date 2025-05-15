@@ -307,7 +307,7 @@ resource "aws_instance" "ec2_2" {
 }
 
 resource "aws_eip_association" "eip_assoc_ec2_1" {
-  instance_id   = aws_instance.ec2_1.id
+  instance_id   = aws_instance.ec2_2.id
   allocation_id = aws_eip.eip_ec2_1.id
 }
 
