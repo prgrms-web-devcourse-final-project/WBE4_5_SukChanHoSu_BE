@@ -47,5 +47,15 @@ public class AdminController {
         return new RsData<>("200-OK", "오늘 일어난 매칭 수 조회 성공", count);
     }
 
+    @Operation(summary = "부적절 리뷰 삭제", description = "관리자가 부적절한 리뷰를 삭제합니다.")
+    @DeleteMapping("/reviews/{reviewId}")
+    public RsData<String> deleteInappropriateReview(
+            @PathVariable Long reviewId,
+            @RequestParam String reason
+    ) throws Exception {
+        adminService.deleteInappropriateReview(reviewId, reason);
+        return new RsData<>("200-OK", "부적절한 리뷰가 성공적으로 삭제되었습니다.", reason);
+    }
+
 }
 

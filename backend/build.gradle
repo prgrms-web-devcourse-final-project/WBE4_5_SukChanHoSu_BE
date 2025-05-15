@@ -21,6 +21,9 @@ configurations {
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://djl.ai/maven/"
+    }
 }
 
 dependencies {
@@ -76,6 +79,23 @@ dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus'
     //actuator
     implementation("org.springframework.boot:spring-boot-starter-actuator:3.4.5")
+    // DJL
+    implementation 'ai.djl:api:0.24.0'
+    implementation 'ai.djl.pytorch:pytorch-engine:0.24.0'
+    implementation 'ai.djl.huggingface:tokenizers:0.24.0'
+
+    // PyTorch 엔진
+    implementation 'ai.djl.pytorch:pytorch-engine:0.23.0'
+//    implementation 'ai.djl.pytorch:pytorch-native-auto:2.0.0'
+
+    // NLP 모델 (Hugging Face)
+    implementation 'ai.djl.huggingface:tokenizers:0.23.0'
+//    implementation 'ai.djl.huggingface:transformers:0.23.0'
+
+    // 필수 Translator 및 Predictor
+//    implementation 'ai.djl.api:djl-basicdataset:0.23.0'
+//    implementation 'ai.djl.api:djl-translate:0.23.0'
+
     tasks.named('test') {
         useJUnitPlatform()
     }
