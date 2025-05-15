@@ -53,5 +53,6 @@ public class User {
     private UserProfile userProfile;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @JsonIgnoreProperties({"user", "userProfile"})
     private List<Review> reviews = new ArrayList<>();
 }
