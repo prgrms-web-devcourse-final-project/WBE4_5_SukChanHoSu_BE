@@ -48,7 +48,6 @@ spring:
         highlight_sql: true
         use_sql_comments: true
   security:
-    enabled: true
     oauth2:
       client:
         registration:
@@ -59,7 +58,7 @@ spring:
               - profile
               - email
             redirect-uri: https://api.app.mm.ts0608.life/login/oauth2/code/google
-      enabled: false
+
   cloud: # AWS 클라우드 설정
     aws:
       s3:
