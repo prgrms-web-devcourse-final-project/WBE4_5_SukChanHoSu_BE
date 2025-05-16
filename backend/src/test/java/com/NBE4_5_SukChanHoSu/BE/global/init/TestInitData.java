@@ -10,12 +10,13 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
-import org.springframework.context.annotation.Bean;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Random;
@@ -24,13 +25,23 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Configuration
-@ActiveProfiles("test")
+@RequiredArgsConstructor
 public class TestInitData {
+
     @Autowired
     private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private UserProfileRepository userProfileRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private MovieRepository movieRepository;
 
-    @Bean
-    public ApplicationRunner initData(UserProfileRepository userProfileRepository, UserService userService, UserRepository userRepository, MovieRepository movieRepository) {
+
+    @EventListener(ApplicationReadyEvent.class)
+    public ApplicationRunner initData() {
         Random random = new Random();
         return args -> {
             if (userRepository.count() > 0) {

@@ -19,6 +19,7 @@ public class PrincipalDetails implements UserDetails, OAuth2User, Principal {
     private final User user;
     private Map<String, Object> attributes;
 
+    private static final String ROLE_PREFIX = "ROLE_";
 
     public PrincipalDetails(User user) {
         this.user = user;
@@ -42,7 +43,7 @@ public class PrincipalDetails implements UserDetails, OAuth2User, Principal {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
+                new SimpleGrantedAuthority(ROLE_PREFIX + user.getRole().name())
         );
     }
 

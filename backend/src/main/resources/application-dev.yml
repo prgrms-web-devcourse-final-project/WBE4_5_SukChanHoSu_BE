@@ -17,7 +17,7 @@ spring:
       auth-code-expiration-millis: 300000  # 5 * 60 * 1000(밀리초) == 5분
   data:
     redis:
-      host: localhost
+      host: redis
       port: 6379
       time_to_live:
         likes: 86400 # 24h
@@ -89,3 +89,5 @@ movie:
     rank-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/boxoffice/searchWeeklyBoxOfficeList.json"
     detail-url: "https://www.kobis.or.kr/kobisopenapi/webservice/rest/movie/searchMovieInfo.json"
     tmdb-search-url: "https://api.themoviedb.org/3/search/movie"
+
+

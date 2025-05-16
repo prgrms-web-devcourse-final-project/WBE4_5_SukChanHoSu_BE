@@ -1,6 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant.ReviewErrorCode;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.responseCode.ReviewErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.ReviewLikeResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.ReviewLike;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
+import org.springframework.test.context.ActiveProfiles;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -23,6 +24,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+@ActiveProfiles("test")
 class ReviewLikeTest {
 
     private ReviewLikeService reviewLikeService;

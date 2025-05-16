@@ -15,6 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -139,7 +140,7 @@ class RecommendControllerTest {
         // then
         action.andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value("200"))
-                .andExpect(jsonPath("$.message",containsString("성공")))
+                .andExpect(jsonPath("$.message",containsString(String.valueOf(radius))))
                 .andExpect(jsonPath("$.data.searchRadius").value(radius));
 
         mvc.perform(get("/api/profile/profile/me")
