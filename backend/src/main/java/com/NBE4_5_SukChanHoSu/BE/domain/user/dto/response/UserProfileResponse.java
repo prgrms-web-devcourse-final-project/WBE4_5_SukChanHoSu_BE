@@ -38,5 +38,4 @@ public class UserProfileResponse {
         this.introduce = userProfile.getIntroduce();
         this.distance = "약 "+distance+"km";
     }
-
 }

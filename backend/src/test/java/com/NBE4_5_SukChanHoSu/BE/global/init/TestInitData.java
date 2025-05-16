@@ -14,11 +14,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Random;
@@ -30,11 +28,16 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class TestInitData {
 
-    @Autowired private RedisTemplate<String, String> redisTemplate;
-    @Autowired private UserProfileRepository userProfileRepository;
-    @Autowired private UserService userService;
-    @Autowired private UserRepository userRepository;
-    @Autowired private MovieRepository movieRepository;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private UserProfileRepository userProfileRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private MovieRepository movieRepository;
 
 
     @EventListener(ApplicationReadyEvent.class)
