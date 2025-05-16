@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 @Slf4j
 @Service
@@ -26,13 +27,26 @@ public class ReviewService {
     private static final int FIRST_LINE = 0;
     private static final int FIRST_INDEX = 0;
     private static final int SECOND_INDEX = 1;
+    private static final List<Pattern> PROFANITY_PATTERNS = List.of(
+            Pattern.compile("씨발", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("좆", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("개새끼", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("병신", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("ㅅㅂ", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("ㅈ같", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("꺼져", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("미친", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("염병", Pattern.CASE_INSENSITIVE)
+    );
 
     public ReviewResponseDto createReviewPost(ReviewRequestDto requestDto) {
         User user = SecurityUtil.getCurrentUser();
 
+        // 욕설 마스킹 적용
+        String filteredContent = maskProfanity(requestDto.getContent());
         Review review = Review.builder()
                 .title(requestDto.getTitle())
-                .content(requestDto.getContent())
+                .content(filteredContent)
                 .rating(requestDto.getRating())
                 .user(user)
                 .build();
@@ -103,6 +117,8 @@ public class ReviewService {
                 );
 
         if (requestDto.getContent() != null) {
+            // 욕설 마스킹 적용
+            String filteredContent = maskProfanity(requestDto.getContent());
             review.setContent(requestDto.getContent());
         }
 
@@ -113,5 +129,15 @@ public class ReviewService {
 
     public void deleteReview(Long reviewId) {
         reviewRepository.deleteById(reviewId);
+    }
+
+    // 욕설 마스킹 내부 메서드
+    private String maskProfanity(String content) {
+        if (content == null) return null;
+
+        for (Pattern pattern : PROFANITY_PATTERNS) {
+            content = pattern.matcher(content).replaceAll("ㅇㅇ");
+        }
+        return content;
     }
 }
