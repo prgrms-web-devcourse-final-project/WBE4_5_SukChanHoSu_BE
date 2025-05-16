@@ -2,13 +2,13 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant.ReviewErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewCreateDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewUpdateDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.AllReviewDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.ReviewResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.repository.ReviewRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.responseCode.ReviewErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
@@ -65,7 +65,7 @@ public class ReviewService {
     }
 
     public ReviewResponseDto getOneReview(Long reviewId) {
-        Review review = reviewRepository.findById(reviewId)
+        Review review = reviewRepository.findByIdWithMovie(reviewId)
                 .orElseThrow(() -> new ServiceException(
                                 ReviewErrorCode.REVIEW_NOT_FOUND.getCode(),
                                 ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
@@ -77,7 +77,7 @@ public class ReviewService {
     public AllReviewDto getAllReviewsByMovieId(Long movieId, String sort) {
         List<ReviewResponseDto> reviewList = new ArrayList<>();
 
-        if (sort.isEmpty()) {
+        if (sort == null || sort.isEmpty()) {
             List<Review> reviews = reviewRepository.findByMovie_MovieIdOrderByCreatedDateDesc(movieId);
             reviewList = reviews.stream()
                     .map(ReviewResponseDto::new)
@@ -101,7 +101,7 @@ public class ReviewService {
 
     @Transactional
     public void updateReview(Long reviewId, ReviewUpdateDto requestDto) {
-        Review review = reviewRepository.findById(reviewId)
+        Review review = reviewRepository.findByIdWithMovie(reviewId)
                 .orElseThrow(() -> new ServiceException(
                                 ReviewErrorCode.REVIEW_NOT_FOUND.getCode(),
                                 ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()

@@ -31,12 +31,14 @@ public class ReviewLikeService {
     private static final String LOCK_PREFIX = "lock:review:like:";
     private static final int LIKE_INCREMENT = 1;
     private static final int LIKE_DECREMENT = -1;
+    private static final long LOCK_LEASE_TIME_SECONDS = 5;
+    private static final long LOCK_WAIT_TIME_SECONDS = 10;
 
     @Transactional
     public ReviewLikeResponseDto addLike(Long reviewId) {
         User user = SecurityUtil.getCurrentUser();
 
-        Review review = reviewRepository.findById(reviewId)
+        Review review = reviewRepository.findByIdWithMovie(reviewId)
                 .orElseThrow(() -> new ServiceException(
                         ReviewErrorCode.REVIEW_NOT_FOUND.getCode(),
                         ReviewErrorCode.REVIEW_NOT_FOUND.getMessage()
@@ -51,7 +53,7 @@ public class ReviewLikeService {
 
         boolean isLocked = false;
         try {
-            isLocked = lock.tryLock(5, 10, TimeUnit.SECONDS);
+            isLocked = lock.tryLock(LOCK_LEASE_TIME_SECONDS, LOCK_WAIT_TIME_SECONDS, TimeUnit.SECONDS);
             if (!isLocked) {
                 throw new RuntimeException(LOCK_ACQUIRE_FAIL_MESSAGE);
             }

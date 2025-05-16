@@ -3,6 +3,7 @@ package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.FetchType;
@@ -29,9 +30,14 @@ public class Review extends BaseTime {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
+
+    @Column(nullable = false)
     private String content;
-    private int likeCount;
+
+    @Column(nullable = false)
     private Double rating;
+
+    private int likeCount;
 
     @JoinColumn(name = "movie_id")
     @ManyToOne(fetch = FetchType.LAZY)

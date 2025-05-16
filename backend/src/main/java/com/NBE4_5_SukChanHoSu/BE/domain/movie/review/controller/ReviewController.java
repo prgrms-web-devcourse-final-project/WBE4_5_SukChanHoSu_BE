@@ -1,10 +1,10 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant.ReviewSuccessCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewCreateDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewUpdateDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.AllReviewDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.ReviewResponseDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.responseCode.ReviewSuccessCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import io.swagger.v3.oas.annotations.Operation;
