@@ -3,6 +3,7 @@ package com.NBE4_5_SukChanHoSu.BE.global.init;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewCreateDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.repository.ReviewRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
@@ -135,7 +136,7 @@ public class BaseInitData {
         Random random = new Random();
 
         for (User user : users) {
-            Movie movie = movies.get(random.nextInt(movies.size())); // 랜덤 영화 선택
+            Movie movie = movies.getFirst();
             double rating = 2.5 + random.nextDouble() * 2.5; // 2.5 ~ 5.0
 
             ReviewCreateDto reviewDto = new ReviewCreateDto();
@@ -145,6 +146,11 @@ public class BaseInitData {
 
             reviewService.initCreateReviewPost(reviewDto, user);
         }
+
+        List<Review> reviews = reviewRepository.findAllByMovie_MovieId(20070001L);
+        reviews.getFirst().setLikeCount(10);
+        reviews.get(1).setLikeCount(8);
+        reviews.get(2).setLikeCount(6);
     }
 
 

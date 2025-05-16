@@ -158,15 +158,13 @@ public class TestInitData {
                     .user(user1)
                     .movie(movie1)
                     .rating(4.5)
-                    .likeCount(10)
-                    .content("이 영화 정말 재미있었어요! (Inception에 대한 리뷰입니다)")
+                    .content("꿈속에서 펼쳐지는 놀라운 액션! 놀란 감독 최고.")
                     .build();
 
             Review review2 = Review.builder()
                     .user(user2)
                     .movie(movie2)
                     .rating(4.0)
-                    .likeCount(8)
                     .content("철학적인 주제와 액션의 조화가 인상적이었다.")
                     .build();
 

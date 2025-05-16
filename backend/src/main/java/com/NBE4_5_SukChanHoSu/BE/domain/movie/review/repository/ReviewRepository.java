@@ -17,4 +17,6 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
 
     List<Review> findByMovie_MovieIdOrderByCreatedDateDesc(Long movieId);
     List<Review> findByMovie_MovieIdOrderByLikeCountDescCreatedDateDesc(Long movieId);
+
+    List<Review> findAllByMovie_MovieId(Long movieId);
 }

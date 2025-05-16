@@ -147,6 +147,6 @@ public class ReviewControllerTest {
                         .param("sort", "like"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.data.reviews[0].likeCount").value(8))
-                .andExpect(jsonPath("$.data.reviews[1].likeCount").value(0));
+                .andExpect(jsonPath("$.data.reviews[1].likeCount").value(6));
     }
 }
