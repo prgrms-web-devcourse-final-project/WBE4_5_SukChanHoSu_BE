@@ -1,7 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.global.util;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserErrorCode;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.BadCredentialsException;
 import com.NBE4_5_SukChanHoSu.BE.global.security.PrincipalDetails;
 import lombok.AccessLevel;

@@ -4,6 +4,8 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode.UserErrorCode;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.BlacklistedTokenException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.ExpiredTokenException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.InvalidTokenException;
@@ -32,6 +34,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -49,7 +52,6 @@ public class TokenService {
 
     @Value("${jwt.expiration.access-token}")
     private int accessTokenExpiration;
-
     @Value("${jwt.expiration.refresh-token}")
     private int refreshTokenExpiration;
 
@@ -107,7 +109,7 @@ public class TokenService {
         // 클레임에서 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                 .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+                .toList();
 
         User user = userRepository.findByEmail(claims.getSubject());
         UserDetails principal = new PrincipalDetails(user);
