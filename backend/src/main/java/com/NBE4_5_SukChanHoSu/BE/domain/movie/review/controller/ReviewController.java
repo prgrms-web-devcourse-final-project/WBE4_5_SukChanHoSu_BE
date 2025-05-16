@@ -78,11 +78,13 @@ public class ReviewController {
             summary = "리뷰 수정",
             description = "리뷰 ID를 사용하여 기존 리뷰를 수정합니다."
     )
-    public RsData<?> updateReview(@PathVariable Long reviewId, @RequestBody ReviewUpdateDto requestDto) {
+    public RsData<ReviewResponseDto> updateReview(@PathVariable Long reviewId, @RequestBody ReviewUpdateDto requestDto) {
         reviewService.updateReview(reviewId, requestDto);
+        ReviewResponseDto reviewResponseDto = reviewService.getOneReview(reviewId);
         return new RsData<>(
                 ReviewSuccessCode.REVIEW_UPDATED.getCode(),
-                ReviewSuccessCode.REVIEW_UPDATED.getMessage()
+                ReviewSuccessCode.REVIEW_UPDATED.getMessage(),
+                reviewResponseDto
         );
     }
 
