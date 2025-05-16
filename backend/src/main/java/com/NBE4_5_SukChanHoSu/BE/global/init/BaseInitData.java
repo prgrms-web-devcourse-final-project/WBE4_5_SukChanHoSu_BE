@@ -95,7 +95,7 @@ public class BaseInitData {
             UserProfile userProfile = UserProfile.builder()
                     .nickName("TempUser" + i)
                     .gender(i % 2 == 0 ? Gender.Female : Gender.Male)
-                    .profileImage("https://example.com/profile" + i + ".jpg")
+                    .profileImages(List.of("https://example.com/profile" + i + ".jpg"))
                     .favoriteGenres(genres) // 장르 리스트 설정
                     .introduce("안녕하세요! 임시 유저 " + i + "입니다.")
                     .latitude(37.5665 + (i * 0.02)) // 임의의 위도 값
@@ -114,7 +114,7 @@ public class BaseInitData {
             System.out.println("userId: " + userProfile.getUserId());
             System.out.println("nickName: " + userProfile.getNickName());
             System.out.println("gender: " + userProfile.getGender());
-            System.out.println("profileImage: " + userProfile.getProfileImage());
+            System.out.println("profileImage: " + userProfile.getProfileImages());
             System.out.println("favoriteGenres: " + userProfile.getFavoriteGenres());
             System.out.println("introduce: " + userProfile.getIntroduce());
             System.out.println("latitude: " + userProfile.getLatitude());

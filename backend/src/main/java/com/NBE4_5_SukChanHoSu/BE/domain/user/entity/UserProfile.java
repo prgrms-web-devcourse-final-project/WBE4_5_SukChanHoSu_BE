@@ -61,9 +61,10 @@ public class UserProfile extends BaseTime {
     @Column(nullable = false)
     private Gender gender;
 
+    @ElementCollection
     @Column(nullable = false)
     @Setter
-    private String profileImage;
+    private List<String> profileImages = new ArrayList<>();
 
     @Past(message = "생년월일은 과거 날짜여야 합니다.")
     private LocalDate birthdate;

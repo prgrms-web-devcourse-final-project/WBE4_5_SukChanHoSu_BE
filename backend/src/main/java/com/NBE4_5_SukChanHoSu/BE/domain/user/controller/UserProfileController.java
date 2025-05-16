@@ -37,17 +37,18 @@ public class UserProfileController {
     @PostMapping(consumes = "multipart/form-data")
     @ResponseStatus(HttpStatus.CREATED)
     public RsData<ProfileResponse> createProfile(@ModelAttribute  ProfileRequest dto,
-                                                 @RequestPart(value = "profileImage", required = false) MultipartFile profileImageFile) throws IOException {
+                                                 @RequestPart(value = "profileImages", required = false) List<MultipartFile> profileImages) throws IOException {
 
-        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto,profileImageFile);
+        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto,profileImages);
         return new RsData<>("201", "프로필 등록 완료", response);
     }
 
     @Operation(summary = "프로필 수정", description = "닉네임, 성별, 위치 등 프로필 정보 수정")
     @PutMapping(consumes = "multipart/form-data")
     public RsData<ProfileResponse> updateProfile(@ModelAttribute ProfileUpdateRequest dto,
-                                                 @RequestPart(value = "profileImage", required = false) MultipartFile profileImageFile) throws IOException {
-        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto,profileImageFile);
+                                                 @RequestPart(value = "profileImages", required = false) List<MultipartFile> profileImages,
+                                                 @RequestParam(value = "imagesToDelete", required = false) List<String> imagesToDelete) throws IOException {
+        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto,profileImages,imagesToDelete);
         return new RsData<>("200", "프로필 수정 완료", response);
     }
 
