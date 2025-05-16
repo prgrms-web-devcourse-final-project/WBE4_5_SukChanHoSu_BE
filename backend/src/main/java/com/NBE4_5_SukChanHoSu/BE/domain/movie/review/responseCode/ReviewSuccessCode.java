@@ -4,7 +4,6 @@ import lombok.Getter;
 
 @Getter
 public enum ReviewSuccessCode {
-
     REVIEW_CREATED("200-1", "리뷰 작성 성공"),
     REVIEW_FETCHED("200-2", "리뷰 조회 성공"),
     REVIEW_LIST_FETCHED("200-3", "리뷰 목록 조회 성공"),
