@@ -1,7 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.chat.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.chat.dto.ChatMessage;
-
+import com.NBE4_5_SukChanHoSu.BE.domain.chat.service.ChatMessageService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.BadCredentialsException;
 import com.NBE4_5_SukChanHoSu.BE.global.security.PrincipalDetails;
@@ -13,6 +13,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.stereotype.Controller;
 
 import java.security.Principal;
+import java.time.LocalDateTime;
 
 
 @Controller
@@ -20,6 +21,7 @@ import java.security.Principal;
 public class ChatController {
 
     private final SimpMessagingTemplate messagingTemplate;
+    private final ChatMessageService chatMessageService;
 
     @MessageMapping("/chat/message")
     public void sendMessage(@Payload ChatMessage message, Principal principal) {
@@ -43,8 +45,14 @@ public class ChatController {
         String nickname = details.getUser().getUserProfile().getNickName(); // or getUser().getNickname() if 존재
         message.setSender(nickname);
 
+        message.setSentAt(LocalDateTime.now());
 
-         //메시지 전송
+        // Redis에 메시지 저장
+        chatMessageService.saveMessage(message);
+
+        //메시지 전송
         messagingTemplate.convertAndSend("/sub/chat/room/" + message.getRoomId(), message);
+
+
     }
 }
