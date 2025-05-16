@@ -35,7 +35,7 @@ public class ReviewLikeService {
     private static final long LOCK_WAIT_TIME_SECONDS = 10;
 
     @Transactional
-    public ReviewLikeResponseDto addLike(Long reviewId) {
+    public ReviewLikeResponseDto reviewLikeHandler(Long reviewId) {
         User user = SecurityUtil.getCurrentUser();
 
         Review review = reviewRepository.findByIdWithMovie(reviewId)
@@ -58,8 +58,7 @@ public class ReviewLikeService {
                 throw new RuntimeException(LOCK_ACQUIRE_FAIL_MESSAGE);
             }
 
-            ReviewLike reviewLike = reviewLikeRepository.findById(reviewId)
-                    .orElse(null);
+            ReviewLike reviewLike = reviewLikeRepository.findByReviewIdAndUserId(reviewId, user.getId());
 
             if (reviewLike == null) {
                 reviewLike = ReviewLike.builder()
