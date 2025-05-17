@@ -72,7 +72,7 @@ public class BaseInitData {
 
         Random random = new Random();
 
-        for (int i = 1; i <= 30; i++) {
+        for (int i = 1; i <= 100; i++) {
             String newEmail = "initUser" + i + "@example.com";
             redisTemplate.opsForValue().set("emailVerify:" + newEmail, "true", 5, TimeUnit.MINUTES);
             UserSignUpRequest signUpDto = UserSignUpRequest.builder()
@@ -98,8 +98,8 @@ public class BaseInitData {
                     .profileImages(List.of("https://example.com/profile" + i + ".jpg"))
                     .favoriteGenres(genres) // 장르 리스트 설정
                     .introduce("안녕하세요! 임시 유저 " + i + "입니다.")
-                    .latitude(37.5665 + (i * 0.02)) // 임의의 위도 값
-                    .longitude(126.9780 + (i * 0.02)) // 임의의 경도 값
+                    .latitude(37.5665 + (i * 0.01)) // 임의의 위도 값
+                    .longitude(126.9780 + (i * 0.01)) // 임의의 경도 값
                     .searchRadius(20)
                     .user(user) // 유저와 매핑
                     .build();
