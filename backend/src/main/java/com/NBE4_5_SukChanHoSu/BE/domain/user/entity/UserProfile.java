@@ -6,21 +6,7 @@ import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import com.NBE4_5_SukChanHoSu.BE.global.config.GenreListDeserializer;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -47,7 +33,6 @@ import java.util.Objects;
 @Table(name = "user_profile")
 public class UserProfile extends BaseTime {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long userId;
 
     @Setter
@@ -115,6 +100,7 @@ public class UserProfile extends BaseTime {
 
     @OneToOne
     @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @MapsId
     @JsonIgnoreProperties({"userProfile"})
     private User user;
 
