@@ -26,5 +26,4 @@ public class ProfileUpdateRequest {
     private List<String> watchedMovies;
     private List<String> preferredTheaters;
     private String introduce;
-
 }

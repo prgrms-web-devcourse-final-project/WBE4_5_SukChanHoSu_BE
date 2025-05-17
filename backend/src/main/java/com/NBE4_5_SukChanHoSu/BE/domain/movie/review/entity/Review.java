@@ -38,4 +38,15 @@ public class Review extends BaseTime {
     @JoinColumn(name = "user_id")
     @ManyToOne(fetch = FetchType.EAGER)
     private User user;
+
+    public void setContent(String content) {
+        this.content = content;
+        this.filterProfanity();
+    }
+
+    private void filterProfanity() {
+        // 내부에서 필터링하여 저장
+        this.content = this.content.replaceAll("씨발|좆|개새끼|병신|ㅅㅂ|ㅈ같|꺼져|미친|염병", "ㅇㅇ");
+    }
+
 }

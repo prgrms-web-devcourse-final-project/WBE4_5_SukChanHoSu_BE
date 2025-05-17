@@ -37,24 +37,30 @@ public class UserProfileService {
     private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
 
     @Transactional
-    public ProfileResponse createProfile(Long userId, ProfileRequest dto, MultipartFile profileImageFile) throws IOException {
+    public ProfileResponse createProfile(Long userId, ProfileRequest dto, List<MultipartFile> profileImageFiles) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
 
         // 해당 userId를 가진 UserProfile이 이미 존재하는지 확인
-        Optional<UserProfile> existingProfile = userProfileRepository.findByUserId(userId);
-        String profileImageUrl = null;
-        UserProfile userProfile;
-        profileImageUrl = s3Util.uploadFile(profileImageFile);
+        if (userProfileRepository.existsByUserId(userId)) {
+            throw new IllegalStateException("이미 프로필이 등록된 사용자입니다.");
+        }
+
+        // 프로필 이미지 업로드
+        List<String> profileImageUrls = new ArrayList<>();
+        if (profileImageFiles != null) {
+            for (MultipartFile file : profileImageFiles) {
+                String imageUrl = s3Util.uploadFile(file);
+                profileImageUrls.add(imageUrl);
+            }
+        }
 
         // 프로필이 없으면 새로 생성
-        if (!existingProfile.isPresent()) {
-            userProfile = new UserProfile();
-            userProfile = UserProfile.builder()
+        UserProfile userProfile = UserProfile.builder()
                     .user(user)
                     .nickName(dto.getNickname())
                     .gender(dto.getGender())
-                    .profileImage(profileImageUrl)
+                    .profileImages(profileImageUrls)
                     .latitude(dto.getLatitude())
                     .longitude(dto.getLongitude())
                     .birthdate(dto.getBirthdate())
@@ -66,25 +72,37 @@ public class UserProfileService {
                     .preferredTheaters(dto.getPreferredTheaters())
                     .build();
 
-        } else {
-            // 프로필이 이미 존재하면 예외 발생 (또는 업데이트 로직 처리 - API 역할에 따라 다름)
-            throw new IllegalStateException("이미 프로필이 등록된 사용자입니다.");
-        }
-
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);
         return new ProfileResponse(savedUserProfile);
     }
 
     @Transactional
-    public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto, MultipartFile profileImageFile) throws IOException {
+    public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto, List<MultipartFile> newProfileImages,List<String> imagesToDelete) throws IOException {
         UserProfile userProfile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
-        String profileImageUrl = userProfile.getProfileImage();
+        //기존 이미지 삭제
+        if (imagesToDelete != null) {
+            List<String> currentImages = new ArrayList<>(userProfile.getProfileImages());
+            for (String imageUrl : imagesToDelete) {
+                if (currentImages.contains(imageUrl)) {
+                    currentImages.remove(imageUrl);
+                    s3Util.deleteFile(imageUrl);  // S3에서 이미지 삭제
+                }
+            }
+            userProfile.setProfileImages(currentImages);  // 삭제된 이미지 반영
+        }
 
-        // 프로필 이미지가 새로 업로드된 경우에만 S3 저장
-        if (profileImageFile != null && !profileImageFile.isEmpty()) {
-            profileImageUrl = s3Util.uploadFile(profileImageFile);
+        //새로운 이미지 추가
+        if (newProfileImages != null && !newProfileImages.isEmpty()) {
+            List<String> currentImages = new ArrayList<>(userProfile.getProfileImages());
+            for (MultipartFile file : newProfileImages) {
+                String imageUrl = s3Util.uploadFile(file);
+                if (!currentImages.contains(imageUrl)) {
+                    currentImages.add(imageUrl);
+                }
+            }
+            userProfile.setProfileImages(currentImages);  // 추가된 이미지 반영
         }
 
         userProfile = UserProfile.builder()
@@ -92,7 +110,7 @@ public class UserProfileService {
                 .userId(userProfile.getUserId())
                 .nickName(dto.getNickname() != null ? dto.getNickname() : userProfile.getNickName())
                 .gender(dto.getGender() != null ? dto.getGender() : userProfile.getGender())
-                .profileImage(profileImageUrl)
+                .profileImages(userProfile.getProfileImages())
                 .latitude(dto.getLatitude() != null ? dto.getLatitude() : userProfile.getLatitude())
                 .longitude(dto.getLongitude() != null ? dto.getLongitude() : userProfile.getLongitude())
                 .birthdate(dto.getBirthdate() != null ? dto.getBirthdate() : userProfile.getBirthdate())
