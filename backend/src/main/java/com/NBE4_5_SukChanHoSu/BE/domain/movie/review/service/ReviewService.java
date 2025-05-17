@@ -118,8 +118,8 @@ public class ReviewService {
 
         if (requestDto.getContent() != null) {
             // 욕설 마스킹 적용
-//            String filteredContent = maskProfanity(requestDto.getContent());
-            review.setContent(requestDto.getContent());
+            String filteredContent = maskProfanity(requestDto.getContent());
+            review.setContent(filteredContent);
         }
 
         if (requestDto.getRating() != null) {
