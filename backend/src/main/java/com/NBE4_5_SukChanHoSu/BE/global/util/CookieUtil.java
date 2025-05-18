@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 public class CookieUtil {
     private static final String ACCESS_TOKEN = "accessToken";
     private static final String REFRESH_TOKEN = "refreshToken";
+    private static final String SAME_SITE = "sameSite";
+    private static final String NONE = "none";
+
     @Value("${jwt.expiration.access-token}")
     private int accessTokenExpiration;
 
@@ -29,7 +32,7 @@ public class CookieUtil {
         cookie.setMaxAge(accessTokenExpiration);
         cookie.setPath(cookiePath);
         cookie.setDomain(cookieDomain);
-        cookie.setAttribute("SameSite", "None");
+        cookie.setAttribute(SAME_SITE, NONE);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
@@ -40,7 +43,7 @@ public class CookieUtil {
         cookie.setMaxAge(refreshTokenExpiration);
         cookie.setPath(cookiePath);
         cookie.setDomain(cookieDomain);
-        cookie.setAttribute("SameSite", "None");
+        cookie.setAttribute(SAME_SITE, NONE);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
@@ -75,7 +78,7 @@ public class CookieUtil {
         cookie.setMaxAge(0);
         cookie.setPath(cookiePath);
         cookie.setDomain(cookieDomain);
-        cookie.setAttribute("SameSite", "None");
+        cookie.setAttribute(SAME_SITE, NONE);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
@@ -86,7 +89,7 @@ public class CookieUtil {
         cookie.setMaxAge(0);
         cookie.setPath(cookiePath);
         cookie.setDomain(cookieDomain);
-        cookie.setAttribute("SameSite", "None");
+        cookie.setAttribute(SAME_SITE, NONE);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
