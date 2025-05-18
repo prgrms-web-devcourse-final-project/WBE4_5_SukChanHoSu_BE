@@ -1,10 +1,17 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.entity;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
-import com.NBE4_5_SukChanHoSu.BE.global.util.GenreDeserializer;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import jakarta.persistence.*;
-import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.PostLoad;
+import jakarta.persistence.Transient;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +24,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Movie {
 
     @Id

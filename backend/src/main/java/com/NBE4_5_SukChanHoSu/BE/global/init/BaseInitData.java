@@ -1,6 +1,9 @@
 package com.NBE4_5_SukChanHoSu.BE.global.init;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewRequestDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.request.ReviewCreateDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.repository.ReviewRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
@@ -44,11 +47,8 @@ public class BaseInitData {
     private ReviewService reviewService;
     @Autowired
     private ReviewRepository reviewRepository;
-    private final Random random = new Random();
-    private final List<String> movieTitles = List.of(
-            "인셉션", "인터스텔라", "타이타닉", "아바타", "어벤져스",
-            "스파이더맨", "라라랜드", "기생충", "듄", "조커"
-    );
+    @Autowired
+    private MovieRepository movieRepository;
 
     private static final String LIKE_STREAM = "like";
     private static final String MATCH_STREAM = "matching";
@@ -58,7 +58,8 @@ public class BaseInitData {
     public ApplicationRunner applicationRunner1() {
         return args -> {
             self.profileInit();
-            self.reviewInit(); // 분리된 리뷰 초기화
+            self.movieInit();
+            self.reviewInit();
         };
     }
 
@@ -72,7 +73,7 @@ public class BaseInitData {
 
         Random random = new Random();
 
-        for (int i = 1; i <= 100; i++) {
+        for (int i = 1; i <= 10; i++) {
             String newEmail = "initUser" + i + "@example.com";
             redisTemplate.opsForValue().set("emailVerify:" + newEmail, "true", 5, TimeUnit.MINUTES);
             UserSignUpRequest signUpDto = UserSignUpRequest.builder()
@@ -129,21 +130,60 @@ public class BaseInitData {
             System.out.println("⚠️ 리뷰가 이미 존재하여 reviewInit() 스킵됨.");
             return;
         }
+
         List<User> users = userRepository.findAll();
+        List<Movie> movies = movieRepository.findAll();
+        Random random = new Random();
+
         for (User user : users) {
-            for (int j = 1; j <= 3; j++) {
-                String title = movieTitles.get(random.nextInt(movieTitles.size()));
-                double rating = 2.5 + random.nextDouble() * 2.5;
-                String content = "이 영화 정말 재미있었어요! (" + title + "에 대한 리뷰입니다)";
+            Movie movie = movies.getFirst();
+            double rating = 2.5 + random.nextDouble() * 2.5; // 2.5 ~ 5.0
 
-                ReviewRequestDto reviewDto = new ReviewRequestDto();
-                reviewDto.setTitle(title);
-                reviewDto.setContent(content);
-                reviewDto.setRating(rating);
+            ReviewCreateDto reviewDto = new ReviewCreateDto();
+            reviewDto.setMovieId(movie.getMovieId()); // ← movieId 설정
+            reviewDto.setContent("이 영화 정말 재미있었어요! (" + movie.getTitle() + "에 대한 리뷰입니다)");
+            reviewDto.setRating(Math.round(rating * 10.0) / 10.0); // 소수점 1자리 반올림
 
-                reviewService.initCreateReviewPost(reviewDto, user);
-            }
+            reviewService.initCreateReviewPost(reviewDto, user);
         }
+
+        List<Review> reviews = reviewRepository.findAllByMovie_MovieId(20070001L);
+        reviews.getFirst().setLikeCount(10);
+        reviews.get(1).setLikeCount(8);
+        reviews.get(2).setLikeCount(6);
+    }
+
+
+    @Transactional
+    public void movieInit() {
+        if (reviewRepository.count() > 0) {
+            return;
+        }
+
+        List<Movie> movies = List.of(
+                Movie.builder()
+                        .movieId(20070001L)
+                        .title("Inception")
+                        .genresRaw("Action, Science Fiction")
+                        .releaseDate("20100716")
+                        .posterImage("https://image.tmdb.org/t/p/w500/qmDpIHrmpJINaRKAfWQfftjCdyi.jpg")
+                        .description("꿈속의 꿈으로 들어가는 액션 블록버스터")
+                        .director("Christopher Nolan")
+                        .rating("PG-13")
+                        .build(),
+
+                Movie.builder()
+                        .movieId(20070002L)
+                        .title("The Matrix")
+                        .genresRaw("Action, Science Fiction")
+                        .releaseDate("19990331")
+                        .posterImage("https://image.tmdb.org/t/p/w500/aZiK1mzNHRn7kvVxU3lK1ElGNRk.jpg")
+                        .description("가상현실과 인간의 전쟁")
+                        .director("Lana Wachowski, Lilly Wachowski")
+                        .rating("R")
+                        .build()
+        );
+        movieRepository.saveAll(movies);
     }
 
     @PostConstruct
