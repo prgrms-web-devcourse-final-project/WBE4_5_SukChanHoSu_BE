@@ -1,7 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieRankingResponse;
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.MovieResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.response.MovieRankingResponse;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.response.MovieResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.service.MovieService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.util.DateUtils;

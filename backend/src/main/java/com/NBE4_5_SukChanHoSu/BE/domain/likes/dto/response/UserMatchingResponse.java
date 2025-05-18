@@ -7,19 +7,19 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
 public class UserMatchingResponse {
-    private Long matchingId;
-    private Date matchingTime;
-    private UserProfileResponse user;
+    private int size;
+    int totalPages;
+    private List<UserProfileResponse> matchings;
 
-    public UserMatchingResponse(UserProfile user, Matching matching,int distance) {
-        this.user = new UserProfileResponse(user,distance);
-        this.matchingId = matching.getMatchingId();
-        this.matchingTime = matching.getMatchingTime();
+    public UserMatchingResponse(List<UserProfileResponse> userProfileResponses,int totalPages) {
+        this.matchings = userProfileResponses;
+        this.totalPages = totalPages;
     }
 }

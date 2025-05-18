@@ -36,9 +36,13 @@ dependencies {
     implementation 'org.webjars:bootstrap:4.3.1'
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    
+    // redisson
+    implementation 'org.redisson:redisson-spring-boot-starter:3.16.3'
 
     // Redis
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+    implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
     testImplementation 'org.springframework.boot:spring-boot-starter-data-redis'
     implementation 'mysql:mysql-connector-java:8.0.29'
     testImplementation 'com.h2database:h2'
@@ -53,7 +57,10 @@ dependencies {
     implementation 'io.jsonwebtoken:jjwt-impl:0.11.5'
     implementation 'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
+    implementation 'org.springframework.cloud:spring-cloud-starter-aws:2.2.6.RELEASE'
+
     compileOnly 'org.projectlombok:lombok'
+    testImplementation 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
 
     // JUnit 5 (기본적인 단위 테스트)
@@ -65,7 +72,8 @@ dependencies {
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
-
+    //prometheus
+    implementation 'io.micrometer:micrometer-registry-prometheus'
     //actuator
     implementation("org.springframework.boot:spring-boot-starter-actuator:3.4.5")
     tasks.named('test') {

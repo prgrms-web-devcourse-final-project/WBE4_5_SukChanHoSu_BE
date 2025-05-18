@@ -18,6 +18,6 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
 
     boolean existsByUserId(Long userId);
 
-    @Query("SELECT up FROM UserProfile up JOIN FETCH up.user WHERE up.userId = :userId")
+    @Query("SELECT up FROM UserProfile up JOIN FETCH up.user WHERE up.user.id = :userId")
     Optional<UserProfile> findByUserId(Long userId);
 }

@@ -6,7 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -29,6 +28,7 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((authorizeHttpRequests) ->
@@ -49,13 +49,17 @@ public class SecurityConfig {
                                 .requestMatchers("/.well-known/**").permitAll()
 
                                 // 채팅 정적 리소스 허용
-                                .requestMatchers("/chat_rooms.html", "/chat_room.html","/chat.html", "/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws-stomp/**", "/ws-stomp", "/chat/rooms", "/chat/rooms/**").permitAll()
+                                .requestMatchers("/chat_rooms.html", "/chat_room.html","/chat.html", "/webjars/**", "/static/**", "/css/**", "/js/**", "/images/**", "/favicon.ico", "/ws-stomp/**", "/ws-stomp", "/chat/rooms", "/chat/rooms/**", "login.html").permitAll()
 
                                 // Public endpoints
                                 .requestMatchers(HttpMethod.GET, "/h2-console/**").permitAll()
                                 .requestMatchers(HttpMethod.POST, "/h2-console/**").permitAll()
+
+                                //ADMIN 권한
+                                .requestMatchers("/admin").hasRole("ADMIN")
                                 .anyRequest().authenticated()
                 )
+
                 .headers(headers -> headers
                         .addHeaderWriter(new XFrameOptionsHeaderWriter(XFrameOptionsHeaderWriter.XFrameOptionsMode.SAMEORIGIN))
                 )

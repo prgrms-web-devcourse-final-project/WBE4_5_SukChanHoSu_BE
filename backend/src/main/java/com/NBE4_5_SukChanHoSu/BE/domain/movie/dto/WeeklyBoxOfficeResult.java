@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
@@ -11,12 +12,14 @@ public class WeeklyBoxOfficeResult {
     private BoxOfficeResult boxOfficeResult;
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class BoxOfficeResult {
         @JsonProperty("weeklyBoxOfficeList")
         private List<WeeklyBoxOffice> weeklyBoxOfficeList;
     }
 
     @Data
+    @JsonIgnoreProperties(ignoreUnknown = true)
     public static class WeeklyBoxOffice {
         @JsonProperty("rank")
         private int rank; // 순위

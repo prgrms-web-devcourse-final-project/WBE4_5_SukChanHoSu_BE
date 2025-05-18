@@ -3,10 +3,35 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.Matching;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
 import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
+import com.NBE4_5_SukChanHoSu.BE.global.config.GenreListDeserializer;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import jakarta.persistence.*;
-import jakarta.validation.constraints.*;
-import lombok.*;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.CollectionTable;
+import jakarta.persistence.Column;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
@@ -28,7 +53,7 @@ public class UserProfile extends BaseTime {
     @Setter
     @NotBlank
     @Pattern(regexp = "^[가-힣a-zA-Z0-9]{2,30}$", message = "닉네임은 한글, 영어 또는 숫자 2~30자만 가능합니다.")
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String nickName;
 
     @NotNull
@@ -46,6 +71,7 @@ public class UserProfile extends BaseTime {
     @ElementCollection(targetClass = Genre.class)
     @Enumerated(EnumType.STRING)
     @Size(max = 5, message = "선호 장르는 최대 5개까지만 등록할 수 있습니다.")
+    @JsonDeserialize(using = GenreListDeserializer.class)
     private List<Genre> favoriteGenres;
 
     @NotBlank
