@@ -97,7 +97,7 @@ class UserProfileServiceTest {
             when(userProfileRepository.findByUserId(userId)).thenReturn(Optional.empty());
             when(userProfileRepository.save(any(UserProfile.class))).thenReturn(savedUserProfile);
 
-            ProfileResponse response = userProfileService.createProfile(userId, dto, null); // 이미지 URL 직접 전달
+            ProfileResponse response = userProfileService.createProfile(userId, dto); // 이미지 URL 직접 전달
 
             assertThat(response.getNickname()).isEqualTo(dto.getNickname());
             assertThat(response.getProfileImages()).isEqualTo("s3://profile.jpg");
@@ -128,7 +128,7 @@ class UserProfileServiceTest {
             when(userProfileRepository.existsByUserId(userId)).thenReturn(true); // 이미 존재한다고 Mocking
 
             // when & then
-            assertThatThrownBy(() -> userProfileService.createProfile(userId, dto, null)) // 이미지 URL null로 전달
+            assertThatThrownBy(() -> userProfileService.createProfile(userId, dto)) // 이미지 URL null로 전달
                     .isInstanceOf(IllegalStateException.class)
                     .hasMessage("이미 프로필이 등록된 사용자입니다.");
 

@@ -17,7 +17,7 @@ logging:
     org.hibernate.orm.jdbc.bind: TRACE
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
-
+    org.springframework.security=DEBUG:
 custom:
   appName: app.mm  # ✅ 앱 이름 변경 가능
   prod:

@@ -13,17 +13,11 @@ import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -38,23 +32,44 @@ public class UserProfileController {
     private final UserProfileService userProfileService;
     private final RecommendService matchingService;
 
-    @Operation(summary = "프로필 등록", description = "회원가입 후 최초 프로필 등록")
-    @PostMapping(consumes = "multipart/form-data")
+    @Operation(summary = "프로필 등록 (DTO)", description = "회원가입 후 최초 프로필 정보 등록")
+    @PostMapping(value = "/info")
     @ResponseStatus(HttpStatus.CREATED)
-    public RsData<ProfileResponse> createProfile(@ModelAttribute  ProfileRequest dto,
-                                                 @RequestPart(value = "profileImages", required = false) List<MultipartFile> profileImages) throws IOException {
-
-        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto,profileImages);
-        return new RsData<>("201", "프로필 등록 완료", response);
+    public RsData<ProfileResponse> createProfileInfo(@RequestBody @Valid ProfileRequest dto) throws IOException {
+        ProfileResponse response = userProfileService.createProfile(SecurityUtil.getCurrentUserId(), dto); // 이미지 리스트는 null로 전달
+        return new RsData<>("201", "프로필 정보 등록 완료", response);
     }
 
-    @Operation(summary = "프로필 수정", description = "닉네임, 성별, 위치 등 프로필 정보 수정")
-    @PutMapping(consumes = "multipart/form-data")
-    public RsData<ProfileResponse> updateProfile(@ModelAttribute ProfileUpdateRequest dto,
-                                                 @RequestPart(value = "profileImages", required = false) List<MultipartFile> profileImages,
-                                                 @RequestParam(value = "imagesToDelete", required = false) List<String> imagesToDelete) throws IOException {
-        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto,profileImages,imagesToDelete);
-        return new RsData<>("200", "프로필 수정 완료", response);
+    @Operation(summary = "프로필 이미지 등록", description = "프로필 이미지 업로드 (선택 사항, 기존 프로필 필요)")
+    @PostMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public RsData<ProfileResponse> uploadProfileImages(@RequestPart(value = "profileImages") List<MultipartFile> profileImages) throws IOException {
+        // UserProfileService의 해당 메서드를 수정하여 이미지 업로드만 처리하도록 하거나,
+        // 기존 createProfile 메서드를 호출하여 처리할 수 있습니다.
+        ProfileResponse response = userProfileService.addProfileImages(SecurityUtil.getCurrentUserId(), profileImages); // 예시 메서드
+        return new RsData<>("200", "프로필 이미지 등록 완료", response);
+    }
+
+    @Operation(summary = "프로필 정보 수정", description = "닉네임, 성별, 위치 등 프로필 정보 수정")
+    @PutMapping(value = "/info", consumes = MediaType.APPLICATION_JSON_VALUE)
+    public RsData<ProfileResponse> updateProfileInfo(@RequestBody @Valid ProfileUpdateRequest dto) throws IOException {
+        ProfileResponse response = userProfileService.updateProfile(SecurityUtil.getCurrentUserId(), dto, null, null);
+        return new RsData<>("200", "프로필 정보 수정 완료", response);
+    }
+
+    @Operation(summary = "프로필 이미지 수정", description = "프로필 이미지 추가 및 삭제")
+    @PutMapping(value = "/images", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public RsData<ProfileResponse> updateProfileImages(
+            @RequestPart(value = "profileImages", required = false) List<MultipartFile> profileImages) throws IOException {
+        ProfileResponse response = userProfileService.updateProfileImages(SecurityUtil.getCurrentUserId(), profileImages);
+        return new RsData<>("200", "프로필 이미지 수정 완료", response);
+    }
+
+    @Operation(summary = "프로필 이미지 삭제", description = "특정 프로필 이미지 URL 목록을 삭제합니다.")
+    @PutMapping("/images/delete")
+    @ResponseStatus(HttpStatus.OK)
+    public RsData<ProfileResponse> deleteProfileImages(@RequestBody List<String> imagesToDelete) {
+        ProfileResponse response = userProfileService.deleteProfileImages(SecurityUtil.getCurrentUserId(), imagesToDelete);
+        return new RsData<>("200", "프로필 이미지 삭제 완료", response); // ProfileResponse를 포함한 RsData 반환
     }
 
     @Operation(summary = "내 프로필 조회", description = "자신의 프로필 정보 조회")

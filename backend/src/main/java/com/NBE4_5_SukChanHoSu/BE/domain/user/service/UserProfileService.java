@@ -37,7 +37,7 @@ public class UserProfileService {
     private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
 
     @Transactional
-    public ProfileResponse createProfile(Long userId, ProfileRequest dto, List<MultipartFile> profileImageFiles) throws IOException {
+    public ProfileResponse createProfile(Long userId, ProfileRequest dto) throws IOException {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("해당 ID의 사용자를 찾을 수 없습니다."));
 
@@ -46,31 +46,21 @@ public class UserProfileService {
             throw new IllegalStateException("이미 프로필이 등록된 사용자입니다.");
         }
 
-        // 프로필 이미지 업로드
-        List<String> profileImageUrls = new ArrayList<>();
-        if (profileImageFiles != null) {
-            for (MultipartFile file : profileImageFiles) {
-                String imageUrl = s3Util.uploadFile(file);
-                profileImageUrls.add(imageUrl);
-            }
-        }
-
         // 프로필이 없으면 새로 생성
         UserProfile userProfile = UserProfile.builder()
-                    .user(user)
-                    .nickName(dto.getNickname())
-                    .gender(dto.getGender())
-                    .profileImages(profileImageUrls)
-                    .latitude(dto.getLatitude())
-                    .longitude(dto.getLongitude())
-                    .birthdate(dto.getBirthdate())
-                    .introduce(dto.getIntroduce())
-                    .searchRadius(dto.getSearchRadius())
-                    .lifeMovie(dto.getLifeMovie())
-                    .favoriteGenres(dto.getFavoriteGenres())
-                    .watchedMovies(dto.getWatchedMovies())
-                    .preferredTheaters(dto.getPreferredTheaters())
-                    .build();
+                .user(user)
+                .nickName(dto.getNickname())
+                .gender(dto.getGender())
+                .latitude(dto.getLatitude())
+                .longitude(dto.getLongitude())
+                .birthdate(dto.getBirthdate())
+                .introduce(dto.getIntroduce())
+                .searchRadius(dto.getSearchRadius())
+                .lifeMovie(dto.getLifeMovie())
+                .favoriteGenres(dto.getFavoriteGenres())
+                .watchedMovies(dto.getWatchedMovies())
+                .preferredTheaters(dto.getPreferredTheaters())
+                .build();
 
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);
         return new ProfileResponse(savedUserProfile);
@@ -80,30 +70,6 @@ public class UserProfileService {
     public ProfileResponse updateProfile(Long userId, ProfileUpdateRequest dto, List<MultipartFile> newProfileImages,List<String> imagesToDelete) throws IOException {
         UserProfile userProfile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
-
-        //기존 이미지 삭제
-        if (imagesToDelete != null) {
-            List<String> currentImages = new ArrayList<>(userProfile.getProfileImages());
-            for (String imageUrl : imagesToDelete) {
-                if (currentImages.contains(imageUrl)) {
-                    currentImages.remove(imageUrl);
-                    s3Util.deleteFile(imageUrl);  // S3에서 이미지 삭제
-                }
-            }
-            userProfile.setProfileImages(currentImages);  // 삭제된 이미지 반영
-        }
-
-        //새로운 이미지 추가
-        if (newProfileImages != null && !newProfileImages.isEmpty()) {
-            List<String> currentImages = new ArrayList<>(userProfile.getProfileImages());
-            for (MultipartFile file : newProfileImages) {
-                String imageUrl = s3Util.uploadFile(file);
-                if (!currentImages.contains(imageUrl)) {
-                    currentImages.add(imageUrl);
-                }
-            }
-            userProfile.setProfileImages(currentImages);  // 추가된 이미지 반영
-        }
 
         userProfile = UserProfile.builder()
                 .user(userProfile.getUser())
@@ -142,5 +108,68 @@ public class UserProfileService {
     public int setRadius(UserProfile userProfile, Integer radius) {
         userProfile.setSearchRadius(radius);
         return userProfile.getSearchRadius();
+    }
+
+    @Transactional
+    public ProfileResponse addProfileImages(Long userId, List<MultipartFile> profileImageFiles) throws IOException {
+        UserProfile userProfile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        List<String> currentImages = new ArrayList<>(userProfile.getProfileImages());
+        for (MultipartFile file : profileImageFiles) {
+            String imageUrl = s3Util.uploadFile(file);
+            if (!currentImages.contains(imageUrl)) {
+                currentImages.add(imageUrl);
+            }
+        }
+        userProfile.setProfileImages(currentImages);
+        UserProfile savedUserProfile = userProfileRepository.save(userProfile);
+        return new ProfileResponse(savedUserProfile);
+    }
+
+    @Transactional
+    public ProfileResponse updateProfileImages(Long userId, List<MultipartFile> profileImages) throws IOException {
+        UserProfile userProfile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        List<String> existingImages = userProfile.getProfileImages() != null ? new ArrayList<>(userProfile.getProfileImages()) : new ArrayList<>();
+        List<String> newImageUrls = new ArrayList<>();
+
+        // 새로운 이미지 업로드 및 URL 저장
+        if (profileImages != null && !profileImages.isEmpty()) {
+            for (MultipartFile file : profileImages) {
+                String imageUrl = s3Util.uploadFile(file);
+                if (!existingImages.contains(imageUrl) && !newImageUrls.contains(imageUrl)) {
+                    newImageUrls.add(imageUrl);
+                }
+            }
+        }
+        // 기존 이미지 목록에 새로운 이미지 URL 추가
+        existingImages.addAll(newImageUrls);
+        // 업데이트된 이미지 목록으로 UserProfile 업데이트
+        userProfile.setProfileImages(existingImages);
+        return new ProfileResponse(userProfile);
+    }
+
+    @Transactional
+    public ProfileResponse deleteProfileImages(Long userId, List<String> imagesToDelete) {
+        UserProfile userProfile = userProfileRepository.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
+
+        List<String> currentImages = new ArrayList<>(userProfile.getProfileImages());
+        List<String> updatedImages = new ArrayList<>(currentImages);
+
+        if (imagesToDelete != null && !imagesToDelete.isEmpty()) {
+            for (String imageUrl : imagesToDelete) {
+                if (currentImages.contains(imageUrl)) {
+                    updatedImages.remove(imageUrl);
+                    s3Util.deleteFile(imageUrl);
+                }
+            }
+            userProfile.setProfileImages(updatedImages);
+        }
+
+        UserProfile savedUserProfile = userProfileRepository.save(userProfile); // 변경된 프로필 정보 저장
+        return new ProfileResponse(savedUserProfile); // 업데이트된 프로필 정보 반환
     }
 }
