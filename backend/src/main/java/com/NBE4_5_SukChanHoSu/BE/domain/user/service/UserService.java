@@ -10,7 +10,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserStatus;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode.UserErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
-import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.service.TokenService;
 import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
@@ -94,15 +93,6 @@ public class UserService {
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
         return tokenService.generateToken(authentication);
-    }
-
-    public User getUserById(Long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UserNotFoundException(
-                                UserErrorCode.USER_NOT_FOUND.getCode(),
-                                UserErrorCode.USER_NOT_FOUND.getMessage()
-                        )
-                );
     }
 
     public void logout(String refreshToken) {
