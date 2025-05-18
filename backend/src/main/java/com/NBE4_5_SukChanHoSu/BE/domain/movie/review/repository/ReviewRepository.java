@@ -6,12 +6,17 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReviewRepository extends JpaRepository<Review, Long> {
-    @Query("select count(r), coalesce(avg(r.rating), 0.0) from Review r where r.title = :movieTitle")
-    List<Object[]> getReviewStatsByTitle(@Param("movieTitle") String movieTitle);
+    @Query("select count(r), coalesce(avg(r.rating), 0.0) from Review r join r.movie m where m.movieId = :movieId")
+    List<Object[]> getReviewStatsByMovie(@Param("movieId") Long movieId);
 
-    // todo 영화 객체의 id 받아서 반환하도록 수정해야댐
-    List<Review> findByTitleOrderByCreatedDateDesc(String movieTitle);
-    List<Review> findByTitleOrderByLikeCountDescCreatedDateDesc(String title);
+    @Query("SELECT r FROM Review r JOIN FETCH r.movie WHERE r.id = :id")
+    Optional<Review> findByIdWithMovie(@Param("id") Long id);
+
+    List<Review> findByMovie_MovieIdOrderByCreatedDateDesc(Long movieId);
+    List<Review> findByMovie_MovieIdOrderByLikeCountDescCreatedDateDesc(Long movieId);
+
+    List<Review> findAllByMovie_MovieId(Long movieId);
 }

@@ -10,9 +10,8 @@ import static com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant.ReviewConst
 import static com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant.ReviewConstant.MIN_RATING_MESSAGE;
 
 @Data
-public class ReviewRequestDto {
-    // todo 영화 객체로 변경 예정 (영화 id로)
-    private String title;
+public class ReviewCreateDto {
+    private Long movieId;
     private String content;
 
     @Min(value = MIN_RATING, message = MIN_RATING_MESSAGE)

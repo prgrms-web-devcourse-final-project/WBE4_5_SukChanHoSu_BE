@@ -25,7 +25,7 @@ public class ReviewLikeController {
             description = "현재 사용자가 리뷰에 대한 좋아요 추가/취소 합니다."
     )
     public RsData<ReviewLikeResponseDto> reviewLike(@PathVariable Long reviewId) {
-        ReviewLikeResponseDto reviewLike = reviewLikeService.addLike(reviewId);
+        ReviewLikeResponseDto reviewLike = reviewLikeService.reviewLikeHandler(reviewId);
 
         ReviewSuccessCode code = reviewLike.isLiked()
                 ? ReviewSuccessCode.REVIEW_LIKE_ADD
