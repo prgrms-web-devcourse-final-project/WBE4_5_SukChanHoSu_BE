@@ -22,8 +22,8 @@ public class OAuth2AuthenticationSuccessHandler implements AuthenticationSuccess
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
         LoginResponse loginResponse = tokenService.generateToken(authentication);
 
-        cookieUtil.addAccessCookie(loginResponse.getAccessToken(), response);
-        cookieUtil.addRefreshCookie(loginResponse.getRefreshToken(), response);
+        cookieUtil.addAccessCookie(loginResponse.getAccessToken(), request, response);
+        cookieUtil.addRefreshCookie(loginResponse.getRefreshToken(), request, response);
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

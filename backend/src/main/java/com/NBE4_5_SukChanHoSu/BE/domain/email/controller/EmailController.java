@@ -1,6 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.email.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.email.dto.request.EmailDto;
+import com.NBE4_5_SukChanHoSu.BE.domain.email.dto.EmailDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.email.service.EmailService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import io.swagger.v3.oas.annotations.Operation;

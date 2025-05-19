@@ -1,6 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.review.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.constant.ReviewSuccessCode;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.responseCode.ReviewSuccessCode;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.dto.response.ReviewLikeResponseDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewLikeService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
@@ -25,7 +25,7 @@ public class ReviewLikeController {
             description = "현재 사용자가 리뷰에 대한 좋아요 추가/취소 합니다."
     )
     public RsData<ReviewLikeResponseDto> reviewLike(@PathVariable Long reviewId) {
-        ReviewLikeResponseDto reviewLike = reviewLikeService.addLike(reviewId);
+        ReviewLikeResponseDto reviewLike = reviewLikeService.reviewLikeHandler(reviewId);
 
         ReviewSuccessCode code = reviewLike.isLiked()
                 ? ReviewSuccessCode.REVIEW_LIKE_ADD

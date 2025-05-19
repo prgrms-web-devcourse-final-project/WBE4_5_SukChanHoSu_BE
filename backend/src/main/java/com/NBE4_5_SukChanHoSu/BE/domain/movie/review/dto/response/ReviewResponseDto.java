@@ -10,7 +10,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class ReviewResponseDto {
     private Long id;
-    // todo 영화 객체로 변경 예정
     private String title;
     private String content;
     private String userName;
@@ -20,7 +19,7 @@ public class ReviewResponseDto {
 
     public ReviewResponseDto(Review review) {
         this.id = review.getId();
-        this.title = review.getTitle();
+        this.title = review.getMovie().getTitle();
         this.content = review.getContent();
         this.userName = review.getUser().getUserProfile().getNickName();
         this.likeCount = review.getLikeCount();

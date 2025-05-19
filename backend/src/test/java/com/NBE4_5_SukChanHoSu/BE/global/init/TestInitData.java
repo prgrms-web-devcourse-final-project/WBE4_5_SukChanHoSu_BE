@@ -2,6 +2,8 @@ package com.NBE4_5_SukChanHoSu.BE.global.init;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.entity.Review;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.repository.ReviewRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.UserSignUpRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
@@ -14,11 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.context.event.ApplicationReadyEvent;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.EventListener;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
 import java.util.Random;
@@ -30,11 +30,18 @@ import java.util.stream.Stream;
 @RequiredArgsConstructor
 public class TestInitData {
 
-    @Autowired private RedisTemplate<String, String> redisTemplate;
-    @Autowired private UserProfileRepository userProfileRepository;
-    @Autowired private UserService userService;
-    @Autowired private UserRepository userRepository;
-    @Autowired private MovieRepository movieRepository;
+    @Autowired
+    private RedisTemplate<String, String> redisTemplate;
+    @Autowired
+    private UserProfileRepository userProfileRepository;
+    @Autowired
+    private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private MovieRepository movieRepository;
+    @Autowired
+    private ReviewRepository reviewRepository;
 
 
     @EventListener(ApplicationReadyEvent.class)
@@ -69,7 +76,7 @@ public class TestInitData {
                 UserProfile userProfile = UserProfile.builder()
                         .nickName("TempUser" + i)
                         .gender(i % 2 == 0 ? Gender.Female : Gender.Male)
-                        .profileImage("https://example.com/profile" + i + ".jpg")
+                        .profileImages(List.of("https://example.com/profile" + i + ".jpg"))
                         .favoriteGenres(genres) // 장르 리스트 설정
                         .introduce("안녕하세요! 임시 유저 " + i + "입니다.")
                         .latitude(37.5665 + (i * 0.03)) // 임의의 위도 값
@@ -140,6 +147,29 @@ public class TestInitData {
 
             movieRepository.saveAll(movies);
             System.out.println("🎬 테스트용 영화 5개 삽입 완료");
+
+            User user1 = userRepository.findByEmail("initUser1@example.com");
+            User user2 = userRepository.findByEmail("initUser2@example.com");
+
+            Movie movie1 = movieRepository.findById(20070001L).orElseThrow();
+            Movie movie2 = movieRepository.findById(20070002L).orElseThrow();
+
+            Review review1 = Review.builder()
+                    .user(user1)
+                    .movie(movie1)
+                    .rating(4.5)
+                    .content("꿈속에서 펼쳐지는 놀라운 액션! 놀란 감독 최고.")
+                    .build();
+
+            Review review2 = Review.builder()
+                    .user(user2)
+                    .movie(movie2)
+                    .rating(4.0)
+                    .content("철학적인 주제와 액션의 조화가 인상적이었다.")
+                    .build();
+
+            reviewRepository.saveAll(List.of(review1, review2));
+            System.out.println("📝 테스트용 리뷰 2개 삽입 완료");
         };
     }
 }

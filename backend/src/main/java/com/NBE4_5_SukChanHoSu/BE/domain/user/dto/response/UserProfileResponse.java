@@ -14,7 +14,7 @@ import java.util.List;
 public class UserProfileResponse {
     private Long userId;
     private String nickName;
-    private String profileImage;
+    private List<String> profileImages;
     private List<Genre> favoriteGenres;
     private String introduce;
     private String distance;
@@ -23,7 +23,7 @@ public class UserProfileResponse {
     public UserProfileResponse (UserProfile userProfile, int distance, LocalDateTime createdAt) {
         this.userId = userProfile.getUserId();
         this.nickName = userProfile.getNickName();
-        this.profileImage = userProfile.getProfileImage();
+        this.profileImages = userProfile.getProfileImages();
         this.favoriteGenres = userProfile.getFavoriteGenres();
         this.introduce = userProfile.getIntroduce();
         this.createdAt = createdAt;
@@ -33,10 +33,9 @@ public class UserProfileResponse {
     public UserProfileResponse (UserProfile userProfile, int distance) {
         this.userId = userProfile.getUserId();
         this.nickName = userProfile.getNickName();
-        this.profileImage = userProfile.getProfileImage();
+        this.profileImages = userProfile.getProfileImages();
         this.favoriteGenres = userProfile.getFavoriteGenres();
         this.introduce = userProfile.getIntroduce();
         this.distance = "약 "+distance+"km";
     }
-
 }
