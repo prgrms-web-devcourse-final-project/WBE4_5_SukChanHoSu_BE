@@ -1,9 +1,9 @@
 package com.NBE4_5_SukChanHoSu.BE.global.util;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureException;
-import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -11,7 +11,6 @@ import java.util.Date;
 
 @Component
 public class JwtUtil {
-
     @Value("${jwt.secret}")
     private String secretKey;
 

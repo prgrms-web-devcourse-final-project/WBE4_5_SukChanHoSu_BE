@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 @ActiveProfiles("test")
 @SpringBootTest
-public class UserLoginControllerTest {
+public class UserControllerTest {
 
     @Autowired
     private UserService userService;
