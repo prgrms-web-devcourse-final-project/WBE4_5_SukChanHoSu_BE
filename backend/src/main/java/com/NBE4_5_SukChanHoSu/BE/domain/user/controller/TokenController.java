@@ -29,7 +29,7 @@ public class TokenController {
 
         TokenResponse tokenResponse = tokenService.reissueAccessToken(refreshToken);
 
-        cookieUtil.addAccessCookie(tokenResponse.getAccessToken(), response);
+        cookieUtil.addAccessCookie(tokenResponse.getAccessToken(), request, response);
 
         return new RsData<>(
                 UserSuccessCode.REISSUE_SUCCESS.getCode(),

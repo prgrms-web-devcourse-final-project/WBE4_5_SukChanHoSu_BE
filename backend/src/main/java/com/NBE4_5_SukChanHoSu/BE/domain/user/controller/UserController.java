@@ -87,11 +87,15 @@ public class UserController {
                     )
             }
     )
-    public RsData<LoginResponse> login(@Valid @RequestBody UserLoginRequest requestDto, HttpServletResponse response) {
+    public RsData<LoginResponse> login(
+            @Valid @RequestBody UserLoginRequest requestDto,
+            HttpServletRequest request,
+            HttpServletResponse response
+    ) {
         LoginResponse loginResponse = userService.login(requestDto);
 
-        cookieUtil.addAccessCookie(loginResponse.getAccessToken(), response);
-        cookieUtil.addRefreshCookie(loginResponse.getRefreshToken(), response);
+        cookieUtil.addAccessCookie(loginResponse.getAccessToken(), request, response);
+        cookieUtil.addRefreshCookie(loginResponse.getRefreshToken(), request, response);
 
         return new RsData<>(
                 UserSuccessCode.LOGIN_SUCCESS.getCode(),
