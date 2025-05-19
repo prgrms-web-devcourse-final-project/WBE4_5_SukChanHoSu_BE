@@ -2,6 +2,7 @@ package com.NBE4_5_SukChanHoSu.BE.domain.user.entity;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.Matching;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
 import com.NBE4_5_SukChanHoSu.BE.global.BaseTime;
 import com.NBE4_5_SukChanHoSu.BE.global.config.GenreListDeserializer;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -118,14 +119,18 @@ public class UserProfile extends BaseTime {
     }
 
     // 인생 영화
-//    @NotBlank
-//    @Column(nullable = false)
-    private String lifeMovie;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "life_movie_id")
+    private Movie lifeMovie;
 
     // 재밌게 본 영화
-    @ElementCollection
-    @CollectionTable(name = "watched_movies", joinColumns = @JoinColumn(name = "user_id"))
-    private List<String> watchedMovies = new ArrayList<>();
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "user_watched_movie",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "movie_id")
+    )
+    private List<Movie> watchedMovies = new ArrayList<>();
 
     // 선호 영화관
     @ElementCollection

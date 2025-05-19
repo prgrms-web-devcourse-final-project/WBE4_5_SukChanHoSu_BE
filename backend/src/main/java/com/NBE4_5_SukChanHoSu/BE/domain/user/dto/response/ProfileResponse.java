@@ -1,5 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.dto.response.MovieDto;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Gender;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile; // UserProfile import
 import jakarta.validation.constraints.*;
@@ -25,9 +26,9 @@ public class ProfileResponse {
     private Double longitude;
     private LocalDate birthdate;
     private int searchRadius;
-    private String lifeMovie;
+    private MovieDto lifeMovie;
     private List<String> favoriteGenres;
-    private List<String> watchedMovies;
+    private List<MovieDto> watchedMovies;
     private List<String> preferredTheaters;
     private String introduce;
 
@@ -40,9 +41,10 @@ public class ProfileResponse {
         this.longitude = userProfile.getLongitude();
         this.birthdate = userProfile.getBirthdate();
         this.searchRadius = userProfile.getSearchRadius();
-        this.lifeMovie = userProfile.getLifeMovie();
+        this.lifeMovie = userProfile.getLifeMovie() != null ? MovieDto.from(userProfile.getLifeMovie()) : null;
         this.favoriteGenres = userProfile.getFavoriteGenres() != null ? userProfile.getFavoriteGenres().stream().map(Enum::name).collect(Collectors.toList()) : null;
-        this.watchedMovies = userProfile.getWatchedMovies();
+        this.watchedMovies = userProfile.getWatchedMovies().stream()
+                .map(MovieDto::from).collect(Collectors.toList());
         this.preferredTheaters = userProfile.getPreferredTheaters();
         this.introduce = userProfile.getIntroduce();
     }

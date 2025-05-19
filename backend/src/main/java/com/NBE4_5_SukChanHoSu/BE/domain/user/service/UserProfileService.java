@@ -1,6 +1,8 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.UserLikesRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.ProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
@@ -23,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +35,7 @@ public class UserProfileService {
     private final UserProfileRepository userProfileRepository;
     private final UserRepository userRepository;
     private final UserLikesRepository userLikesRepository;
+    private final MovieRepository movieRepository;
     private final S3Util s3Util;
     // 사용자별 추천 리스트 관리
     private Map<Long, List<UserProfile>> recommendedUsersMap = new HashMap<>();
@@ -46,6 +50,19 @@ public class UserProfileService {
             throw new IllegalStateException("이미 프로필이 등록된 사용자입니다.");
         }
 
+        Movie life = null;
+        if (dto.getLifeMovieId() != null) {
+            life = movieRepository.findById(dto.getLifeMovieId())
+                    .orElseThrow(() -> new RuntimeException("영화 없음: " + dto.getLifeMovieId()));
+        }
+        List<Movie> watched = new ArrayList<>();
+        if (dto.getWatchedMovieIds() != null) {
+            watched = dto.getWatchedMovieIds().stream()
+                    .map(id -> movieRepository.findById(id)
+                            .orElseThrow(() -> new RuntimeException("영화 없음: " + id)))
+                    .collect(Collectors.toList());
+        }
+
         // 프로필이 없으면 새로 생성
         UserProfile userProfile = UserProfile.builder()
                 .user(user)
@@ -56,9 +73,9 @@ public class UserProfileService {
                 .birthdate(dto.getBirthdate())
                 .introduce(dto.getIntroduce())
                 .searchRadius(dto.getSearchRadius())
-                .lifeMovie(dto.getLifeMovie())
+                .lifeMovie(life)
                 .favoriteGenres(dto.getFavoriteGenres())
-                .watchedMovies(dto.getWatchedMovies())
+                .watchedMovies(watched)
                 .preferredTheaters(dto.getPreferredTheaters())
                 .build();
 
@@ -71,6 +88,24 @@ public class UserProfileService {
         UserProfile userProfile = userProfileRepository.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("사용자를 찾을 수 없습니다."));
 
+        Movie lifeMovie = null;
+        if (dto.getLifeMovieId() != null) {
+            lifeMovie = movieRepository.findById(dto.getLifeMovieId())
+                    .orElseThrow(() -> new RuntimeException("인생 영화를 찾을 수 없습니다."));
+        } else {
+            lifeMovie = userProfile.getLifeMovie();
+        }
+
+        List<Movie> watchedMovies = null;
+        if (dto.getWatchedMovieIds() != null && !dto.getWatchedMovieIds().isEmpty()) {
+            watchedMovies = dto.getWatchedMovieIds().stream()
+                    .map(id -> movieRepository.findById(id)
+                            .orElseThrow(() -> new RuntimeException("재밌게 본 영화를 찾을 수 없습니다: " + id)))
+                    .collect(Collectors.toList());
+        } else {
+            watchedMovies = userProfile.getWatchedMovies();
+        }
+
         userProfile = UserProfile.builder()
                 .user(userProfile.getUser())
                 .userId(userProfile.getUserId())
@@ -82,9 +117,9 @@ public class UserProfileService {
                 .birthdate(dto.getBirthdate() != null ? dto.getBirthdate() : userProfile.getBirthdate())
                 .introduce(dto.getIntroduce() != null ? dto.getIntroduce() : userProfile.getIntroduce())
                 .searchRadius(Optional.ofNullable(dto.getSearchRadius()).orElse(userProfile.getSearchRadius()))
-                .lifeMovie(dto.getLifeMovie() != null ? dto.getLifeMovie() : userProfile.getLifeMovie())
+                .lifeMovie(lifeMovie != null ? lifeMovie : userProfile.getLifeMovie())
                 .favoriteGenres(dto.getFavoriteGenres() != null ? dto.getFavoriteGenres() : userProfile.getFavoriteGenres())
-                .watchedMovies(dto.getWatchedMovies() != null ? dto.getWatchedMovies() : userProfile.getWatchedMovies())
+                .watchedMovies(watchedMovies != null ? watchedMovies : userProfile.getWatchedMovies())
                 .preferredTheaters(dto.getPreferredTheaters() != null ? dto.getPreferredTheaters() : userProfile.getPreferredTheaters())
                 .build();
         UserProfile savedUserProfile = userProfileRepository.save(userProfile);

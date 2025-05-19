@@ -24,9 +24,9 @@ public class ProfileRequest {
     private Double longitude;
     private LocalDate birthdate;
     private int searchRadius;
-    private String lifeMovie;
+    private Long lifeMovieId;
     private List<Genre> favoriteGenres;
-    private List<String> watchedMovies;
+    private List<Long> watchedMovieIds;
     private List<String> preferredTheaters;
     private String introduce;
 
