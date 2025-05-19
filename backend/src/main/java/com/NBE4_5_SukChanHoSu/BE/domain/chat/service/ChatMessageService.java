@@ -22,8 +22,8 @@ public class ChatMessageService {
 
     // 채팅 메시지 저장
     public void saveMessage(ChatMessage message) {
-        String key = CHAT_KEY_PREFIX + message.getRoomId();
-        redisTemplate.opsForList().rightPush(key, message);
+        String key = CHAT_KEY_PREFIX + message.getRoomId();     // key= chat:room:100
+        redisTemplate.opsForList().rightPush(key, message);     // value= 메세지 객체
         redisTemplate.expire(key, Duration.ofDays(3)); // 3일 후 만료
     }
 
