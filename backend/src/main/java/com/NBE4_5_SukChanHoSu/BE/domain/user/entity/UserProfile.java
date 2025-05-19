@@ -47,7 +47,7 @@ public class UserProfile extends BaseTime {
     private Gender gender;
 
     @ElementCollection
-    @Column(nullable = false)
+    @Column
     @Setter
     private List<String> profileImages = new ArrayList<>();
 
