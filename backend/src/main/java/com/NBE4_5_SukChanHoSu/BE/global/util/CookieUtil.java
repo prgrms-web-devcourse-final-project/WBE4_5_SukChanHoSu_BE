@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 public class CookieUtil {
     private static final String ACCESS_TOKEN = "accessToken";
     private static final String REFRESH_TOKEN = "refreshToken";
+    private static final String SAME_SITE = "sameSite";
+    private static final String NONE = "none";
+
     @Value("${jwt.expiration.access-token}")
     private int accessTokenExpiration;
 
@@ -24,23 +27,33 @@ public class CookieUtil {
     @Value("${jwt.cookie-path}")
     private String cookiePath;
 
-    public void addAccessCookie(String token, HttpServletResponse response) {
+    public void addAccessCookie(String token, HttpServletRequest request, HttpServletResponse response) {
         Cookie cookie = new Cookie(ACCESS_TOKEN, token);
         cookie.setMaxAge(accessTokenExpiration);
         cookie.setPath(cookiePath);
-        cookie.setDomain(cookieDomain);
-        cookie.setAttribute("SameSite", "None");
+
+        String serverName = request.getServerName();
+        if (isValidDomain(serverName)) {
+            cookie.setDomain(serverName);
+        }
+
+        cookie.setAttribute(SAME_SITE, NONE);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
     }
 
-    public void addRefreshCookie(String token, HttpServletResponse response) {
+    public void addRefreshCookie(String token, HttpServletRequest request, HttpServletResponse response) {
         Cookie cookie = new Cookie(REFRESH_TOKEN, token);
         cookie.setMaxAge(refreshTokenExpiration);
         cookie.setPath(cookiePath);
-        cookie.setDomain(cookieDomain);
-        cookie.setAttribute("SameSite", "None");
+
+        String serverName = request.getServerName();
+        if (isValidDomain(serverName)) {
+            cookie.setDomain(serverName);
+        }
+
+        cookie.setAttribute(SAME_SITE, NONE);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
@@ -75,7 +88,7 @@ public class CookieUtil {
         cookie.setMaxAge(0);
         cookie.setPath(cookiePath);
         cookie.setDomain(cookieDomain);
-        cookie.setAttribute("SameSite", "None");
+        cookie.setAttribute(SAME_SITE, NONE);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
@@ -86,9 +99,13 @@ public class CookieUtil {
         cookie.setMaxAge(0);
         cookie.setPath(cookiePath);
         cookie.setDomain(cookieDomain);
-        cookie.setAttribute("SameSite", "None");
+        cookie.setAttribute(SAME_SITE, NONE);
         cookie.setHttpOnly(true);
         cookie.setSecure(true);
         response.addCookie(cookie);
+    }
+
+    private boolean isValidDomain(String domain) {
+        return domain.endsWith("mm.ts0608.life") || domain.equals("localhost");
     }
 }

@@ -20,7 +20,7 @@ public class ProfileResponse {
     private String nickname;
     private String email;
     private Gender gender;
-    private String profileImage;
+    private List<String> profileImages;
     private Double latitude;
     private Double longitude;
     private LocalDate birthdate;
@@ -35,7 +35,7 @@ public class ProfileResponse {
         this.nickname = userProfile.getNickName();
         this.email = userProfile.getUser().getEmail();
         this.gender = userProfile.getGender();
-        this.profileImage = userProfile.getProfileImage();
+        this.profileImages = userProfile.getProfileImages();
         this.latitude = userProfile.getLatitude();
         this.longitude = userProfile.getLongitude();
         this.birthdate = userProfile.getBirthdate();

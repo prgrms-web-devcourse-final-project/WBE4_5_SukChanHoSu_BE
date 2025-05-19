@@ -1,7 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.global.security;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +18,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
     private final UserRepository userRepository;
-    private static final String GOOGLE_PREFIX  = "google";
+    private static final String GOOGLE_PREFIX = "google";
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest oAuth2UserRequest) throws OAuth2AuthenticationException {
@@ -48,6 +48,7 @@ public class CustomOAuth2UserDetailService extends DefaultOAuth2UserService {
                     .build();
             userRepository.save(user);
         }
+
 
         return new PrincipalDetails(user, oAuth2User.getAttributes());
     }

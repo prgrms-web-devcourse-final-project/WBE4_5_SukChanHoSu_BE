@@ -1,6 +1,6 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserSuccessCode;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode.UserSuccessCode;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.dto.TokenResponse;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.service.TokenService;
@@ -29,7 +29,7 @@ public class TokenController {
 
         TokenResponse tokenResponse = tokenService.reissueAccessToken(refreshToken);
 
-        cookieUtil.addAccessCookie(tokenResponse.getAccessToken(), response);
+        cookieUtil.addAccessCookie(tokenResponse.getAccessToken(), request, response);
 
         return new RsData<>(
                 UserSuccessCode.REISSUE_SUCCESS.getCode(),

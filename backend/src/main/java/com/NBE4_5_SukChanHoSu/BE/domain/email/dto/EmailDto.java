@@ -1,4 +1,4 @@
-package com.NBE4_5_SukChanHoSu.BE.domain.email.dto.request;
+package com.NBE4_5_SukChanHoSu.BE.domain.email.dto;
 
 import lombok.Data;
 
