@@ -30,7 +30,7 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(  cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests((authorizeHttpRequests) ->
                         authorizeHttpRequests
                                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -40,8 +40,11 @@ public class SecurityConfig {
                                         "/api/auth/login",
                                         "/api/auth/join",
                                         "/api/auth/google/url",
-                                        "/api/email/**"
+                                        "/api/email/**",
+                                        "/api/monitoring/health"
                                 ).permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/profile/info").permitAll()
+                                .requestMatchers(HttpMethod.POST, "/api/profile/images").permitAll()
                                 // Swagger
                                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                                 // Actuator

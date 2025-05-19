@@ -29,21 +29,6 @@ public class SecurityUtil {
         return ((PrincipalDetails) authentication.getPrincipal()).getUser().getId();
     }
 
-    // 현재 인증된 사용자의 이메일을 반환합니다.
-    public static String getCurrentUserEmail() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-
-        if (authentication == null || !authentication.isAuthenticated() ||
-                !(authentication.getPrincipal() instanceof PrincipalDetails)) {
-            throw new BadCredentialsException(
-                    UserErrorCode.USER_UNAUTHORIZED.getCode(),
-                    UserErrorCode.USER_UNAUTHORIZED.getMessage()
-            );
-        }
-
-        return ((PrincipalDetails) authentication.getPrincipal()).getUsername();
-    }
-
     // 현재 인증된 사용자 반환
     public static User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

@@ -4,11 +4,11 @@ import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.LoginResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Role;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserRepository;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.responseCode.UserErrorCode;
-import com.NBE4_5_SukChanHoSu.BE.global.exception.ServiceException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.security.BlacklistedTokenException;
-import com.NBE4_5_SukChanHoSu.BE.global.exception.security.InvalidRefreshTokenException;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.security.ExpiredTokenException;
+import com.NBE4_5_SukChanHoSu.BE.global.exception.security.InvalidTokenException;
 import com.NBE4_5_SukChanHoSu.BE.global.jwt.dto.TokenResponse;
+import com.NBE4_5_SukChanHoSu.BE.global.jwt.responseCode.JwtErrorCode;
 import com.NBE4_5_SukChanHoSu.BE.global.security.PrincipalDetails;
 import com.NBE4_5_SukChanHoSu.BE.global.util.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -16,7 +16,6 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.MalformedJwtException;
 import io.jsonwebtoken.SignatureAlgorithm;
-import io.jsonwebtoken.UnsupportedJwtException;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
@@ -33,9 +32,7 @@ import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Component
@@ -99,7 +96,10 @@ public class TokenService {
         Claims claims = parseClaims(accessToken);
 
         if (claims.get(AUTHORITIES_KEY) == null) {
-            throw new RuntimeException("권한 정보가 없는 토큰입니다.");
+            throw new InvalidTokenException(
+                    JwtErrorCode.MISSING_AUTHORITY.getCode(),
+                    JwtErrorCode.MISSING_AUTHORITY.getMessage()
+            );
         }
 
         // 클레임에서 권한 정보 가져오기
@@ -113,24 +113,28 @@ public class TokenService {
         return new UsernamePasswordAuthenticationToken(principal, "", principal.getAuthorities());
     }
 
-    // 토큰 정보를 검증하는 메서드
-    public boolean validateToken(String accessToken) {
+    public void validateToken(String accessToken) {
         try {
             Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(accessToken);
-            return true;
         } catch (SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT Token", e);
+            throw new InvalidTokenException(
+                    JwtErrorCode.INVALID_SIGNATURE.getCode(),
+                    JwtErrorCode.INVALID_SIGNATURE.getMessage()
+            );
         } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
-        } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
+            throw new ExpiredTokenException(
+                    JwtErrorCode.EXPIRED_TOKEN.getCode(),
+                    JwtErrorCode.EXPIRED_TOKEN.getMessage()
+            );
         } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
+            throw new InvalidTokenException(
+                    JwtErrorCode.EMPTY_CLAIMS.getCode(),
+                    JwtErrorCode.EMPTY_CLAIMS.getMessage()
+            );
         }
-        return false;
     }
 
     private Claims parseClaims(String accessToken) {
@@ -159,10 +163,12 @@ public class TokenService {
     }
 
     public TokenResponse reissueAccessToken(String refreshToken) {
-        if (!validateToken(refreshToken)) {
-            throw new InvalidRefreshTokenException(
-                    UserErrorCode.INVALID_REFRESH_TOKEN.getCode(),
-                    UserErrorCode.INVALID_REFRESH_TOKEN.getMessage()
+        try {
+            validateToken(refreshToken);
+        } catch (InvalidTokenException | ExpiredTokenException e) {
+            throw new InvalidTokenException(
+                    JwtErrorCode.INVALID_REFRESH_TOKEN.getCode(),
+                    JwtErrorCode.INVALID_REFRESH_TOKEN.getMessage()
             );
         }
 
@@ -171,13 +177,15 @@ public class TokenService {
         String isBlacklisted = redisTemplate.opsForValue().get(refreshToken);
         if (isBlacklisted != null) {
             throw new BlacklistedTokenException(
-                    UserErrorCode.BLACKLISTED_REFRESH_TOKEN.getCode(),
-                    UserErrorCode.BLACKLISTED_REFRESH_TOKEN.getMessage());
+                    JwtErrorCode.BLACKLISTED_REFRESH_TOKEN.getCode(),
+                    JwtErrorCode.BLACKLISTED_REFRESH_TOKEN.getMessage()
+            );
         }
 
         String newAccessToken = createAccessToken(email);
 
         return new TokenResponse(newAccessToken, refreshToken);
     }
+
 }
 

@@ -4,6 +4,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.StatusUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.dto.UserDetailResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.service.AdminService;
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.service.AdminMonitoringService;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -21,7 +22,7 @@ public class AdminController {
 
     private final AdminService adminService;
     private final AdminMonitoringService adminMonitoringService;
-
+    private final ReviewService reviewService;
     @Operation(summary = "사용자 상태 변경", description = "관리자가 사용자의 상태 (ACTIVE, SUSPENDED, DELETED)를 변경합니다.")
     @PatchMapping("/users/{userId}/status")
     public RsData<String> updateStatus(
@@ -45,6 +46,13 @@ public class AdminController {
     public RsData<Long> getDailyMatches() {
         long count = adminMonitoringService.getTodayDailyMatches();
         return new RsData<>("200-OK", "오늘 일어난 매칭 수 조회 성공", count);
+    }
+
+    @Operation(summary = "부적절 리뷰 삭제", description = "관리자가 리뷰를 삭제합니다.")
+    @DeleteMapping("/reviews/{reviewId}")
+    public RsData<String> deleteReview(@PathVariable Long reviewId) {
+        reviewService.deleteReview(reviewId);
+        return new RsData<>("200-OK", "리뷰가 성공적으로 삭제되었습니다.", "리뷰 ID: " + reviewId);
     }
 
 }

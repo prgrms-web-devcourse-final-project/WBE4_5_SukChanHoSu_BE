@@ -1,6 +1,8 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.admin.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.admin.service.AdminMonitoringService;
+import com.NBE4_5_SukChanHoSu.BE.domain.admin.service.AdminService;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.review.service.ReviewService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,7 +18,6 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -29,11 +30,17 @@ public class AdminControllerTest {
 
     @BeforeEach
     void setUp() {
-        // 1. AdminMonitoringService Mock 객체 생성
+        // 1. AdminMonitoringService Mock 객체 생성 (기존 코드 유지)
         adminMonitoringService = Mockito.mock(AdminMonitoringService.class);
 
-        // 2. AdminController 인스턴스 생성 및 Mock 객체 주입 (생성자 주입 방식 가정)
-        adminController = new AdminController(null, adminMonitoringService); // AdminService는 여기서는 Mocking하지 않음
+        // 2. AdminService Mock 객체 생성
+        AdminService adminService = Mockito.mock(AdminService.class);
+
+        // 3. ReviewService Mock 객체 생성
+        ReviewService reviewService = Mockito.mock(ReviewService.class);
+
+        // 4. AdminController 인스턴스 생성 및 Mock 객체 주입
+        adminController = new AdminController(adminService, adminMonitoringService, reviewService);
 
         // 3. MockMvc 빌더 설정
         mockMvc = MockMvcBuilders.standaloneSetup(adminController)

@@ -31,12 +31,15 @@ public class ProfileCheckInterceptor implements HandlerInterceptor {
         String method = request.getMethod();
 
         // 프로필 등록은 허용
-        if ((uri.equals("/api/profile") && method.equalsIgnoreCase("POST")) ||
-                (uri.equals("/api/email/send") && method.equalsIgnoreCase("POST")) ||
-                (uri.equals("/api/email/verify") && method.equalsIgnoreCase("POST")) ||
-                (uri.equals("/api/token/reissue") && method.equalsIgnoreCase("POST")) ||
-                (uri.equals("/api/movie/review") && method.equalsIgnoreCase("GET"))
-        ) {
+        if ((uri.equals("/api/profile/info") && method.equalsIgnoreCase("POST")) ||
+                (uri.equals("/api/profile/images") && method.equalsIgnoreCase("POST")) ||
+                        (uri.equals("/api/email/send") && method.equalsIgnoreCase("POST")) ||
+                        (uri.equals("/api/email/verify") && method.equalsIgnoreCase("POST")) ||
+                        (uri.equals("/api/token/reissue") && method.equalsIgnoreCase("POST")) ||
+                        (uri.equals("/api/movie/review") && method.equalsIgnoreCase("GET"))||
+                        (uri.equals("/api/monitoring/health") && method.equalsIgnoreCase("GET"))||
+                        (uri.startsWith("/api/movie"))
+                ) {
             return true;
         }
         Long userId = SecurityUtil.getCurrentUserId();
