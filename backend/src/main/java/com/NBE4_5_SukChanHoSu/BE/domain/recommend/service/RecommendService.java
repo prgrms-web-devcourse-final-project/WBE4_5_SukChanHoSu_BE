@@ -33,7 +33,7 @@ public class RecommendService {
 
     // 이성만 조회
     public List<UserProfile> findProfileByGender(UserProfile userProfile) {
-        return userProfileRepository.findAll().stream().filter(profile -> !profile.getUserId().equals(userProfile.getUserId())) // 자신 제외
+        return userProfileRepository.findAll().stream()
                 .filter(profile -> !profile.getGender().equals(userProfile.getGender())) // 성별이 다른 유저 필터링
                 .toList();
     }
@@ -147,7 +147,7 @@ public class RecommendService {
         int distance = 0;
 
         // 레디스의 사용자 필터링: 1순위(영화 겹치는 사용자) + 2순위(안겹치는 사용자)
-        List<UserProfile> filteredUser = filterFromRedis(keys,profile,distance,radius,movieCd);
+        List<UserProfile> filteredUser = filterFromRedis(keys,profile,radius,movieCd);
 
         // 레디스에 저장된 사용자 우선 반환
         if(!filteredUser.isEmpty()){
@@ -157,7 +157,7 @@ public class RecommendService {
         }
 
         // 3순위: DB에 저장된 사용자
-        List<UserProfile> dbUsers = filterFromDb(profile,recommendedUser,distance,radius,movieCd);
+        List<UserProfile> dbUsers = filterFromDb(profile,radius);
         if(!dbUsers.isEmpty()) {
             recommendedUser = getRandomUser(dbUsers);
             saveRecommendUser(profile.getUserId(), recommendedUser.getUserId(),"movie");
@@ -168,7 +168,7 @@ public class RecommendService {
         throw new NoRecommendException("404","추천할 사용자가 없습니다.");
     }
 
-    private List<UserProfile> filterFromDb(UserProfile profile,UserProfile recommendedUser, int distance, int radius, String movieCd) {
+    private List<UserProfile> filterFromDb(UserProfile profile, int radius) {
         // 이성 사용자
         List<UserProfile> profilesByGender = findProfileByGender(profile);
         LocalDateTime oneMonthAgo = LocalDateTime.now().minusMonths(1);
@@ -185,7 +185,7 @@ public class RecommendService {
             if(isRecommended(profile.getUserId(), profile2.getUserId(), "movie")) continue;
 
             //  범위 밖 사용자 제외
-            distance = calculateDistance.calDistance(profile, profile2);
+            int distance = calculateDistance.calDistance(profile, profile2);
             if(radius < distance) continue;
 
             candidates.add(profile2);
@@ -194,7 +194,7 @@ public class RecommendService {
         return candidates;
     }
 
-    private List<UserProfile> filterFromRedis(Set<String> keys, UserProfile profile, int distance, int radius, String movieCd) {
+    private List<UserProfile> filterFromRedis(Set<String> keys, UserProfile profile, int radius, String movieCd) {
         // 영화가 겹치는 사용자 목록
         List<UserProfile> matchingMovieUsers = new ArrayList<>();
         // 영화가 겹치지 않는 사용자 목록
@@ -214,7 +214,7 @@ public class RecommendService {
                 if(isRecommended(profile.getUserId(), userId, "movie")) continue;
 
                 // 4. 범위 밖 사용자 제외
-                distance = calculateDistance.calDistance(profile, profile2);
+                int distance = calculateDistance.calDistance(profile, profile2);
                 if(radius < distance) continue;
 
                 String value = (String) redisTemplate.opsForValue().get(key);   // movieCd 추출
