@@ -1,23 +1,25 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.recommend.service;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.UserLikesRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.entity.RecommendUser;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.repository.RecommendUserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
-import com.NBE4_5_SukChanHoSu.BE.domain.recommend.entity.RecommendUser;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
-import com.NBE4_5_SukChanHoSu.BE.domain.recommend.repository.RecommendUserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.Ut;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.NoRecommendException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
-import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,14 +30,11 @@ public class RecommendService {
     private final RedisTemplate<String, Object> redisTemplate;
     private final UserLikesRepository userLikesRepository;
     private final CalculateDistance calculateDistance;
-
-    public UserProfile findUser(Long userId) {
-        return userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
-    }
+    private final Ut ut;
 
     // 이성만 조회
     public List<UserProfile> findProfileByGender(UserProfile userProfile) {
-        return userProfileRepository.findAll().stream()
+        return userProfileRepository.findAll().stream().filter(profile -> !profile.getUserId().equals(userProfile.getUserId())) // 자신 제외
                 .filter(profile -> !profile.getGender().equals(userProfile.getGender())) // 성별이 다른 유저 필터링
                 .toList();
     }
@@ -59,8 +58,7 @@ public class RecommendService {
     // 범위 내에 존재하는 사용자 추천
     @Transactional
     public UserProfileResponse recommendByDistance() {
-        UserProfile profile = SecurityUtil.getCurrentUser().getUserProfile();
-        Long userId = profile.getUserId();
+        UserProfile profile = ut.getUserProfileByContextHolder();
 
         int radius = profile.getSearchRadius();
 
@@ -69,7 +67,7 @@ public class RecommendService {
 
         // 이미 추천한 사용자 제외
         List<UserProfileResponse> candidates = list.stream()
-                .filter(candidate -> !isRecommended(userId,candidate.getUserId(),"distance"))
+                .filter(candidate -> !isRecommended(profile.getUserId(), candidate.getUserId(),"distance"))
                 .toList();
 
         // 남아있는 사용자 있는 경우 랜덤 추천
@@ -78,7 +76,7 @@ public class RecommendService {
             UserProfileResponse recommendedUser = candidates.get(random.nextInt(candidates.size()));
 
             // 객체화 하여 DB에 저장
-            saveRecommendUser(userId,recommendedUser.getUserId(),"distance");
+            saveRecommendUser(profile.getUserId(), recommendedUser.getUserId(),"distance");
             return recommendedUser;
         }
 
@@ -88,24 +86,24 @@ public class RecommendService {
     // 태그 기반 매칭
     @Transactional
     public UserProfileResponse recommendUserByTags() {
-        UserProfile profile = SecurityUtil.getCurrentUser().getUserProfile();
-        long userId = profile.getUserId();
+        UserProfile userProfile = ut.getUserProfileByContextHolder();
+        long userId = userProfile.getUserId();
 
-        List<Genre> tags = profile.getFavoriteGenres();
+        List<Genre> tags = userProfile.getFavoriteGenres();
         int maxScore = -1;
-        int radius = profile.getSearchRadius();
+        int radius = userProfile.getSearchRadius();
         int recommendDistance = 0;
         UserProfile recommendedUser = null;
 
         // 1차: 이성
-        List<UserProfile> profileByGender = findProfileByGender(profile);
+        List<UserProfile> profileByGender = findProfileByGender(userProfile);
 
         // 거리 및 태그
-        for (UserProfile userProfile : profileByGender) {
+        for (UserProfile profile : profileByGender) {
             // 이미 추천한 사용자 pass
             if(isRecommended(userId, profile.getUserId(),"tags")) continue;
             // 거리 계산
-            int distance = calculateDistance.calDistance(profile, userProfile);
+            int distance = calculateDistance.calDistance(userProfile, profile);
             // 범위 밖 사용자 패스
             if (distance > radius) continue;
 

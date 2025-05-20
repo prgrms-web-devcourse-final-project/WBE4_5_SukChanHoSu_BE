@@ -1,6 +1,7 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.user.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.Ut;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.request.ProfileUpdateRequest;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.NicknameCheckResponse;
@@ -30,7 +31,7 @@ import java.util.List;
 public class UserProfileController {
 
     private final UserProfileService userProfileService;
-    private final RecommendService matchingService;
+    private final Ut ut;
 
     @Operation(summary = "프로필 등록 (DTO)", description = "회원가입 후 최초 프로필 정보 등록")
     @PostMapping(value = "/info")
@@ -91,7 +92,7 @@ public class UserProfileController {
     public RsData<User> getUser() {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
-        UserProfile profile = matchingService.findUser(profileId);
+        UserProfile profile = ut.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", profile.getUser());
     }
 
@@ -101,7 +102,7 @@ public class UserProfileController {
     public RsData<UserProfile> getMyProfile1() {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
-        UserProfile profile = matchingService.findUser(profileId);
+        UserProfile profile = ut.findUser(profileId);
         return new RsData<>("200", "프로필 조회 성공", profile);
     }
 
@@ -110,7 +111,7 @@ public class UserProfileController {
     public RsData<ProfileResponse> setRadius(@RequestParam Integer radius) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
-        UserProfile profile = matchingService.findUser(profileId);
+        UserProfile profile = ut.findUser(profileId);
         int updatedRadius = userProfileService.setRadius(profile, radius);
         ProfileResponse response = new ProfileResponse(profile);
 

@@ -3,11 +3,11 @@ package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.*;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
 import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.CalculateDistance;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.service.Ut;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.service.UserLikeService;
 import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.RecommendService;
-import com.NBE4_5_SukChanHoSu.BE.domain.user.service.UserProfileService;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.Empty;
 import com.NBE4_5_SukChanHoSu.BE.global.dto.RsData;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.like.RelationNotFoundException;
@@ -26,8 +26,8 @@ import java.util.List;
 public class UserLikeController {
 
     private final UserLikeService userLikeService;
-    private final RecommendService matchingService;
     private final CalculateDistance calculateDistance;
+    private final Ut ut;
 
 
     @PostMapping("/like")
@@ -36,8 +36,8 @@ public class UserLikeController {
         Long fromUserId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         // 유저 탐색
-        UserProfile fromUser = matchingService.findUser(fromUserId);
-        UserProfile toUser = matchingService.findUser(toUserId);
+        UserProfile fromUser = ut.findUser(fromUserId);
+        UserProfile toUser = ut.findUser(toUserId);
 
         if(userLikeService.isSameGender(fromUser,toUser)){
             return new RsData<>("403","이성간 매칭만 허용합니다.");
@@ -73,7 +73,7 @@ public class UserLikeController {
             @RequestParam(defaultValue = "4") int pageSize) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
-        UserProfile profile = matchingService.findUser(profileId);
+        UserProfile profile = ut.findUser(profileId);
         List<UserProfileResponse> userProfileResponses = userLikeService.getUserLikes(profile);
 
         int totalSize = userProfileResponses.size();
@@ -99,7 +99,7 @@ public class UserLikeController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "4") int pageSize) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
-        UserProfile profile = matchingService.findUser(profileId);
+        UserProfile profile = ut.findUser(profileId);
         List<UserProfileResponse> userProfileResponses = userLikeService.getUserLiked(profile);
 
         int totalSize = userProfileResponses.size();
@@ -125,7 +125,7 @@ public class UserLikeController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "4") int pageSize) {
         Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
-        UserProfile profile = matchingService.findUser(profileId);
+        UserProfile profile = ut.findUser(profileId);
         List<UserProfileResponse> userProfileResponses = userLikeService.getUserMatches(profile);
 
         int totalSize = userProfileResponses.size();
@@ -151,8 +151,8 @@ public class UserLikeController {
         Long fromUserId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
 
         // 유저 탐색
-        UserProfile fromUser = matchingService.findUser(fromUserId);
-        UserProfile toUser = matchingService.findUser(toUserId);
+        UserProfile fromUser = ut.findUser(fromUserId);
+        UserProfile toUser = ut.findUser(toUserId);
 
         // 매칭 된 사용자인지 검증
         if(userLikeService.isAlreadyMatched(fromUser,toUser)){
