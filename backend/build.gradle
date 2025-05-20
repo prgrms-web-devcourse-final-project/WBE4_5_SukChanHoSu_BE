@@ -76,6 +76,12 @@ dependencies {
     implementation 'io.micrometer:micrometer-registry-prometheus'
     //actuator
     implementation("org.springframework.boot:spring-boot-starter-actuator:3.4.5")
+
+    //elasticsearch
+    implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
+
+    //modelmapper
+    implementation 'org.modelmapper:modelmapper:3.1.1'
     tasks.named('test') {
         useJUnitPlatform()
     }

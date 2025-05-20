@@ -1,24 +1,32 @@
 package com.NBE4_5_SukChanHoSu.BE.domain.movie.service;
 
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.document.MovieDocument;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.entity.Movie;
+import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieElasticsearchRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class MovieContentsService {
 
     private final MovieRepository movieRepository;
+    private final MovieElasticsearchRepository movieElasticsearchRepository;
+    private final ModelMapper modelMapper;
 
     public Movie save(Movie movie) {
-        return movieRepository.save(movie);
+        Movie savedMovie = movieRepository.save(movie);
+        movieElasticsearchRepository.save(modelMapper.map(savedMovie, MovieDocument.class));
+        return savedMovie;
     }
 
     public List<Movie> findAll() {
@@ -60,5 +68,20 @@ public class MovieContentsService {
     @Transactional
     public void delete(Long movieId) {
         movieRepository.deleteById(movieId);
+    }
+
+    // 엘라스틱서치 관련 메서드
+    public List<Movie> searchByTitleFromEs(String title) {
+        return movieElasticsearchRepository.findByTitleContaining(title)
+                .stream()
+                .map(document -> modelMapper.map(document, Movie.class))
+                .collect(Collectors.toList());
+    }
+
+    public List<String> autocompleteTitleFromEs(String query) {
+        return movieElasticsearchRepository.findByTitleStartingWith(query)
+                .stream()
+                .map(MovieDocument::getTitle)
+                .collect(Collectors.toList());
     }
 }

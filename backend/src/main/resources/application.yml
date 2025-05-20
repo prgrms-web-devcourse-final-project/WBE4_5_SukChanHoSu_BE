@@ -11,6 +11,10 @@ spring:
     active: dev
     include: secret  # ✅ 추가 설정 파일 포함
 
+  data:
+    elasticsearch:
+      uris: http://localhost:9200
+
 logging:
   level:
     org.hibernate.SQL: DEBUG  # ✅ 로그 레벨 조정 가능 (INFO, DEBUG, TRACE 등)

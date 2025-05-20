@@ -97,4 +97,18 @@ public class MovieContentsController {
             throw new ServiceException("404", "해당 ID의 영화가 존재하지 않습니다.");
         }
     }
+
+    @Operation(summary = "엘라스틱서치 기반 영화 이름 검색", description = "엘라스틱서치를 사용하여 영화 제목을 기준으로 영화를 검색합니다.")
+    @GetMapping("/search/es/title")
+    public RsData<List<Movie>> searchByTitleFromEs(@RequestParam String title) {
+        List<Movie> result = movieContentsService.searchByTitleFromEs(title);
+        return new RsData<>("200", "엘라스틱서치 제목 검색 결과", result);
+    }
+
+    @Operation(summary = "엘라스틱서치 기반 영화 이름 자동완성", description = "엘라스틱서치를 사용하여 입력된 제목의 일부를 기반으로 자동완성된 영화 제목 목록을 제공합니다.")
+    @GetMapping("/autocomplete/es/title")
+    public RsData<List<String>> autocompleteTitleFromEs(@RequestParam String query) {
+        List<String> suggestions = movieContentsService.autocompleteTitleFromEs(query);
+        return new RsData<>("200", "엘라스틱서치 제목 자동완성 결과", suggestions);
+    }
 }
