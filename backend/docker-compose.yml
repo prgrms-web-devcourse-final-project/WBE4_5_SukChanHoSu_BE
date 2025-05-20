@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   prometheus:
     image: prom/prometheus
@@ -16,6 +18,8 @@ services:
       - app-network
     volumes:
       - grafana-storage:/var/lib/grafana
+    depends_on:
+      - prometheus
 
   redis:
     image: redis:latest
@@ -23,6 +27,8 @@ services:
     ports:
       - "6379:6379"
     restart: always
+    networks:
+      - app-network
 
   redis-exporter:
     image: oliver006/redis_exporter
@@ -33,6 +39,8 @@ services:
       - REDIS_ADDR=redis:6379
     networks:
       - app-network
+    depends_on:
+      - redis
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.10
@@ -53,10 +61,22 @@ services:
     networks:
       - app-network
 
+  kibana:
+    image: docker.elastic.co/kibana/kibana:7.17.10
+    container_name: kibana
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+    networks:
+      - app-network
+    depends_on:
+      - elasticsearch
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
   grafana-storage:
-  esdata:  # ✅ 누락된 볼륨 추가
+  esdata:

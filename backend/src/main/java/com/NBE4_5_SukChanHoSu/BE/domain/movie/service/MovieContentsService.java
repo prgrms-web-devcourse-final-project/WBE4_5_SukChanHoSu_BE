@@ -6,6 +6,7 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieElasticsearchRepos
 import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
@@ -21,11 +22,26 @@ public class MovieContentsService {
 
     private final MovieRepository movieRepository;
     private final MovieElasticsearchRepository movieElasticsearchRepository;
-    private final ModelMapper modelMapper;
+//    private final ModelMapper modelMapper;
+
+    // Movie → MovieDocument 변환 헬퍼
+    private MovieDocument toMovieDocument(Movie movie) {
+        String genresRaw = movie.getGenres().stream()
+                .map(Genre::getLabel)
+                .collect(Collectors.joining(", "));  // 예: "Action, Drama, Comedy"
+
+        return MovieDocument.builder()
+                .movieId(movie.getMovieId())
+                .title(movie.getTitle())
+                .genresRaw(genresRaw)
+                .description(movie.getDescription())
+                .director(movie.getDirector())
+                .build();
+    }
 
     public Movie save(Movie movie) {
         Movie savedMovie = movieRepository.save(movie);
-        movieElasticsearchRepository.save(modelMapper.map(savedMovie, MovieDocument.class));
+        movieElasticsearchRepository.save(toMovieDocument(savedMovie));
         return savedMovie;
     }
 
@@ -62,26 +78,43 @@ public class MovieContentsService {
         movie.setRating(updatedMovie.getRating());
         movie.setDirector(updatedMovie.getDirector());
 
-        return movieRepository.save(movie);
+        Movie saved = movieRepository.save(movie);
+        movieElasticsearchRepository.save(toMovieDocument(saved)); // Elasticsearch 동기화
+        return saved;
     }
 
     @Transactional
     public void delete(Long movieId) {
         movieRepository.deleteById(movieId);
+        movieElasticsearchRepository.deleteById(movieId); // Elasticsearch에서도 삭제
     }
 
-    // 엘라스틱서치 관련 메서드
+    // Elasticsearch: 제목으로 검색
     public List<Movie> searchByTitleFromEs(String title) {
         return movieElasticsearchRepository.findByTitleContaining(title)
                 .stream()
-                .map(document -> modelMapper.map(document, Movie.class))
+                .map(this::toMovieEntity) // 수동 역변환
                 .collect(Collectors.toList());
     }
 
+    // Elasticsearch: 자동완성
     public List<String> autocompleteTitleFromEs(String query) {
         return movieElasticsearchRepository.findByTitleStartingWith(query)
                 .stream()
                 .map(MovieDocument::getTitle)
                 .collect(Collectors.toList());
     }
+
+    private Movie toMovieEntity(MovieDocument document) {
+        List<Genre> genres = Genre.parseGenres(document.getGenresRaw());
+
+        return Movie.builder()
+                .movieId(document.getMovieId())
+                .title(document.getTitle())
+                .genres(genres)
+                .description(document.getDescription())
+                .director(document.getDirector())
+                .build();
+    }
+
 }
