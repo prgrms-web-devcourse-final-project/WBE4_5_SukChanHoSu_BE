@@ -80,8 +80,6 @@ dependencies {
     //elasticsearch
     implementation 'org.springframework.boot:spring-boot-starter-data-elasticsearch'
 
-    //modelmapper
-    implementation 'org.modelmapper:modelmapper:3.1.1'
     tasks.named('test') {
         useJUnitPlatform()
     }

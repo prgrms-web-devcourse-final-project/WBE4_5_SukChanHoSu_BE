@@ -7,7 +7,6 @@ import com.NBE4_5_SukChanHoSu.BE.domain.movie.repository.MovieRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,7 +21,6 @@ public class MovieContentsService {
 
     private final MovieRepository movieRepository;
     private final MovieElasticsearchRepository movieElasticsearchRepository;
-//    private final ModelMapper modelMapper;
 
     // Movie → MovieDocument 변환 헬퍼
     private MovieDocument toMovieDocument(Movie movie) {
@@ -87,14 +85,6 @@ public class MovieContentsService {
     public void delete(Long movieId) {
         movieRepository.deleteById(movieId);
         movieElasticsearchRepository.deleteById(movieId); // Elasticsearch에서도 삭제
-    }
-
-    // Elasticsearch: 제목으로 검색
-    public List<Movie> searchByTitleFromEs(String title) {
-        return movieElasticsearchRepository.findByTitleContaining(title)
-                .stream()
-                .map(this::toMovieEntity) // 수동 역변환
-                .collect(Collectors.toList());
     }
 
     // Elasticsearch: 자동완성
