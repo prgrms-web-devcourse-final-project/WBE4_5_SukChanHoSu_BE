@@ -90,9 +90,7 @@ public class UserProfileController {
     @Operation(summary = "프로필로 유저 객체 조회", description = "프로필 엔티티를 이용하여 유저 정보 가져오는지 확인")
     @GetMapping("/user")
     public RsData<User> getUser() {
-        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
-
-        UserProfile profile = ut.findUser(profileId);
+        UserProfile profile = ut.getUserProfileByContextHolder();
         return new RsData<>("200", "프로필 조회 성공", profile.getUser());
     }
 
@@ -100,18 +98,15 @@ public class UserProfileController {
     @GetMapping("/profile/me")
     //todo 임시, 이후 삭제
     public RsData<UserProfile> getMyProfile1() {
-        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
-
-        UserProfile profile = ut.findUser(profileId);
+        UserProfile profile = ut.getUserProfileByContextHolder();
         return new RsData<>("200", "프로필 조회 성공", profile);
     }
 
     @Operation(summary = "범위 조절", description = "탐색 범위 조절")
     @PutMapping("/radius")
     public RsData<ProfileResponse> setRadius(@RequestParam Integer radius) {
-        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
+        UserProfile profile = ut.getUserProfileByContextHolder();
 
-        UserProfile profile = ut.findUser(profileId);
         int updatedRadius = userProfileService.setRadius(profile, radius);
         ProfileResponse response = new ProfileResponse(profile);
 
