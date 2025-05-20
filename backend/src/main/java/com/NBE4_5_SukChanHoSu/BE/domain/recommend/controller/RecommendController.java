@@ -26,24 +26,14 @@ public class RecommendController {
     @Operation(summary = "매칭 - 거리로 조회", description = "범위 내에 있는 사용자 무작위 조회")
     @GetMapping("/withinRadius")
     public RsData<UserProfileResponse> getProfileWithinRadius() {
-        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
-
-        UserProfile profile = matchingService.findUser(profileId);
-        int radius = profile.getSearchRadius();
-
-        UserProfileResponse response = matchingService.recommendByDistance(profile, radius);
+        UserProfileResponse response = matchingService.recommendByDistance();
         return new RsData<>("200", "거리 조회 성공", response);
     }
 
     @Operation(summary = "매칭 - 태그로 조회", description = "겹치는 태그가 있는 사람중 매칭 조회")
     @GetMapping("/tags")
     public RsData<UserProfileResponse> recommendByTags() {
-        Long profileId = SecurityUtil.getCurrentUser().getUserProfile().getUserId();
-
-        UserProfile profile = matchingService.findUser(profileId);
-
-        UserProfileResponse response = matchingService.recommendUserByTags(profile);
-
+        UserProfileResponse response = matchingService.recommendUserByTags();
         return new RsData<>("200", "프로필 조회 성공", response);
     }
 

@@ -4,11 +4,13 @@ import com.NBE4_5_SukChanHoSu.BE.domain.likes.repository.UserLikesRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.Genre;
 import com.NBE4_5_SukChanHoSu.BE.domain.recommend.entity.RecommendUser;
+import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.User;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.recommend.repository.RecommendUserRepository;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.repository.UserProfileRepository;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.NoRecommendException;
 import com.NBE4_5_SukChanHoSu.BE.global.exception.user.UserNotFoundException;
+import com.NBE4_5_SukChanHoSu.BE.global.util.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -56,11 +58,14 @@ public class RecommendService {
 
     // 범위 내에 존재하는 사용자 추천
     @Transactional
-    public UserProfileResponse recommendByDistance(UserProfile userProfile, Integer distance) {
-        Long userId = userProfile.getUserId();
+    public UserProfileResponse recommendByDistance() {
+        UserProfile profile = SecurityUtil.getCurrentUser().getUserProfile();
+        Long userId = profile.getUserId();
+
+        int radius = profile.getSearchRadius();
 
         // 범위 이내에 존재하는 사용자 리스트
-        List<UserProfileResponse> list = findProfileWithinRadius(userProfile, distance);
+        List<UserProfileResponse> list = findProfileWithinRadius(profile, radius);
 
         // 이미 추천한 사용자 제외
         List<UserProfileResponse> candidates = list.stream()
@@ -82,23 +87,25 @@ public class RecommendService {
 
     // 태그 기반 매칭
     @Transactional
-    public UserProfileResponse recommendUserByTags(UserProfile userProfile) {
-        long userId = userProfile.getUserId();
-        List<Genre> tags = userProfile.getFavoriteGenres();
+    public UserProfileResponse recommendUserByTags() {
+        UserProfile profile = SecurityUtil.getCurrentUser().getUserProfile();
+        long userId = profile.getUserId();
+
+        List<Genre> tags = profile.getFavoriteGenres();
         int maxScore = -1;
-        int radius = userProfile.getSearchRadius();
+        int radius = profile.getSearchRadius();
         int recommendDistance = 0;
         UserProfile recommendedUser = null;
 
         // 1차: 이성
-        List<UserProfile> profileByGender = findProfileByGender(userProfile);
+        List<UserProfile> profileByGender = findProfileByGender(profile);
 
         // 거리 및 태그
-        for (UserProfile profile : profileByGender) {
+        for (UserProfile userProfile : profileByGender) {
             // 이미 추천한 사용자 pass
             if(isRecommended(userId, profile.getUserId(),"tags")) continue;
             // 거리 계산
-            int distance = calculateDistance.calDistance(userProfile, profile);
+            int distance = calculateDistance.calDistance(profile, userProfile);
             // 범위 밖 사용자 패스
             if (distance > radius) continue;
 
