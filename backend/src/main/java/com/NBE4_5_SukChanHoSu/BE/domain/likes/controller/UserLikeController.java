@@ -2,6 +2,7 @@ package com.NBE4_5_SukChanHoSu.BE.domain.likes.controller;
 
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.dto.response.*;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.entity.UserLikes;
+import com.NBE4_5_SukChanHoSu.BE.domain.recommend.service.CalculateDistance;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.dto.response.UserProfileResponse;
 import com.NBE4_5_SukChanHoSu.BE.domain.user.entity.UserProfile;
 import com.NBE4_5_SukChanHoSu.BE.domain.likes.service.UserLikeService;
@@ -25,8 +26,9 @@ import java.util.List;
 public class UserLikeController {
 
     private final UserLikeService userLikeService;
-    private final UserProfileService userProfileService;
     private final RecommendService matchingService;
+    private final CalculateDistance calculateDistance;
+
 
     @PostMapping("/like")
     @Operation(summary = "like 전송", description = "toUser에게 like 전송")
@@ -59,7 +61,7 @@ public class UserLikeController {
             return new RsData<>("200", fromUser.getNickName()+"과(와)"+toUser.getNickName()+"이 매칭 되었습니다.", response);
         }
 
-        int radius = matchingService.calDistance(fromUser,toUser);
+        int radius = calculateDistance.calDistance(fromUser,toUser);
         LikeResponse likeResponse = new LikeResponse(like,toUser,radius);
         return new RsData<>("200", fromUser.getNickName()+ " 가 "+toUser.getNickName()+ "님 에게 좋아요를 보냈습니다", likeResponse);
     }

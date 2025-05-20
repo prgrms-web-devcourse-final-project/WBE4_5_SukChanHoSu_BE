@@ -25,8 +25,7 @@ public class RecommendService {
     private final RecommendUserRepository recommendUserRepository;
     private final RedisTemplate<String, Object> redisTemplate;
     private final UserLikesRepository userLikesRepository;
-
-    static final double EARTH_RADIUS = 6371; // 지구의 반지름 (단위: km)
+    private final CalculateDistance calculateDistance;
 
     public UserProfile findUser(Long userId) {
         return userProfileRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("401", "존재하지 않는 유저입니다."));
@@ -47,7 +46,7 @@ public class RecommendService {
         // 거리 계산
         List<UserProfileResponse> responses = new ArrayList<>();
         for (UserProfile profile : profileByGender) {
-            int distance = calDistance(userProfile, profile); // 거리 계산
+            int distance = calculateDistance.calDistance(userProfile, profile); // 거리 계산
             if (distance <= radius) { // 거리가 범위 이내인 경우만 추가
                 responses.add(new UserProfileResponse(profile, distance));
             }
@@ -81,32 +80,6 @@ public class RecommendService {
         throw new NoRecommendException("404", "추천할 사용자가 없습니다.");
     }
 
-    // 거리 계산
-    public int calDistance(UserProfile userProfile1, UserProfile userProfile2) {
-        // 내 위/경도
-        double lat1 = userProfile1.getLatitude();
-        double lon1 = userProfile1.getLongitude();
-        // 탐색 대상의 위/경도
-        double lat2 = userProfile2.getLatitude();
-        double lon2 = userProfile2.getLongitude();
-
-        // 위/경도 차이
-        double dLat = Math.toRadians(lat2 - lat1);
-        double dLon = Math.toRadians(lon2 - lon1);
-
-        // 곡률 감안해서 어쩌구저쩌구해서 거리 계산
-        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                        Math.sin(dLon / 2) * Math.sin(dLon / 2);
-        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-
-        // 거리를 km로 계산
-        double distance = EARTH_RADIUS * c;
-
-        // 소수 첫째 자리에서 반올림 후 int형으로 반환
-        return (int) Math.round(distance); // 반올림하여 int형으로 반환
-    }
-
     // 태그 기반 매칭
     @Transactional
     public UserProfileResponse recommendUserByTags(UserProfile userProfile) {
@@ -125,7 +98,7 @@ public class RecommendService {
             // 이미 추천한 사용자 pass
             if(isRecommended(userId, profile.getUserId(),"tags")) continue;
             // 거리 계산
-            int distance = calDistance(userProfile, profile);
+            int distance = calculateDistance.calDistance(userProfile, profile);
             // 범위 밖 사용자 패스
             if (distance > radius) continue;
 
@@ -212,7 +185,7 @@ public class RecommendService {
             if(isRecommended(profile.getUserId(), profile2.getUserId(), "movie")) continue;
 
             //  범위 밖 사용자 제외
-            distance = calDistance(profile, profile2);
+            distance = calculateDistance.calDistance(profile, profile2);
             if(radius < distance) continue;
 
             candidates.add(profile2);
@@ -241,7 +214,7 @@ public class RecommendService {
                 if(isRecommended(profile.getUserId(), userId, "movie")) continue;
 
                 // 4. 범위 밖 사용자 제외
-                distance = calDistance(profile, profile2);
+                distance = calculateDistance.calDistance(profile, profile2);
                 if(radius < distance) continue;
 
                 String value = (String) redisTemplate.opsForValue().get(key);   // movieCd 추출
