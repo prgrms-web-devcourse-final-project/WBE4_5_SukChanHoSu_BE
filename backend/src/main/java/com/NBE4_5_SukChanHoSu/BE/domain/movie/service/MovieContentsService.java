@@ -24,14 +24,20 @@ public class MovieContentsService {
 
     // Movie → MovieDocument 변환 헬퍼
     private MovieDocument toMovieDocument(Movie movie) {
-        String genresRaw = movie.getGenres().stream()
-                .map(Genre::getLabel)
-                .collect(Collectors.joining(", "));  // 예: "Action, Drama, Comedy"
+        String genresRaw = ""; // 기본값으로 빈 문자열 설정
+
+        // movie.getGenres()가 null이 아닌 경우에만 스트림 처리
+        if (movie.getGenres() != null) {
+            genresRaw = movie.getGenres().stream()
+                    .map(Genre::getLabel) // Genre enum에 getLabel() 메서드가 있다고 가정합니다.
+                    .collect(Collectors.joining(", "));
+        }
+        // else: genresRaw는 초기값인 "" (빈 문자열)을 유지합니다.
 
         return MovieDocument.builder()
                 .movieId(movie.getMovieId())
                 .title(movie.getTitle())
-                .genresRaw(genresRaw)
+                .genresRaw(genresRaw) // null 체크 후 처리된 genresRaw 사용
                 .description(movie.getDescription())
                 .director(movie.getDirector())
                 .build();
