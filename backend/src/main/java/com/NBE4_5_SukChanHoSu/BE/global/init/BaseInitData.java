@@ -73,7 +73,7 @@ public class BaseInitData {
 
         Random random = new Random();
 
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 1; i <= 100; i++) {
             String newEmail = "initUser" + i + "@example.com";
             redisTemplate.opsForValue().set("emailVerify:" + newEmail, "true", 5, TimeUnit.MINUTES);
             UserSignUpRequest signUpDto = UserSignUpRequest.builder()
