@@ -11,9 +11,9 @@ spring:
     active: dev
     include: secret  # ✅ 추가 설정 파일 포함
 
-  data:
-    elasticsearch:
-      uris: ${ELASTICSEARCH.URIS}
+#  data:
+#    elasticsearch:
+#      uris: ${ELASTICSEARCH.URIS}
 
 logging:
   level:
