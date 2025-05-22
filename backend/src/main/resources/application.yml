@@ -11,6 +11,10 @@ spring:
     active: dev
     include: secret  # ✅ 추가 설정 파일 포함
 
+#  data:
+#    elasticsearch:
+#      uris: ${ELASTICSEARCH.URIS}
+
 logging:
   level:
     org.hibernate.SQL: DEBUG  # ✅ 로그 레벨 조정 가능 (INFO, DEBUG, TRACE 등)
@@ -18,6 +22,7 @@ logging:
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
     org.springframework.security=DEBUG:
+    org.springframework.data.elasticsearch.core.ElasticsearchTemplate: DEBUG
 custom:
   appName: app.mm  # ✅ 앱 이름 변경 가능
   prod:
