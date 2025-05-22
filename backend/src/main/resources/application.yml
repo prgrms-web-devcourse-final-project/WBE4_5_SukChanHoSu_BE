@@ -21,6 +21,9 @@ spring:
       idle-timeout: 30000
       max-lifetime: 1800000
       connection-timeout: 30000
+#  data:
+#    elasticsearch:
+#      uris: ${ELASTICSEARCH.URIS}
 
 logging:
   level:
@@ -29,6 +32,7 @@ logging:
     org.hibernate.orm.jdbc.extract: TRACE
     org.springframework.transaction.interceptor: TRACE
     org.springframework.security=DEBUG:
+    org.springframework.data.elasticsearch.core.ElasticsearchTemplate: DEBUG
 custom:
   appName: app.mm  # ✅ 앱 이름 변경 가능
   prod:
