@@ -22,7 +22,7 @@ public class MovieSchedular {
     @Autowired
     ReviewRepository reviewRepository;
 
-    @Scheduled(initialDelay = 0, cron = "0 0 0 * * SUN")
+    @Scheduled(cron = "0 0 0 * * SUN")
     @Transactional
     public void updateReview() {
         System.out.println("스케줄러 실행됨");
