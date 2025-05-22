@@ -73,10 +73,34 @@ services:
     depends_on:
       - elasticsearch
 
+  influxdb:
+    image: influxdb:1.8
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=k6
+    volumes:
+      - influxdb-storage:/var/lib/influxdb
+    networks:
+      - app-network
+
+  k6:
+    image: grafana/k6
+    volumes:
+      - ./scripts:/scripts
+    depends_on:
+      - influxdb
+    command: run --out influxdb=http://host.docker.internal:8086/k6 /scripts/stressTest2.js
+    networks:
+      - app-network
+
+
 networks:
   app-network:
     driver: bridge
 
 volumes:
   grafana-storage:
+  influxdb-storage:
   esdata:
